@@ -123,7 +123,7 @@ class DDT():
         dumpIs = False
         for root, dirs, files in os.walk("./dumps"):
             for f in files:
-                if (xfn + '.') in f:
+                if ('_' + xfn + '.') in f:
                     dumpIs = True
                     break
 
