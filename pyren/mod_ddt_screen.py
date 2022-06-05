@@ -491,11 +491,11 @@ class DDTScreen (tk.Frame):
                 if self.decu.ecufname.split ('/')[-1][:-4] in f:
                     try:
                         uda = f.split ('_')[0]
+                        fda = datetime.datetime.fromtimestamp (int (uda)).strftime ('%Y/%m/%d %H:%M:%S')
+                        flist.append (fda + '\t#\t' + f)
                     except:
-                        tkMessageBox.showinfo ("Wrong dump file", "No appropriate dump file in ./dumps folder")
+                        tkMessageBox.showinfo ("Wrong dump file", "Wrong file name " + f + " in ./dumps folder")
                         return ""
-                    fda = datetime.datetime.fromtimestamp (int (uda)).strftime ('%Y/%m/%d %H:%M:%S')
-                    flist.append (fda + '\t#\t' + f)
         if len (flist) == 0:
             tkMessageBox.showinfo ("Wrong dump file", "No appropriate dump file in ./dumps folder")
             return ""
