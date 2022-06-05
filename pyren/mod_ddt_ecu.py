@@ -398,7 +398,7 @@ class DDTECU():
      
       for root, dirs, files in os.walk("./dumps"):
         for f in files:
-          if (xmlname+'.') in f:
+          if ('_'+xmlname+'.') in f:
             flist.append(f)
             
       if len(flist)==0: return
