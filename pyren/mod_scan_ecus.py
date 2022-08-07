@@ -645,7 +645,7 @@ class ScanEcus:
     ttrrsp = rrsp.replace(' ','')
     if not all(c in string.hexdigits for c in ttrrsp): return False 
     
-    while base+6<=len(row) and (int(row[base+3])*3+2)<=len(rrsp):
+    while base+6<=len(row):
       if row[base]!=req:
         req = row[base]
         rrsp = self.elm.cmd(req)[3:]
@@ -654,7 +654,10 @@ class ScanEcus:
         if not all(c in string.hexdigits for c in ttrrsp): return False
         
         if len( req )/2==3: rrsp = rrsp[3:]
-
+      
+      if  int(row[base+3])*3+2<=len(rrsp):
+        return False
+        
       byte = int(rrsp[int(row[base+3])*3:int(row[base+3])*3+2],16)
       mask = int(row[base+4],16)
       val  = int(row[base+5],16)
@@ -691,8 +694,8 @@ class ScanEcus:
     if row['stdType']=='UDS': 
       rerr = self.elm.cmd('1902AF')	    #get errors UDS
     
-    if len(row['stopDiagReq'])>0:
-      self.elm.cmd(row['stopDiagReq'])	#close session
+    #if len(row['stopDiagReq'])>0:
+    #  self.elm.cmd(row['stopDiagReq'])	#close session
 
     self.elm.cmd("at at 1")               #enable adaptive timing
     
