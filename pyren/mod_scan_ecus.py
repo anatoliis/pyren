@@ -655,7 +655,7 @@ class ScanEcus:
         
         if len( req )/2==3: rrsp = rrsp[3:]
       
-      if  int(row[base+3])*3+2<=len(rrsp):
+      if  int(row[base+3])*3+2 > len(rrsp):
         return False
         
       byte = int(rrsp[int(row[base+3])*3:int(row[base+3])*3+2],16)
