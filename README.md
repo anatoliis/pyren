@@ -1,4 +1,4 @@
-# pyren
+# pyren3
 pyren is a program for getting diagnostic data from Renault cars by ELM327 adapter. It works in two modes and with two types of databases accordingly.
 Compatible with Windows, Linux,  MacOS and Android(only CLIP mode under Android)
 
@@ -141,7 +141,7 @@ https://www.youtube.com/watch?v=DazsvlnLCoA
 # Installation
 
 ## Dependencies
-* **Python 2.7.xx**
+* **Python 3.7.xx**
 * **ELM327** adapter with FlowControl support (original one or chinese v1.5)
     * **ELM327-USB** - preferred for Windows, Linux and MacOS
     * **ELM327-BT** - not compatible with Android 7.0 and above, use ELM327-WiFi
@@ -174,7 +174,7 @@ and extract next to directories EcuRenault, Location, Vehicles
 You have to get the next directory tree
 ```
 <any work directory>
-|- _pyren_launcher.py       #(universal launcher)
+|- _pyren3_launcher.py       #(universal launcher)
 |- BVMEXTRACTION            #(need for doc_maker)
 |- DocDB_xx                 #(need for doc_maker where xx=language) 
 |- EcuRenault               #(for CLIP mode)
@@ -185,8 +185,8 @@ You have to get the next directory tree
 |   |- graphics             #(for DDT mode)
 |   |- vehicles             #(for DDT mode)
 |
-|- pyren                    #(pyren)
-|   |- pyren.py
+|- pyren3                    #(pyren)
+|   |- pyren3.py
 ...    ...
 |   |- <other modules>
 ```
@@ -226,9 +226,9 @@ Universal launcher **_pyren_launcher.py** is compatible with any OS. Run it unde
 Firs run pyren without options
 
 ```
-$cd c:\CLIP\Data\GenAppli\pyren
-$python.exe ./pyren.py 
-usage: pyren.py [-h] [-v] [-p PORT] [-s SPEED] [-r RATE] [-L LANG] [-m CAR]
+$cd c:\CLIP\Data\GenAppli\pyren3
+$python3.exe ./pyren3.py 
+usage: pyren3.py [-h] [-v] [-p PORT] [-s SPEED] [-r RATE] [-L LANG] [-m CAR]
                 [-vv] [-e ECUID] [-e CAR] [--si] [--cfc] [--caf] [--n1c] [--csv] 
                 [--csv_only] [--csv_human] [--usr_key USR_KEY] [--log LOGFILE] 
                 [--scan] [--demo] [--dump] [--dev DEV] [--exp] [--can2] [--performance]
@@ -283,14 +283,14 @@ it shows the list of available options and COM ports
 Run pyren with a mandatory option {-p PORT} 
 
 ```
-$cd c:\CLIP\Data\GenAppli\pyren
-$python.exe pyren.py -p COM3
+$cd c:\CLIP\Data\GenAppli\pyren3
+$python3.exe pyren3.py -p COM3
 ``` 
 
 For the first start you will be prompted to choose a model of car
 
 ```
-$python.exe pyren.py -p COM3
+$python3.exe pyren3.py -p COM3
 Opening ELM
 Loading ECUs list
 
@@ -365,8 +365,8 @@ Also I suggest you to use option **--log** and **--dump** every time you start t
 After first connection to ECU with **--dump** option you will be able to run the pyren offline in demo mode
 
  ```
-$cd c:\CLIP\Data\GenAppli\pyren
-$python.exe pyren.py -pp --demo
+$cd c:\CLIP\Data\GenAppli\pyren3
+$python3.exe pyren3.py -pp --demo
 ``` 
 
 (As so **-p** is a mandatory option you may define any value for demo)
