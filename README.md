@@ -205,8 +205,8 @@ sl4a/scripts
 |- EcuRenault           
 |- Location             
 |- Vehicles             
-|- pyren              
-|   |- pyren.py
+|- pyren3              
+|   |- pyren3.py
 ...    ...
 |   |- <other modules>
 |- _pyren_launcher.py   

@@ -102,18 +102,18 @@ def update_from_gitlab():
         ctx.verify_mode = ssl.CERT_NONE
 
         h_user_agent = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3'}
-        req = urllib.request.Request('https://gitlab.com/py_ren/pyren/-/archive/master/pyren-master.zip', headers=h_user_agent)
+        req = urllib.request.Request('https://gitlab.com/py_ren/pyren/-/archive/pyren3/pyren-pyren3.zip', headers=h_user_agent)
         filedata = urllib.request.urlopen(req, context=ctx, timeout = 10)
         datatowrite = filedata.read()
 
-        with open('./pyren_master.zip', 'wb') as f:
+        with open('./pyren-pyren3.zip', 'wb') as f:
             f.write(datatowrite)
     except:
         return 1
 
     try:
-        if os.path.isfile('./pyren_master.zip'):
-            with zipfile.ZipFile('./pyren_master.zip') as zip_file:
+        if os.path.isfile('./pyren-pyren3.zip'):
+            with zipfile.ZipFile('./pyren-pyren3.zip') as zip_file:
                 for src in zip_file.namelist():
                     if src.endswith('exe'):
                         continue
@@ -134,10 +134,10 @@ def update_from_gitlab():
                     with source, target:
                         shutil.copyfileobj(source, target)
     except:
-        os.remove('./pyren_master.zip')
+        os.remove('./pyren-pyren3.zip')
         return 2
 
-    os.remove('./pyren_master.zip')
+    os.remove('./pyren-pyren3.zip')
 
     return 0
 
