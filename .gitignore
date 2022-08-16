@@ -4,6 +4,7 @@
 /EcuRsm/
 /Output/
 /pyren/*.zip
+/pyren3/*.zip
 cache/
 csv/
 dumps/
@@ -15,7 +16,7 @@ EcuRenault/
 Location/
 .vscode/      
 BVMEXTRACTION/
-DDT2000data/
+DDT2000data*/
 DocDB*/
 MTCSAVE/
 NML/
@@ -23,17 +24,14 @@ Params/
 Python27/
 *.pyc
 *.p
+*.zip
 *.csv
 *.acf
 *.tdv
 *.bin
-pyren/acf.py
-pyren/history.txt
-pyren/mod_acf_func.py
-pyren/mod_acf_proc.py
-pyren/mod_ddt_config.py
-pyren/parser.out
-pyren/parsetab.py
-pyren/scen_appr_4valves.py
-pyren/scen_ecri_fap2.py
+pyren3/history.txt
+pyren3/parser.out
+pyren3/parsetab.py
+pyren3/scen_appr_4valves.py
+pyren3/scen_ecri_fap2.py
 

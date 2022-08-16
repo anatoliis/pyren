@@ -57,6 +57,27 @@ class settings():
         pickle.dump(self.__dict__, f)
         f.close()
 
+def cmp_to_key(mycmp):
+    class K(object):
+        def __init__(self, obj, *args):
+            self.obj = obj
+        def __lt__(self, other):
+            return mycmp(self.obj, other.obj) < 0
+        def __gt__(self, other):
+            return mycmp(self.obj, other.obj) > 0
+        def __eq__(self, other):
+            return mycmp(self.obj, other.obj) == 0
+        def __le__(self, other):
+            return mycmp(self.obj, other.obj) <= 0
+        def __ge__(self, other):
+            return mycmp(self.obj, other.obj) >= 0
+        def __ne__(self, other):
+            return mycmp(self.obj, other.obj) != 0
+    return K
+ 
+def cmp(a, b):
+    return (a > b) - (a < b)
+
 def multikeysort(items, columns):
     comparers = [ ((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1)) for col in columns]
     def comparer(left, right):
@@ -66,7 +87,7 @@ def multikeysort(items, columns):
                 return mult * result
         else:
             return 0
-    return sorted(items, cmp=comparer)
+    return sorted(items, key=cmp_to_key(comparer))
 
 def getPortList():
     ret = []

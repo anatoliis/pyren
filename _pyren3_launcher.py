@@ -130,7 +130,7 @@ def update_from_gitlab():
                         continue
                     
                     source = zip_file.open(src)
-                    target = file(dst, "wb")
+                    target = open(dst, "wb")
                     with source, target:
                         shutil.copyfileobj(source, target)
     except:
