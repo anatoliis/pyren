@@ -228,7 +228,7 @@ class DDTScreen (tk.Frame):
         self.root.focus_force ()
         self.root.mainloop ()
         
-        del(self.decu)
+        #del(self.decu)
     
     def __del__(self):
         try:
