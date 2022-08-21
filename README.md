@@ -137,16 +137,17 @@ https://www.youtube.com/watch?v=DazsvlnLCoA
 * **mod_optfile.py** - for exploring CLIP database
 * **mod_term.py** - simple terminal
 * **mod_ecu.py** - shows list of all parameters, commands and DTCs. Build "PID" CSV file for "Torque PRO" 
+* **acf.py** - build default dump file and autoconfiguration macro (require BVMEXTRACTION folder and *.acf db)
 
 # Installation
 
 ## Dependencies
-* **Python 3.7.xx**
+* **Python 3.7+**
 * **ELM327** adapter with FlowControl support (original one or chinese v1.5)
     * **ELM327-USB** - preferred for Windows, Linux and MacOS
-    * **ELM327-BT** - not compatible with Android 7.0 and above, use ELM327-WiFi
-* **CLIP database** required for CLIP mode, not included (not included, you must own it)
-* **DDT2000 database** required for DDT mode, not included (not included, you must own it)
+    * **ELM327-BT** - supports only 38400 bit/sec serial communication speed 
+* **CLIP database** required for CLIP mode (not included you must own it)
+* **DDT2000 database** required for DDT mode (not included, you must own it)
 
 ## Installation on Windows
 
