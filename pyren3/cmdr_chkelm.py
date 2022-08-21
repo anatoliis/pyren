@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys, os
 import time
     
 import mod_globals
-import pyren
+import pyren3
 
 cmdb = '''
 #v1.0 ;AC P; ATZ                   ; Z                  ; reset all

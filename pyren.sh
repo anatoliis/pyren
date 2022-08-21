@@ -12,6 +12,6 @@
 #./venv/bin/activate
 printf "Runs app ...\n"
 #./venv/bin/python ./_pyren_launcher.py
-python ./_pyren_launcher.py
+python3 ./_pyren3_launcher.py
 #printf "Deactivate venv ..."
 #./venv/bin/deactivate

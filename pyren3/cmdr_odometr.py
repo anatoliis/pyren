@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys, os
 import time
@@ -7,7 +7,7 @@ import mod_db_manager
     
 import mod_globals
 import mod_ecu
-import pyren
+import pyren3
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
