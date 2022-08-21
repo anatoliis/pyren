@@ -71,9 +71,7 @@ def optParser():
   import argparse
 
   parser = argparse.ArgumentParser(
-    #usage = "%prog -p <port> [options]",
-    version="acfg Version 1.0",
-    description = "acfg - auto configuration tool"
+    description = "acf - auto configuration tool"
   )
   
   parser.add_argument('-p',

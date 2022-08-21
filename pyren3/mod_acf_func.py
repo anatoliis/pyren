@@ -38,8 +38,8 @@ def acf_find_in_sirev( ref2, platform ):
   if len(list(errone.keys()))==0:
     se=zip.open('SIREV_ERRONE.dat')
     cont=se.read()
-    for l in cont.split('\n'):
-      li = l.split('/')
+    for l in cont.split(b'\n'):
+      li = l.split(b'/')
       if len(li)==6 and li[0]==platform:
         errone[li[2]] = li[3]
   
@@ -68,7 +68,7 @@ def acf_loadModules( de, refdata, platform ):
     print("Configuration database: ", acfFile)
     
   zip=zipfile.ZipFile(acfFile)
-  zip.setpassword('A710FBD006342FC8')
+  zip.setpassword(b'A710FBD006342FC8')
   zipflist = zip.namelist()
 
   module_list = []

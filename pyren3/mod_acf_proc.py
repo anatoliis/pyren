@@ -148,26 +148,27 @@ def acf_MTC_generateDefaults( m, mtc ):
   for k, v in sorted( list(m['acf_wc'].items()), key=lambda x_y: x_y[1] ):
     if mod_globals.opt_verbose or mod_globals.opt_verbose2:
       try:
-      	sf.write('#'*60 + '\n')
-      	sf.write('# ' + k + '\n')
+        sf.write('#'*60 + '\n')
+        sf.write('# ' + k + '\n')
       except:
-      	pass
+        pass
     if mod_globals.opt_verbose2:
       for di in sorted(list(m['mo'].req[k].SentDI.values()), key=lambda x: x.FirstByte * 8 + x.BitOffset):
         try:
           sf.write(pyren_encode('##     ' + di.Name + ' = ' + di.val + '\n'))
         except:
           try:
-          	sf.write(pyren_encode('##     ' + di.Name + ' = UNDEFINED\n'))
+            sf.write(pyren_encode('##     ' + di.Name + ' = UNDEFINED\n'))
           except:
-          	pass
+            pass
     sf.write(m['acf_wc'][k]+'\n')
 
 
   # write trailer
-  sf.write('\n# VIN programming\n')
+  sf.write('\n# VIN programming !!!check the command!!!\n')
   sf.write('#2EF190' + hex_VIN_plus_CRC(mod_globals.vin, False) +'\n')
-  sf.write('\n# reset ecu\n')
+  sf.write('#3B81' + hex_VIN_plus_CRC(mod_globals.vin, False) +'\n')
+  sf.write('\n# reset ecu or disconnect the battary!!!check the command!!!\n')
   sf.write('#1101\n\n')
   sf.write('exit\n')
 

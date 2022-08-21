@@ -159,9 +159,9 @@ def get_file_from_clip( filename ):
         else: 
             encoding = 'utf-8'
         if mode=='rb':
-        	return open(os.path.join(mod_globals.cliproot, filename), mode)
+            return open(os.path.join(mod_globals.cliproot, filename), mode)
         else:
-        	return open(os.path.join(mod_globals.cliproot, filename), mode, encoding=encoding)
+            return open(os.path.join(mod_globals.cliproot, filename), mode, encoding=encoding)
     else:
         if filename.startswith('../'):
             filename = filename[3:]
@@ -228,7 +228,7 @@ def path_in_ddt( pattern ):
 
 def get_file_from_ddt( filename ):
     if mod_globals.ddt_arc=='':
-        return open(os.path.join(mod_globals.ddtroot, filename), 'r')
+        return open(os.path.join(mod_globals.ddtroot, filename), 'rb')
     else:
         return mod_globals.ddt_arc.open(filename, 'r')
 

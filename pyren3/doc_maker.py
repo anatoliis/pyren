@@ -646,8 +646,6 @@ def optParser():
   global allvin
 
   parser = argparse.ArgumentParser(
-    #usage = "%prog -p <port> [options]",
-    version="Document Viewer Version 1.0",
     description = "Tool for view DocDb"
   )
   
