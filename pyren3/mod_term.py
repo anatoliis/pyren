@@ -181,8 +181,6 @@ def optParser():
   global debug_mode
 
   parser = argparse.ArgumentParser(
-    #usage = "%prog -p <port> [options]",
-    version="pyRen terminal Version 0.9.q",
     description = "pyRen terminal"
   )
   
@@ -268,7 +266,7 @@ def optParser():
     print("")
     print("Available COM ports:")
     for port, desc, hwid in iterator:
-      print("%-30s \n\tdesc: %s \n\thwid: %s" % (port,desc.decode("windows-1251"),hwid))
+      print("%-30s \n\tdesc: %s \n\thwid: %s" % (port,desc,hwid))
     print("")
     exit(2)
   else:

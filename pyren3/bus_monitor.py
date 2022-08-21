@@ -290,8 +290,6 @@ def optParser():
   global infile
   
   parser = argparse.ArgumentParser(
-    #usage = "%prog -p <port> [options]",
-    version="bus_monitor Version 0.1",
     description = "bus_monitor - python program for diagnostic Renault cars"
   )
   

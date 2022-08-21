@@ -141,7 +141,7 @@ def acf_MTC_generateDefaults( m, mtc ):
   sf.write('can500  # init can macro\n\n')
   sf.write('delay 1\n\n')
   sf.write('# open session\n')
-  sf.write(m['startDiagReq'] +'\n\n')
+  sf.write('session ' + m['startDiagReq'] + '\n\n')
   sf.write('# configuration\n')
 
   # save write commands
