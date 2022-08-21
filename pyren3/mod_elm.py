@@ -210,10 +210,10 @@ class Port:
                 print("")
                 print("Available COM ports:")
                 for port, desc, hwid in iterator:
-                    print("%-30s \n\tdesc: %s \n\thwid: %s" % (port, desc.decode ("windows-1251"), hwid))
+                    print("%-30s \n\tdesc: %s \n\thwid: %s" % (port, desc, hwid))
                 print("")
                 mod_globals.opt_demo = True
-                exit (2)
+                exit ()
             # print self.hdr.BAUDRATES
             self.check_elm ()
         
@@ -1898,7 +1898,8 @@ class ELM:
 
         self.screenRefreshTime += roundtrip
 
-        self.response_time = ((self.response_time * 9) + roundtrip) // 10
+        if command[0].isdigit():
+            self.response_time = ((self.response_time * 9) + roundtrip) / 10
 
         # save responce to log
         if self.lf != 0:
