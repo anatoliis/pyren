@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #  ______  ___   ___      ___       ___  ___   ______    __       _______ 
 # |   ___| \  \ /  /     /   \     |   \/   | |   _  \  |  |     |   ____|
@@ -13,7 +13,7 @@ import time
     
 import mod_globals
 import mod_ecu
-import pyren
+import pyren3
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
