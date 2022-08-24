@@ -13,15 +13,15 @@ from   mod_utils    import Choice
 def acf_saveMTCtoFile( folder, vindata, mtcdata, refdata, platform ):
 
   f = open( folder+'/vindata.txt', 'wt' )
-  f.write(vindata)
+  f.write(str(vindata))
   f.close()
 
   f = open( folder+'/refdata.txt', 'wt' )
-  f.write(refdata)
+  f.write(str(refdata))
   f.close()
   
   f = open( folder+'/platform.txt', 'wt' )
-  f.write(platform)
+  f.write(str(platform))
   f.close()
   
   f = open( folder+'/mtcdata.txt', 'wt' )
@@ -179,8 +179,8 @@ def acf_getMTC( VIN, preferFile=False ):
                 zf=zip.open(i)
                 vin3list=zf.read()
                 zf.close()
-                for l in vin3list.split('\n'):
-                  if l.startswith(VIN3):
+                for l in vin3list.split(b'\n'):
+                  if l.startswith(VIN3.encode('utf-8')):
                     vindata = l
                     break
             if vindata!='': break
@@ -191,6 +191,9 @@ def acf_getMTC( VIN, preferFile=False ):
         break
     if vindata!='': break
   
+  if type(vindata) == bytes:
+    vindata = vindata.decode("utf-8")
+
   if vindata=='' or vindir=='':
     print("\n\nVIN has not found in databse\n\n")
     exit()

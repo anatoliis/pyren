@@ -96,8 +96,6 @@ class DDTECU():
     self.Multipoint = '1'
 
   def __del__(self):
-    #debug
-    #print 'DDTECU __del__'
     try:
       del(self.elm)
       del(self.cecu)
@@ -116,6 +114,7 @@ class DDTECU():
       del(self.rotaryResultsQueue)
       del(self.elmAccess)
     except:
+      print('Exception in DDTECU __del__')
       pass
 
   def initRotary(self):
@@ -259,6 +258,9 @@ class DDTECU():
       print("Getting ID from 22xx")
       self.clearELMcache ()
 
+      rule = 'replace'
+      #rule = 'ignore' may be a bit better in some cases
+
       #DiagVersion F1A0
       IdRsp_F1A0 = self.elm.request( req = '22F1A0', positive = '62', cache = False )
       if len(IdRsp_F1A0)>8 and 'NR' not in IdRsp_F1A0:
@@ -269,19 +271,19 @@ class DDTECU():
       IdRsp_F18A = self.elm.request( req = '22F18A', positive = '62', cache = False )
       if len(IdRsp_F18A)>8 and 'NR' not in IdRsp_F18A:
         Supplier = trim(IdRsp_F18A[9:].replace(' ',''))
-        Supplier = bytes.fromhex(Supplier).decode('utf-8')
+        Supplier = bytes.fromhex(Supplier).decode('utf-8',rule)
 
       #Soft F194
       IdRsp_F194 = self.elm.request( req = '22F194', positive = '62', cache = False )
       if len(IdRsp_F194)>8 and 'NR' not in IdRsp_F194:
         Soft = trim(IdRsp_F194[9:].replace(' ',''))
-        Soft = bytes.fromhex(Soft).decode('utf-8')
+        Soft = bytes.fromhex(Soft).decode('utf-8',rule)
 
       #Version F195
       IdRsp_F195 = self.elm.request( req = '22F195', positive = '62', cache = False )
       if len(IdRsp_F195)>8 and 'NR' not in IdRsp_F195:
         Version = trim(IdRsp_F195[9:].replace(' ',''))
-        Version = bytes.fromhex(Version).decode('utf-8','replace')
+        Version = bytes.fromhex(Version).decode('utf-8',rule)
         
     hash = Address+DiagVersion+Supplier+Soft+Version
 
