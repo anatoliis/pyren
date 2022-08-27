@@ -44,16 +44,16 @@ class settings():
         pass
 
     def load(self):
-        if not os.path.isfile("../settings.p"):
+        if not os.path.isfile("../settings3.p"):
             self.save()
 
-        f = open('../settings.p', 'rb')
+        f = open('../settings3.p', 'rb')
         tmp_dict = pickle.load(f)
         f.close()
         self.__dict__.update(tmp_dict)
 
     def save(self):
-        f = open('../settings.p', 'wb')
+        f = open('../settings3.p', 'wb')
         pickle.dump(self.__dict__, f)
         f.close()
 

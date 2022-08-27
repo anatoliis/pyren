@@ -631,7 +631,7 @@ class DDTLauncher():
                      ecu['xml'],
                      ecu['dump'],
                      ecu['ses']]
-                fout.write(str(';'.join(e)).encode("ascii", "ignore") + '\n')
+                fout.write(';'.join(e) + '\n')
         fout.close()
 
         copyfile(filename, "./savedCAR_prev.csv")

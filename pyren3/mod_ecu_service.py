@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from mod_utils          import Choice
 from mod_utils          import pyren_encode
