@@ -465,7 +465,7 @@ class Port:
                 continue
             self.buff += byte
             tc = time.time ()
-            if 'ELM' or 'STN' in self.buff:
+            if ('ELM' in self.buff) or ('STN' in self.buff):
                 break
             if (tc - tb) > 1:
                 print "ERROR - rate not supported. Let's go back."
