@@ -452,30 +452,6 @@ class Port:
         self.hdr.timeout = 1
         self.hdr.baudrate = boudrate
         
-        # search ELM
-        tb = time.time ()  # start time
-        self.buff = ""
-        while True:
-            if not mod_globals.opt_demo:
-                byte = self.read ()
-            else:
-                byte = 'ELM'
-            if byte == '\r' or byte == '\n':
-                self.buff = ""
-                continue
-            self.buff += byte
-            tc = time.time ()
-            if ('ELM' in self.buff) or ('STN' in self.buff):
-                break
-            if (tc - tb) > 1:
-                print "ERROR - rate not supported. Let's go back."
-                self.hdr.timeout = self.portTimeout
-                self.hdr.baudrate = mod_globals.opt_speed
-                self.rwLock = False
-                # disable at_keepalive
-                #self.elm_at_KeepAlive ()
-                return
-        
         self.write ("\r")
         
         # search >
