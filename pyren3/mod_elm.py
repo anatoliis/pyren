@@ -192,12 +192,13 @@ class Port:
             self.droid = android.Android ()
             self.droid.toggleBluetoothState (True)
             try:
-                self.droid.bluetoothConnect ('00001101-0000-1000-8000-00805F9B34FB')
+                self.btcid = self.droid.bluetoothConnect ('00001101-0000-1000-8000-00805F9B34FB').result
             except:
                 pass
 
-            if len (self.droid.bluetoothActiveConnections ().result) != 0:
-                self.btcid = list (self.droid.bluetoothActiveConnections ().result.keys ())[0]
+            #if len (self.droid.bluetoothActiveConnections ().result) != 0:
+            #    self.btcid = list (self.droid.bluetoothActiveConnections ().result.keys ())[0]
+
 
         else:
             self.portName = portName
@@ -296,7 +297,8 @@ class Port:
                 except:
                     pass
             elif self.portType == 2:
-                byte = self.droid.bluetoothRead (1).result
+                if self.droid.bluetoothReadReady(self.btcid).result:
+                    byte = self.droid.bluetoothRead (1, self.btcid ).result
             else:
                 inInputBuffer = self.hdr.inWaiting()
                 if inInputBuffer:
@@ -338,7 +340,7 @@ class Port:
             return rcv_bytes
         elif self.portType == 2:
             # return self.droid.bluetoothWrite(data , self.btcid)
-            return self.droid.bluetoothWrite (data)
+            return self.droid.bluetoothWrite (data.decode("utf-8"), self.btcid )
         else:
             return self.hdr.write(data)
         #except:
@@ -2175,45 +2177,49 @@ class ELM:
 
     def checkPerformaceLevel(self, level, dataids):
         if len(dataids) >= level:
+            predicted_response_length = 2 # length of string ReadDataByIdentifier service byte - 0x22
+            did_number = 0
             paramToSend = ''
 
-            if level <= 3: # 3 dataids max can be send in single frame
-                frameLength = '{:02X}'.format(1 + level * 2)
-                for lvl in range(level):
-                    paramToSend += list(dataids.keys())[lvl]
-                
-                cmd = '22' + paramToSend
-                
-                resp = self.cmd(cmd).replace(" ", "")   #check response length first
-                if not all (c in string.hexdigits for c in resp):
-                    return False 
-                
-                if self.l1_cache.get(cmd, ""):
-                    if mod_globals.opt_caf:
-                        resp = self.send_raw(cmd + self.l1_cache.get(cmd)) # get all frames, not only first one
-                    else:                                                  # prevents from triggering false error_frame error
-                        resp = self.send_raw(frameLength + cmd + self.l1_cache.get(cmd))
-                    for s in resp.split('\n'):
-                        if s.strip().startswith("037F") or "?" in s:
-                            return False 
-            
-            else: # send multiframe command for more than 3 dataids
+            if level > 3: # Send multiframe command for more than 3 dataids
                 # Some modules can return NO DATA if multi frame command is sent after some no activity time
                 # Sending anything before main command usually helps that command to be accepted
                 self.send_cmd ("22" + list(dataids.keys())[0] + "1")  
 
-                for lvl in range(level):
-                    resp = self.request("22" + list(dataids.keys())[lvl])
-                    if any(s in resp for s in ['?', 'NR']):
-                        continue
-                    paramToSend += list(dataids.keys())[lvl]
-                cmd = '22' + paramToSend
-                resp = self.send_cmd(cmd)
-            if any(s in resp for s in ['?', 'NR']):
+            # while there is some dataids left and actual number of used dids 
+            # is lower than requeseted performance level
+            while did_number < len(dataids) and len(param_to_send)/4 < level:
+                # get another did
+                did = dataids.keys()[did_number]
+                did_number += 1
+
+                # exclude did_supported_in_range did
+                # sent seperatly - response provided
+                # sent in multi did request - empty response
+                # these are available only in injection module
+                if not int('0x' + did, 16) % 0x20 and self.currentaddress == '7A':
+                    continue
+
+                #check if it is supported
+                resp = self.request("22" + did)
+                if not any(s in resp for s in ['?', 'NR']):
+                    # add it to the list
+                    param_to_send += did
+                    predicted_response_length += len(did) + int(dataids[did].dataBitLength)/4
+
+            # if module does not support any did, we cannot check performance level
+            if not param_to_send:
                 return False
-        
-        self.performanceModeLevel = level
-        return True
+            
+            cmd = '22' + param_to_send
+            resp = self.send_cmd(cmd).replace(" ", "")   #check response length first
+            if any(s in resp for s in ['?', 'NR']) or len(resp) < predicted_response_length:
+                return False
+
+            self.performanceModeLevel = len(param_to_send)/4
+            return True
+        else:
+            return False
 
     def getRefreshRate(self):
         refreshRate = 0
