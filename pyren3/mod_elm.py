@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
    module contains class for working with ELM327
-   version: 180408
+   version: 010922
 """
 
 import mod_globals
@@ -170,7 +170,7 @@ class Port:
                 self.hdr.connect ((self.macaddr, self.channel))
                 self.hdr.setblocking (True)
             except Exception as e:
-                print(" \n\nERROR: Can not connect to Bluetooth ELM\n\n", e)
+                print(" \n\nERROR: Can't connect to BT adapter\n\n", e)
                 mod_globals.opt_demo = True
                 sys.exit()
         elif re.match (r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}$", portName):
@@ -184,22 +184,27 @@ class Port:
                 self.hdr.connect ((self.ipaddr, self.tcpprt))
                 self.hdr.setblocking (True)
             except:
-                print(" \n\nERROR: Can not connect to WiFi ELM\n\n")
+                print(" \n\nERROR: Can't connect to WiFi ELM\n\n")
                 mod_globals.opt_demo = True
                 sys.exit()
         elif mod_globals.os == 'android' and portName == 'bt':
             self.portType = 2
             self.droid = android.Android ()
             self.droid.toggleBluetoothState (True)
-            try:
-                self.btcid = self.droid.bluetoothConnect ('00001101-0000-1000-8000-00805F9B34FB').result
-            except:
-                pass
-
-            #if len (self.droid.bluetoothActiveConnections ().result) != 0:
-            #    self.btcid = list (self.droid.bluetoothActiveConnections ().result.keys ())[0]
-
-
+            retry = 0
+            while 1:
+                time.sleep(1)
+                retry = retry + 1
+                try:
+                    self.btcid = self.droid.bluetoothConnect ('00001101-0000-1000-8000-00805F9B34FB').result
+                except:
+                    pass
+                print( 'Try ',retry, ":", self.btcid )
+                if self.btcid != None and len(self.btcid) > 10:  #uuid length greater then 10
+                    break
+                if retry > 5:
+                    print( " \n\nERROR: Can't connect to BT adapter" )
+                    exit()
         else:
             self.portName = portName
             self.portType = 0
