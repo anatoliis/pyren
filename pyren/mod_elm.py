@@ -2170,7 +2170,7 @@ class ELM:
                 if not any(s in resp for s in ['?', 'NR']):
                     # add it to the list
                     param_to_send += did
-                    predicted_response_length += len(did) + int(dataids[did].dataBitLength)/4
+                    predicted_response_length += len(self.getFromCache('22' + did).replace(' ', '')) - 2
 
             # if module does not support any did, we cannot check performance level
             if not param_to_send:
