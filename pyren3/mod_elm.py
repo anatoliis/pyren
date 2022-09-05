@@ -2184,7 +2184,7 @@ class ELM:
         if len(dataids) >= level:
             predicted_response_length = 2 # length of string ReadDataByIdentifier service byte - 0x22
             did_number = 0
-            paramToSend = ''
+            param_to_send = ''
 
             if level > 3: # Send multiframe command for more than 3 dataids
                 # Some modules can return NO DATA if multi frame command is sent after some no activity time
