@@ -199,7 +199,7 @@ class settings():
     logName = 'log.txt'
     csvOption = 'csv'
     log = True
-    cfc = False
+    cfc = True
     n1c = False
     si = False
     csv = False
@@ -457,7 +457,7 @@ if osname != 'android':
             self.style.configure('.', font="TkDefaultFont")
             self.style.map('.', background=[('selected', '#d9d9d9'), ('active', '#d9d9d9')])
 
-            self.root.geometry("500x420+0+28")
+            self.root.geometry("500x500+0+28")
             self.root.title("Pyren launcher")
             self.root.configure(background="#d9d9d9")
             self.root.configure(highlightbackground="#d9d9d9")
@@ -587,7 +587,7 @@ if osname != 'android':
             self.mCAN.configure(highlightbackground="#d9d9d9")
             self.mCAN.configure(highlightcolor="black")
             self.mCAN.configure(
-                text='''These options should be enabled for some fake chinese ELM. Any of them decrease data rate.''')
+                text='''CFC - enable soft flow control (recommended)          N1C - disable L1 cache (not recommended)''')
             self.mCAN.configure(width=142)
 
             self.mKWP = tk.Message(self.root)
