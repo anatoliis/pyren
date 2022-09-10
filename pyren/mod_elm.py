@@ -1930,7 +1930,7 @@ class ELM:
         self.check_answer(self.cmd("at l0"))
         self.check_answer(self.cmd("at al"))
 
-        if mod_globals.opt_obdlink and mod_globals.opt_caf:
+        if mod_globals.opt_obdlink and mod_globals.opt_caf and not self.ATCFC0:
             self.check_answer(self.cmd("AT CAF1"))
             self.check_answer(self.cmd("STCSEGR 1"))
             self.check_answer(self.cmd("STCSEGT 1"))
