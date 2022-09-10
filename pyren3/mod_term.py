@@ -225,7 +225,7 @@ def optParser():
   parser.add_argument("--caf",
       help="turn on CAN Auto Formatting. Available only for OBDLink",
       dest="caf",
-      default=False,
+      default=True,
       action="store_true")
 
   parser.add_argument("--n1c",
