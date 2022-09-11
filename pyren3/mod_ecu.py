@@ -415,7 +415,7 @@ class ECU:
         csv_filename = csv_filename.replace(' ','_')
         #if mod_globals.os == 'android':
         #  csv_filename = csv_filename.encode("ascii","ignore")
-        csvf = open("./csv/"+pyren_encode(csv_filename), "wt")
+        csvf = open("./csv/"+pyren_encode(csv_filename), "wb")
 
     DTCpos = path.find('DTC')
     if DTCpos > 0:

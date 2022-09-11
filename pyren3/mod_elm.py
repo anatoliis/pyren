@@ -467,30 +467,6 @@ class Port:
         self.hdr.timeout = 1
         self.hdr.baudrate = boudrate
         
-        # search ELM
-        tb = time.time ()  # start time
-        self.buff = ""
-        while True:
-            if not mod_globals.opt_demo:
-                byte = self.read ()
-            else:
-                byte = 'ELM'
-            if byte == '\r' or byte == '\n':
-                self.buff = ""
-                continue
-            self.buff += byte
-            tc = time.time ()
-            if ('ELM' in self.buff) or ('STN' in self.buff):
-                break
-            if (tc - tb) > 1:
-                print("ERROR - rate not supported. Let's go back.")
-                self.hdr.timeout = self.portTimeout
-                self.hdr.baudrate = mod_globals.opt_speed
-                self.rwLock = False
-                # disable at_keepalive
-                #self.elm_at_KeepAlive ()
-                return
-        
         self.write ("\r")
         
         # search >
@@ -1534,8 +1510,8 @@ class ELM:
                 tc = time.time()  # current time
                 self.screenRefreshTime += ST /1000.
                 if (tc - tb) * 1000. < ST:
-                    target_time = time.clock() + (ST / 1000. - (tc - tb))
-                    while time.clock() < target_time:
+                    target_time = time.time() + (ST / 1000. - (tc - tb))
+                    while time.time() < target_time:
                         pass
                 tb = tc
 
@@ -2195,7 +2171,7 @@ class ELM:
             # is lower than requeseted performance level
             while did_number < len(dataids) and len(param_to_send)/4 < level:
                 # get another did
-                did = dataids.keys()[did_number]
+                did = list(dataids)[did_number]
                 did_number += 1
 
                 # exclude did_supported_in_range did
@@ -2221,7 +2197,7 @@ class ELM:
             if any(s in resp for s in ['?', 'NR']) or len(resp) < predicted_response_length:
                 return False
 
-            self.performanceModeLevel = len(param_to_send)/4
+            self.performanceModeLevel = len(param_to_send)//4
             return True
         else:
             return False
