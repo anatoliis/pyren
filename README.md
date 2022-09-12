@@ -165,17 +165,19 @@ Install pyren
 ```
 cd c:\CLIP\Data\GenAppli\
 git clone git@gitlab.com:py_ren/pyren.git
+cd pyren
+git branch pyren3
 ```
 or just download it
 
-https://gitlab.com/py_ren/pyren/-/archive/master/pyren-master.zip
+https://gitlab.com/py_ren/pyren/-/archive/pyren3/pyren-pyren3.zip
 
 and extract next to directories EcuRenault, Location, Vehicles
 
 You have to get the next directory tree
 ```
 <any work directory>
-|- _pyren3_launcher.py       #(universal launcher)
+|- main.py       #(universal launcher)
 |- BVMEXTRACTION            #(need for doc_maker)
 |- DocDB_xx                 #(need for doc_maker where xx=language) 
 |- EcuRenault               #(for CLIP mode)
