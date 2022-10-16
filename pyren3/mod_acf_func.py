@@ -35,6 +35,9 @@ def acf_find_in_sirev( ref2, platform ):
   global zip
   global zipflist
   
+  platform = bytes(platform, 'utf-8')
+  ref2 = bytes(ref2, 'utf-8')
+
   if len(list(errone.keys()))==0:
     se=zip.open('SIREV_ERRONE.dat')
     cont=se.read()
@@ -44,10 +47,10 @@ def acf_find_in_sirev( ref2, platform ):
         errone[li[2]] = li[3]
   
   while( ref2 in list(errone.keys())):
-    #print 'e:',ref2,errone[ref2] 
+    #print('e:',ref2,errone[ref2] )
     ref2 = errone[ref2]
     
-  return ref2
+  return ref2.decode("utf-8")
 
 def acf_loadModules( de, refdata, platform ):
   ''' load modules from CONFIG database'''
