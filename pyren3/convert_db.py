@@ -65,7 +65,7 @@ if __name__ == "__main__":
         for vf in fbsessionfiles:
             vf = vf[:-4] + vf[-4:].lower()
             print("Processing file ", vf)
-            f = open (vf, "r")
+            f = open (vf, "rb")
             data = f.read ()
             zf.writestr (os.path.join ("EcuRenault", "Sessions", os.path.basename (vf)), data)
 
