@@ -5,13 +5,13 @@ import os
 import pickle
 import sys
 import zipfile
-from io import StringIO
+from io import BytesIO
 import mod_db_manager
 
 from  mod_optfile import *
 
 if __name__ == "__main__":
-    zipoutput = StringIO ()
+    zipoutput = BytesIO ()
     
     if len (sys.argv) < 2:
         print("Usage : convert_db.py [path/to/GenAppli]")
@@ -39,35 +39,35 @@ if __name__ == "__main__":
     with zipfile.ZipFile (zipoutput, mode='w', compression=zipfile.ZIP_DEFLATED, allowZip64=True) as zf:
         for vf in scnerariosfiles:
             print("Processing file ", vf)
-            f = open (vf, "r")
+            f = open (vf, "rb")
             data = f.read ()
-            zf.writestr (os.path.join ("EcuRenault", "Scenarios", os.path.basename (vf)), str (data))
+            zf.writestr (os.path.join ("EcuRenault", "Scenarios", os.path.basename (vf)), data)
 
         for vf in vehiclesfiles:
             print("Processing file ", vf)
-            f = open (vf, "r")
+            f = open (vf, "rb")
             data = f.read ()
-            zf.writestr (os.path.join ("Vehicles", os.path.basename (vf)), str (data))
+            zf.writestr (os.path.join ("Vehicles", os.path.basename (vf)), data)
 
         for vf in dfgfiles:
             print("Processing file ", vf)
-            f = open(vf, "r")
+            f = open(vf, "rb")
             data = f.read()
-            zf.writestr(os.path.join("Vehicles", "DFG", os.path.basename(vf)), str(data))
+            zf.writestr(os.path.join("Vehicles", "DFG", os.path.basename(vf)), data)
 
         for vf in ecufiles:
             vf = vf[:-4] + vf[-4:].lower()
             print("Processing file ", vf)
-            f = open (vf, "r")
+            f = open (vf, "rb")
             data = f.read ()
-            zf.writestr (os.path.join ("EcuRenault", os.path.basename (vf)), str (data))
+            zf.writestr (os.path.join ("EcuRenault", os.path.basename (vf)), data)
 
         for vf in fbsessionfiles:
             vf = vf[:-4] + vf[-4:].lower()
             print("Processing file ", vf)
             f = open (vf, "r")
             data = f.read ()
-            zf.writestr (os.path.join ("EcuRenault", "Sessions", os.path.basename (vf)), str (data))
+            zf.writestr (os.path.join ("EcuRenault", "Sessions", os.path.basename (vf)), data)
 
         for vf in locationsfiles:
             print("Processing file ", vf)
