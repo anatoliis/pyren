@@ -19,6 +19,9 @@ if __name__ == "__main__":
 
     if not os.path.exists('./cache'):
         os.makedirs('./cache')
+    
+    if os.path.exists('pyrendata.zip'):
+        os.remove('pyrendata.zip')
 
     mod_db_manager.find_DBs()
 
@@ -74,13 +77,13 @@ if __name__ == "__main__":
             try:
                 while len(vf) and vf[0] in ['.', '/', '\\']:
                     vf = vf[1:]
-                optf = optfile (vf)
+                optf = optfile (vf, cache=False)
             except:
                 print("Skipping file ", vf)
                 continue
             data = pickle.dumps (optf.dict)
             zf.writestr (os.path.join ("Location",
-                                       os.path.basename (vf).replace (".bqm", ".p")), str (data))
+                                       os.path.basename (vf).replace (".bqm", ".p")), data)
         
         for vf in fgsessionfiles:
             vf = vf[:-4] + vf[-4:].lower()
@@ -88,13 +91,13 @@ if __name__ == "__main__":
             try:
                 while len(vf) and vf[0] in ['.', '/', '\\']:
                     vf = vf[1:]
-                optf = optfile (vf)
+                optf = optfile (vf, cache=False)
             except:
                 print("Skipping file ", vf)
                 continue
             data = pickle.dumps (optf.dict)
             zf.writestr (os.path.join ("EcuRenault", "Sessions",
-                                       os.path.basename (vf).replace ("FG", "UG").replace (".xml", ".p")), str (data))
+                                       os.path.basename (vf).replace ("FG", "UG").replace (".xml", ".p")), data)
     
     with open ("pyrendata.zip", "wb") as zf:
         zf.write (zipoutput.getvalue ())
