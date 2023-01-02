@@ -158,16 +158,17 @@ class Port:
         
         self.portTimeout = portTimeout
         
-        portName = portName.strip ()
+        portName = portName.strip()
 
         MAC = None
         upPortName = portName.upper()
         if re.match (r"^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$", upPortName) or \
            re.match (r"^[0-9A-F]{4}.[0-9A-F]{4}.[0-9A-F]{4}$", upPortName) or \
            re.match (r"^[0-9A-F]{12}$", upPortName):
-            MAC = upPortName
+            upPortName = upPortName.replace(':','').replace('.','')
+            MAC = ':'.join (a + b for a, b in zip (upPortName[::2], upPortName[1::2]))
 
-        if MAC:
+        if mod_globals.os != 'android' and MAC:
             try:
                 self.macaddr = portName
                 self.channel = 1
@@ -1552,11 +1553,13 @@ class ELM:
 
         if responses[0][:1] == '0':  # single frame (sf)
             nBytes = int(responses[0][1:2], 16)
+            rspLen = nBytes
             nFrames = 1
             result = responses[0][2:2 + nBytes * 2]
 
         elif responses[0][:1] == '1':  # first frame (ff)
             nBytes = int(responses[0][1:4], 16)
+            rspLen = nBytes
             nBytes = nBytes - 6  # we assume that it should be more then 7
             nFrames = 1 + nBytes // 7 + bool(nBytes % 7)
             cFrame = 1
@@ -1605,7 +1608,7 @@ class ELM:
 
         if noerrors and len(result) // 2 >= nBytes:
             # trim padding
-            result = result[:nBytes*2]
+            result = result[:rspLen*2]
             # split by bytes and return
             result = ' '.join(a + b for a, b in zip(result[::2], result[1::2]))
             return result
@@ -1772,11 +1775,13 @@ class ELM:
         
         if responses[0][:1] == '0':  # single frame (sf)
             nBytes = int (responses[0][1:2], 16)
+            rspLen = nBytes
             nFrames = 1
             result = responses[0][2:2 + nBytes * 2]
         
         elif responses[0][:1] == '1':  # first frame (ff)
             nBytes = int (responses[0][1:4], 16)
+            rspLen = nBytes
             nBytes = nBytes - 6 # we assume that it should be more then 7
             nFrames = 1 + nBytes//7 + bool(nBytes%7)
             cFrame = 1
@@ -1826,7 +1831,7 @@ class ELM:
 
         if len (result) // 2 >= nBytes and noErrors and result[:2] != '7F':
             # trim padding
-            result = result[:nBytes*2]            
+            result = result[:rspLen*2]            
             # split by bytes and return
             result = ' '.join (a + b for a, b in zip (result[::2], result[1::2]))
             return result

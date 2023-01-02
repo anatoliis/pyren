@@ -6,7 +6,7 @@
 ##################################
 #                                #
 #                                #
-#    Version: 3.0 (1-Aug-2022)   #
+#    Version: 3.1 (2-Jan-2023)   #
 #    Author: Shr-Lnm             #
 #                                #
 #                                #
@@ -16,7 +16,7 @@ __author__ = "Shr-Lnm"
 __copyright__ = "Copyright 2018-2022"
 __credits__ = []
 # __license__ = "GNU"  # Unknown licence!
-__version__ = "3.0.0"  # python3 maybe ?
+__version__ = "3.1.0"  # python3 maybe ?
 __maintainer__ = "Shr-Lnm"
 __email__ = "mshkn@inbox.ru"
 __status__ = "Beta"
@@ -26,6 +26,7 @@ import shutil
 from os import listdir
 from os.path import isdir
 from os.path import isfile
+import re
 import sys
 
 try:
@@ -244,9 +245,17 @@ def run(s, cmd):
         cmdr = __import__('mod_ddt')
     elif cmd == 'term':
         cmdr = __import__('mod_term')
+    elif cmd == 'pids':
+        cmdr = __import__('mod_ecu')
 
-    if s.port.lower() == 'bt' or s.port == '': s.port = 'bt'
+    if s.port.upper() == 'BT' or s.port == '': 
+        s.port = 'bt'
+
+    if s.port.upper().endswith(';BT'):
+        s.port = s.port.split(';')[0]
+
     sys.argv.append('-p' + s.port)
+
     if cmd == 'demo':
         sys.argv.append('--demo')
     if cmd == 'scan' and cmd != 'term':
@@ -276,6 +285,8 @@ def run(s, cmd):
         # sys.argv.append('--demo')
     if cmd == 'ddt':
         sys.argv.append('--demo')
+#    if cmd == 'pids':
+#        sys.argv = [ 'mod_ecu.py', 'ask', s.lang, 'torq']
     os.chdir(s.path)
     cmdr.main()
     sys.exit()
@@ -903,6 +914,11 @@ else:
             self.droid.fullDismiss()
             run(self.save, 'term')
 
+        def cmd_PIDs(self):
+            self.saveSettings()
+            self.droid.fullDismiss()
+            run(self.save, 'pids')
+
         def cmd_Update(self):
             res = update_from_gitlab()
             if res == 0:
@@ -920,7 +936,15 @@ else:
             if self.droid.fullQueryDetail("rb_bt").result['checked'] == 'false':
                 self.save.port = self.droid.fullQueryDetail("in_wifi").result['text']
             else:
-                self.save.port = 'BT'
+                portName = self.droid.fullQueryDetail("in_wifi").result['text']
+                upPortName = portName.upper()
+                MAC = ''
+                if re.match (r"^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$", upPortName) or \
+                   re.match (r"^[0-9A-F]{4}.[0-9A-F]{4}.[0-9A-F]{4}$", upPortName) or \
+                   re.match (r"^[0-9A-F]{12}$", upPortName):
+                    upPortName = upPortName.replace(':','').replace('.','')
+                    MAC = ':'.join (a + b for a, b in zip (upPortName[::2], upPortName[1::2]))
+                self.save.port = MAC + ';' + 'BT'
 
             self.save.speed = '38400'
 
@@ -984,10 +1008,13 @@ else:
 
             if self.save.port == '':
                 self.save.port = "192.168.0.10:35000"
-            if self.save.port.lower() == 'bt':
+            if self.save.port.upper().endswith('BT'):
+                MAC = ""
+                if ';' in self.save.port:
+                    MAC = self.save.port.split(';')[0]
                 self.droid.fullSetProperty("rb_bt", "checked", "true")
                 self.droid.fullSetProperty("rb_wifi", "checked", "false")
-                self.droid.fullSetProperty("in_wifi", "text", "192.168.0.10:35000")
+                self.droid.fullSetProperty("in_wifi", "text", MAC)
             else:
                 self.droid.fullSetProperty("rb_bt", "checked", "false")
                 self.droid.fullSetProperty("rb_wifi", "checked", "true")
@@ -1257,6 +1284,13 @@ else:
                 android:layout_toLeftOf="@+id/bt_mon"
                 android:text="Macro" />
             <Button
+                android:id="@+id/bt_pids"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/bt_start"
+                android:layout_toLeftOf="@+id/bt_term"
+                android:text="PIDs" />
+            <Button
                 android:id="@+id/bt_update"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -1287,6 +1321,8 @@ else:
                         self.cmd_Mon()
                     elif id == "bt_term":
                         self.cmd_Term()
+                    elif id == "bt_pids":
+                        self.cmd_PIDs()
                     elif id == "bt_update":
                         self.cmd_Update()
 
