@@ -1897,7 +1897,7 @@ class ELM:
 
         self.screenRefreshTime += roundtrip
 
-        if command[0].isdigit():
+        if command[0].isdigit() or command.startswith('STPX'):
             self.response_time = ((self.response_time * 9) + roundtrip) / 10
 
         # save responce to log
