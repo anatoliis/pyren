@@ -1021,7 +1021,7 @@ else:
             else:
                 self.droid.fullSetProperty("rb_bt", "checked", "false")
                 self.droid.fullSetProperty("rb_wifi", "checked", "true")
-                self.droid.fullSetList("in_wifi", [self.save.port])
+                self.droid.fullSetList("in_wifi", self.dev_list)
 
             self.droid.fullSetProperty("in_logname", "text", self.save.logName)
             if self.save.log:
