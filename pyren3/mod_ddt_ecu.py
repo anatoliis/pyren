@@ -237,7 +237,8 @@ class DDTECU():
     
     '''      0         1         2         3         4         5         6         7      '''
     '''      01234567890123456789012345678901234567890123456789012345678901234567890123456'''
-    IdRsp = '61 80 34 36 33 32 52 45 34 42 45 30 30 33 37 52 00 83 9D 00 1A 90 01 01 00 88 AA'
+    #IdRsp = '61 80 34 36 33 32 52 45 34 42 45 30 30 33 37 52 00 83 9D 00 1A 90 01 01 00 88 AA'
+    #IdRsp = '61 80 30 33 32 32 53 44 34 36 34 36 34 31 39 52 43 10 34 00 25 80 01 01 01 88 00'
     '''                           -- --------                ----- -----                  '''
     '''              DiagVersion--+      |                     |     +--Version           '''
     '''                        Supplier--+                     +--Soft                    '''
@@ -1161,11 +1162,15 @@ def AutoIdents_distance( DiagVersion, Supplier, Soft, Version, ai ):
   #normalize supplier in such cases
   #DiagVersion="12" Supplier="746" Soft="2470" Version="A600"
 	#DiagVersion="12" Supplier="39324d" Soft="0052" Version="0400"
-  if  len( ai['Supplier'] ) == 6 and \
-      len( ai['Soft'] ) == 4 and \
-      len( ai['Version'] ) == 4:
-    ai['Supplier'] = bytes.fromhex(ai['Supplier']).decode('utf-8')
-    
+  try:
+    if  len( ai['Supplier'] ) == 6 and \
+        len( ai['Soft'] ) == 4 and \
+        len( ai['Version'] ) == 4:
+      ai['Supplier'] = bytes.fromhex(ai['Supplier']).decode('utf-8')
+  except:
+    #catch not hex supplier with len 6
+    pass
+
   d = distance( DiagVersion, ai['DiagVersion']) * 0.25
   d = d + distance( Supplier, ai['Supplier']) * 0.25
   d = d + distance( Soft, ai['Soft']) * 0.25

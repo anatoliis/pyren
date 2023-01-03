@@ -285,8 +285,6 @@ def run(s, cmd):
         # sys.argv.append('--demo')
     if cmd == 'ddt':
         sys.argv.append('--demo')
-#    if cmd == 'pids':
-#        sys.argv = [ 'mod_ecu.py', 'ask', s.lang, 'torq']
     os.chdir(s.path)
     cmdr.main()
     sys.exit()
@@ -934,10 +932,10 @@ else:
             self.save.csvOption = self.csvl[int(self.droid.fullQueryDetail("sp_csv").result['selectedItemPosition'])]
 
             if self.droid.fullQueryDetail("rb_bt").result['checked'] == 'false':
-                self.save.port = self.droid.fullQueryDetail("in_wifi").result['text']
+                self.save.port = '192.168.0.10:3500'
             else:
-                portName = self.droid.fullQueryDetail("in_wifi").result['text']
-                upPortName = portName.upper()
+                portName = self.dev_list[int(self.droid.fullQueryDetail("in_wifi").result['selectedItemPosition'])]
+                upPortName = portName.upper().split(';')[0]
                 MAC = ''
                 if re.match (r"^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$", upPortName) or \
                    re.match (r"^[0-9A-F]{4}.[0-9A-F]{4}.[0-9A-F]{4}$", upPortName) or \
@@ -1007,18 +1005,23 @@ else:
             self.csvl = csvl
 
             if self.save.port == '':
-                self.save.port = "192.168.0.10:35000"
+                self.save.port = "192.168.0.10:35000;WiFi"
+                self.dev_list.append(self.save.port)
             if self.save.port.upper().endswith('BT'):
                 MAC = ""
                 if ';' in self.save.port:
                     MAC = self.save.port.split(';')[0]
+                for d in self.dev_list:
+                    if MAC in d:
+                        self.dev_list.insert(0, self.dev_list.pop(self.dev_list.index(d)))
+
                 self.droid.fullSetProperty("rb_bt", "checked", "true")
                 self.droid.fullSetProperty("rb_wifi", "checked", "false")
-                self.droid.fullSetProperty("in_wifi", "text", MAC)
+                self.droid.fullSetList("in_wifi", self.dev_list)
             else:
                 self.droid.fullSetProperty("rb_bt", "checked", "false")
                 self.droid.fullSetProperty("rb_wifi", "checked", "true")
-                self.droid.fullSetProperty("in_wifi", "text", self.save.port)
+                self.droid.fullSetList("in_wifi", [self.save.port])
 
             self.droid.fullSetProperty("in_logname", "text", self.save.logName)
             if self.save.log:
@@ -1123,16 +1126,14 @@ else:
                     android:checked="false"
                     android:text="WiFi" />
             </RadioGroup>
-            <EditText
+            <Spinner
                 android:id="@+id/in_wifi"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_below="@id/tx_elm"
                 android:layout_toRightOf="@id/radioGroup"
-                android:layout_marginLeft="20dp"
-                android:ems="10"
-                android:text="192.168.0.10:35000" />
+                android:layout_marginLeft="20dp" />
             <TextView
                 android:id="@+id/tx_log"
                 android:layout_width="wrap_content"
@@ -1331,6 +1332,13 @@ else:
             try:
                 self.droid = android.Android()
                 self.droid.fullShow(self.lay)
+                self.dev_list = ['192.168.0.10:35000;WiFi']
+                try:
+                    tmp = self.droid.bluetoothGetBondedDevices().result
+                    for i in range(0, len(tmp), 2):
+                        self.dev_list.append( tmp[i]+';'+tmp[i+1])
+                except:
+                    pass
                 self.loadSettings()
                 self.eventloop()
             finally:
