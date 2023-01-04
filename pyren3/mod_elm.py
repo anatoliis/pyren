@@ -198,7 +198,10 @@ class Port:
         elif mod_globals.os == 'android' and ( portName == 'bt' or MAC != None ):
             self.portType = 2
             self.droid = android.Android ()
-            self.droid.toggleBluetoothState (True)
+            if self.droid:
+                print('SL4A loaded') 
+            print( 'BT is enabled:', self.droid.toggleBluetoothState (True).result)
+            print( 'BT discovery canceled:', self.droid.bluetoothDiscoveryCancel().result)
             retry = 0
             while 1:
                 time.sleep(1)
