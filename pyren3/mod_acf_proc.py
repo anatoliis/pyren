@@ -107,6 +107,8 @@ def acf_MTC_generateDefaults( m, mtc ):
   if ddtxml.upper().endswith('.XML'):
     ddtxml = ddtxml[:-4]
 
+  ddtxml = ddtxml.replace('\\', '_')
+
   if m['ecuname']=='':
     m['ecuname'] = m['dst']
 
