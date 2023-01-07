@@ -158,9 +158,17 @@ class Port:
         
         self.portTimeout = portTimeout
         
-        portName = portName.strip ()
+        portName = portName.strip()
 
-        if re.match (r"^[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}$", portName):
+        MAC = None
+        upPortName = portName.upper()
+        if re.match (r"^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$", upPortName) or \
+           re.match (r"^[0-9A-F]{4}.[0-9A-F]{4}.[0-9A-F]{4}$", upPortName) or \
+           re.match (r"^[0-9A-F]{12}$", upPortName):
+            upPortName = upPortName.replace(':','').replace('.','')
+            MAC = ':'.join (a + b for a, b in zip (upPortName[::2], upPortName[1::2]))
+
+        if mod_globals.os != 'android' and MAC:
             try:
                 self.macaddr = portName
                 self.channel = 1
@@ -187,16 +195,22 @@ class Port:
                 print(" \n\nERROR: Can't connect to WiFi ELM\n\n")
                 mod_globals.opt_demo = True
                 sys.exit()
-        elif mod_globals.os == 'android' and portName == 'bt':
+        elif mod_globals.os == 'android' and ( portName == 'bt' or MAC != None ):
             self.portType = 2
             self.droid = android.Android ()
-            self.droid.toggleBluetoothState (True)
+            if self.droid:
+                print('SL4A loaded') 
+            print( 'BT is enabled:', self.droid.toggleBluetoothState (True).result)
+            print( 'BT discovery canceled:', self.droid.bluetoothDiscoveryCancel().result)
             retry = 0
             while 1:
                 time.sleep(1)
                 retry = retry + 1
                 try:
-                    self.btcid = self.droid.bluetoothConnect ('00001101-0000-1000-8000-00805F9B34FB').result
+                    if MAC == None:
+                        self.btcid = self.droid.bluetoothConnect ('00001101-0000-1000-8000-00805F9B34FB').result
+                    else:
+                        self.btcid = self.droid.bluetoothConnect (uuid='00001101-0000-1000-8000-00805F9B34FB', address=MAC).result
                 except:
                     pass
                 print( 'Try ',retry, ":", self.btcid )
@@ -1327,6 +1341,8 @@ class ELM:
             self.l1_cache[command] = str(hex(nframes))[2:].upper()
         
         if len (result) // 2 >= nbytes and noerrors:
+            # trim padding
+            result = result[:nbytes*2]
             # split by bytes and return
             result = ' '.join (a + b for a, b in zip (result[::2], result[1::2]))
             return result
@@ -1540,11 +1556,13 @@ class ELM:
 
         if responses[0][:1] == '0':  # single frame (sf)
             nBytes = int(responses[0][1:2], 16)
+            rspLen = nBytes
             nFrames = 1
             result = responses[0][2:2 + nBytes * 2]
 
         elif responses[0][:1] == '1':  # first frame (ff)
             nBytes = int(responses[0][1:4], 16)
+            rspLen = nBytes
             nBytes = nBytes - 6  # we assume that it should be more then 7
             nFrames = 1 + nBytes // 7 + bool(nBytes % 7)
             cFrame = 1
@@ -1592,6 +1610,8 @@ class ELM:
             self.l1_cache[init_command] = str(nFrames)
 
         if noerrors and len(result) // 2 >= nBytes:
+            # trim padding
+            result = result[:rspLen*2]
             # split by bytes and return
             result = ' '.join(a + b for a, b in zip(result[::2], result[1::2]))
             return result
@@ -1758,11 +1778,13 @@ class ELM:
         
         if responses[0][:1] == '0':  # single frame (sf)
             nBytes = int (responses[0][1:2], 16)
+            rspLen = nBytes
             nFrames = 1
             result = responses[0][2:2 + nBytes * 2]
         
         elif responses[0][:1] == '1':  # first frame (ff)
             nBytes = int (responses[0][1:4], 16)
+            rspLen = nBytes
             nBytes = nBytes - 6 # we assume that it should be more then 7
             nFrames = 1 + nBytes//7 + bool(nBytes%7)
             cFrame = 1
@@ -1811,6 +1833,8 @@ class ELM:
             noErrors = False
 
         if len (result) // 2 >= nBytes and noErrors and result[:2] != '7F':
+            # trim padding
+            result = result[:rspLen*2]            
             # split by bytes and return
             result = ' '.join (a + b for a, b in zip (result[::2], result[1::2]))
             return result

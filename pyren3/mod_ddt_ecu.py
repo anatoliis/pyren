@@ -237,7 +237,7 @@ class DDTECU():
     
     '''      0         1         2         3         4         5         6         7      '''
     '''      01234567890123456789012345678901234567890123456789012345678901234567890123456'''
-    #IdRsp = '61 80 34 36 33 32 52 45 34 42 45 30 30 33 37 52 00 83 9D 00 1A 90 01 01 00 88 AA'
+    #IdRsp = '61 80 82 00 41 86 46 04 41 46 4A 82 00 41 86 46 D1 00 30 00 00 48 00 05 09 05'
     '''                           -- --------                ----- -----                  '''
     '''              DiagVersion--+      |                     |     +--Version           '''
     '''                        Supplier--+                     +--Soft                    '''
@@ -297,6 +297,8 @@ class DDTECU():
       fname = mod_globals.opt_ddtxml
       self.ecufname = mod_globals.ddtroot+'/ecus/'+fname
     else:
+      #vehTypeCode = 'x81'
+      #Address = '0D'
       problist = ecuSearch(vehTypeCode, Address, DiagVersion, Supplier, Soft, Version, eculist)
 
       while 1:
@@ -1130,6 +1132,52 @@ def minDist(a, b):
 
   return d
 
+def distance( a, b ):
+  """ calculate distance between strings """
+  """ normalized to length of string     """
+  """ a - readen value                   """
+  """ b - pattern from eculist           """
+
+  d = 0
+
+  # align length
+  if len( a ) < len( b ):
+    a = a + ' ' * ( len( b ) - len( a ))
+  else:
+    b = b + ' ' * ( len( a ) - len( b ))
+
+  # humming distance 
+  l = len(a)
+  for i in range(0, l):
+    if b[i] != '?' and ord(a[i]) != ord(b[i]):
+      d = d + 1
+  
+  # normalize to length of string
+  if d:
+    d = d / l
+
+  return d
+
+def AutoIdents_distance( DiagVersion, Supplier, Soft, Version, ai ):
+
+  #normalize supplier in such cases
+  #DiagVersion="12" Supplier="746" Soft="2470" Version="A600"
+	#DiagVersion="12" Supplier="39324d" Soft="0052" Version="0400"
+  try:
+    if  len( ai['Supplier'] ) == 6 and \
+        len( ai['Soft'] ) == 4 and \
+        len( ai['Version'] ) == 4:
+      ai['Supplier'] = bytes.fromhex(ai['Supplier']).decode('utf-8')
+  except:
+    #catch not hex supplier with len 6
+    pass
+
+  d = distance( DiagVersion, ai['DiagVersion']) * 0.25
+  d = d + distance( Supplier, ai['Supplier']) * 0.25
+  d = d + distance( Soft, ai['Soft']) * 0.25
+  d = d + distance( Version, ai['Version']) * 0.25
+
+  return round( d, 4 )
 
 def ecuSearch(vehTypeCode, Address, DiagVersion, Supplier, Soft, Version, el, interactive = True):
 
@@ -1148,13 +1196,14 @@ def ecuSearch(vehTypeCode, Address, DiagVersion, Supplier, Soft, Version, el, in
 
   for k in list(t.keys()):
     for ai in t[k]['AutoIdents']:
-      dist = 0
-      dist = dist + minDist(DiagVersion, ai['DiagVersion']) * 1000  # weight
-      dist = dist + minDist(Supplier, ai['Supplier']) * 1  # weight
-      dist = dist + minDist(Soft, ai['Soft']) * 1  # weight
-      dist = dist + minDist(Version, ai['Version']) * 1  # weight
+      #dist = 0
+      #dist = dist + minDist(DiagVersion, ai['DiagVersion']) * 1000  # weight
+      #dist = dist + minDist(Supplier, ai['Supplier']) * 1  # weight
+      #dist = dist + minDist(Soft, ai['Soft']) * 1  # weight
+      #dist = dist + minDist(Version, ai['Version']) * 1  # weight
+      dist = AutoIdents_distance( DiagVersion, Supplier, Soft, Version, ai )
 
-      if vehTypeCode in t[k]['Projects'] or dist == 0:
+      if vehTypeCode.upper() in t[k]['Projects'] or dist == 0:
         if k not in list(cand.keys()): cand[k] = 0xFFFFFFFF
         if dist < cand[k]: cand[k] = dist
         if dist < min: min = dist
