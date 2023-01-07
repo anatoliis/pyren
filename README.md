@@ -193,7 +193,10 @@ You have to get the next directory tree
 ...    ...
 |   |- <other modules>
 ```
+### OBDLink optimalization
+To get better performance change `Latency Timer` of the OBDLink COM port to `1ms`.  
 
+How to (first point): https://forscan.org/forum/viewtopic.php?f=4&t=1763 
 ## Installation on MacOS and Linux
 
 For running under MacOS or Linux you need just to copy the same directory tree as in Windows installation above
@@ -254,11 +257,13 @@ optional arguments:
   -e CAR             number of car model for DEMO MODE
   --si               try SlowInit first
   --cfc              turn off automatic FC and do it by script
-  --caf              turn on CAN Auto Formatting [OBDLink]
+  --caf              turn on CAN Auto Formatting [OBDLink] -
+                     better performance when using wireless OBDLink,
+                     quicker error reading, re-scanning and module scanning 
   --n1c              turn off L1 cache
-  --csv              save data in csv format
-  --csv_only         data doesnt show on screen for speed up
-  --csv_human        data saves to csv in readable format
+  --csv              save data in csv format (no soft rate limiting)
+  --csv_only         data doesnt show on screen for speed up (no soft rate limiting)
+  --csv_human        data saves to csv in readable format (no soft rate limiting)
   --usr_key USR_KEY  add user events to log
   --log LOGFILE      log file name
   --scan             scan ECUs even if savedEcus.p file exists
@@ -270,6 +275,7 @@ optional arguments:
   --exp              swith to Expert mode (allow to use buttons in DDT)
   --can2             CAN network connected to pin 13 (H) and pin 12 (L)
   --performance      use UDS performance mode (read multiple DIDs in one request)
+                     Recommended when using csv logging opitions
   --minordtc         use to show all DTCs without checking computation formula
 
 Available COM ports:
@@ -373,5 +379,3 @@ $python3.exe pyren3.py -pp --demo
 ``` 
 
 (As so **-p** is a mandatory option you may define any value for demo)
-
-
