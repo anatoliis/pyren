@@ -68,14 +68,14 @@ def acf_buildFull( platf ):
       return
 
   mtc = {}
-  mtcf = open(plDIR+'/MTC.dat', 'rb')
+  mtcf = open(plDIR+'/MTC.dat', 'rt')
   mtc_list = csv.reader(mtcf, delimiter=';')
   for i in mtc_list:
     if i:
       mtc[int(i[0][:-4])] = i[1:]
 
   ref = {}
-  reff = open(plDIR+'/REF.dat', 'rb')
+  reff = open(plDIR+'/REF.dat', 'rt')
   ref_list = csv.reader(reff, delimiter=';')
   for i in ref_list:
     if i:
@@ -104,7 +104,7 @@ def acf_buildFull( platf ):
               VIN2 = i.split('.')[0]
               print('   '+VIN2)
               zf=zip.open(i)
-              vin3list=zf.read()
+              vin3list=str(zf.read())
               zf.close()
               for l in vin3list.split('\n'):
                   l = l.strip()

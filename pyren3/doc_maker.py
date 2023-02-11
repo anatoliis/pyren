@@ -553,7 +553,12 @@ def generateHTML(path, mtc, vin, dfg, date_madc ):
 
   global style
   
-  lf = os.listdir(path)
+  try:
+    lf = os.listdir(path)
+  except:
+    print("ERROR: path not found: ", path)
+    exit()
+    
   doc = et.Element('html')
   h_h = et.SubElement(doc,'head')
   h_b = et.SubElement(doc,'body')
