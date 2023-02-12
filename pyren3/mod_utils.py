@@ -482,17 +482,17 @@ def kill_server():
         os.kill(mod_globals.doc_server_proc.pid, signal.SIGTERM)
 
 def show_doc( addr, id ):
-    if mod_globals.vin == '':
+    if mod_globals.vin == '' and not mod_globals.opt_sd:
         return
 
     if mod_globals.doc_server_proc == None:
         mod_globals.doc_server_proc = subprocess.Popen(["python", "-m", "SimpleHTTPServer", "59152"])
         atexit.register(kill_server)
 
-    if mod_globals.opt_sd:
-        url = 'http://localhost:59152/doc/' + id[1:] + '.htm'
+    if mod_globals.opt_sd and id != '':
+        url = 'http://127.0.0.1:59152/doc/' + id[1:] + '.htm'
     else:
-        url = 'http://localhost:59152/doc/'+mod_globals.vin+'.htm'+id
+        url = 'http://127.0.0.1:59152/doc/'+mod_globals.vin+'.htm'+id
     webbrowser.open(url, new=0)
 
 
