@@ -169,7 +169,7 @@ def acf_MTC_generateDefaults( m, mtc ):
   # write trailer
   sf.write('\n# VIN programming !!!check the command!!!\n')
   sf.write('#2EF190' + hex_VIN_plus_CRC(mod_globals.vin, False) +'\n')
-  sf.write('#3B81' + hex_VIN_plus_CRC(mod_globals.vin, False) +'\n')
+  sf.write('#3B81' + hex_VIN_plus_CRC(mod_globals.vin, True) +'\n')
   sf.write('\n# reset ecu or disconnect the battary!!!check the command!!!\n')
   sf.write('#1101\n\n')
   sf.write('exit\n')
@@ -255,7 +255,8 @@ def acf_MTC_optinInfluence( m, option ):
       res = acf_MTC_compare(op.MTC, option)
       if res:
         tmpMTC = op.MTC.split()
-        if len(tmpMTC)==2 and tmpMTC[0]=='SAUF' and tmpMTC[1]!=option: continue
+        if op.MTC.startswith('SAUF'): continue
+        #if len(tmpMTC)==2 and tmpMTC[0]=='SAUF' and tmpMTC[1]!=option: continue
         out = out + '%-100s;%-30s;%-10s;%s\n'%(cu.DI, op.MTC, op.VW, op.TEX)
         #out = out + '%-100s;%-30s;%-10s;%s\n'%(cu.TE, op.MTC, op.VW, op.TEX)
         #break

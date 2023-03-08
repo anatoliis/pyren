@@ -104,7 +104,7 @@ def acf_buildFull( platf ):
               VIN2 = i.split('.')[0]
               print('   '+VIN2)
               zf=zip.open(i)
-              vin3list=str(zf.read())
+              vin3list=zf.read().decode("utf-8")
               zf.close()
               for l in vin3list.split('\n'):
                   l = l.strip()
@@ -241,9 +241,9 @@ def acf_MTC_finde( mtc_tag, mtc ):
   
   mtc_tag = mtc_tag.strip()
   
-  if mtc_tag.startswith('SAUF '):
+  if mtc_tag.startswith('SAUF'):
     sauf = True
-    mtc_tag = mtc_tag[5:]
+    mtc_tag = mtc_tag[4:].strip()
     
   if mtc_tag in mtc:
   #if mtc_tag==mtc:

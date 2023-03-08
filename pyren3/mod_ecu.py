@@ -397,10 +397,16 @@ class ECU:
       nparams = 0
       for dr in datarefs:
         if dr.type=='State':
-          csvline += ";" + self.States[dr.name].codeMR + ":" + self.States[dr.name].label
+          if mod_globals.opt_csv_only:
+            csvline += ";" + self.States[dr.name].codeMR
+          else:
+            csvline += ";" + self.States[dr.name].codeMR + ":" + self.States[dr.name].label
           nparams += 1
         if dr.type=='Parameter':
-          csvline += (";" + self.Parameters[dr.name].codeMR + ":" +self.Parameters[dr.name].label + " [" + self.Parameters[dr.name].unit + "]")
+          if mod_globals.opt_csv_only:
+            csvline += ";" + self.Parameters[dr.name].codeMR
+          else:
+            csvline += (";" + self.Parameters[dr.name].codeMR + ":" +self.Parameters[dr.name].label + " [" + self.Parameters[dr.name].unit + "]")
           nparams += 1
       if mod_globals.opt_usrkey: csvline += ";User events"
       csvline = pyren_encode(csvline)
