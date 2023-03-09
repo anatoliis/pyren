@@ -932,7 +932,7 @@ else:
             self.save.csvOption = self.csvl[int(self.droid.fullQueryDetail("sp_csv").result['selectedItemPosition'])]
 
             if self.droid.fullQueryDetail("rb_bt").result['checked'] == 'false':
-                self.save.port = '192.168.0.10:3500'
+                self.save.port = '192.168.0.10:35000'
             else:
                 portName = self.dev_list[int(self.droid.fullQueryDetail("in_wifi").result['selectedItemPosition'])]
                 upPortName = portName.upper().split(';')[0]
