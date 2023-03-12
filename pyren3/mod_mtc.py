@@ -68,14 +68,20 @@ def acf_buildFull( platf ):
       return
 
   mtc = {}
-  mtcf = open(plDIR+'/MTC.dat', 'rt')
+  mtc_name = 'MTC.dat'
+  for fn in os.listdir(plDIR):
+    if fn.upper()=='MTC.DAT': mtc_name = fn
+  mtcf = open(plDIR + '/' + mtc_name, 'rt')
   mtc_list = csv.reader(mtcf, delimiter=';')
   for i in mtc_list:
     if i:
       mtc[int(i[0][:-4])] = i[1:]
 
   ref = {}
-  reff = open(plDIR+'/REF.dat', 'rt')
+  ref_name = 'REF.dat'
+  for fn in os.listdir(plDIR):
+    if fn.upper()=='REF.DAT': ref_name = fn
+  reff = open(plDIR + '/' + ref_name, 'rt')
   ref_list = csv.reader(reff, delimiter=';')
   for i in ref_list:
     if i:
@@ -205,7 +211,10 @@ def acf_getMTC( VIN, preferFile=False ):
   
   #check if there is an mtc file 
   
-  mz = open(vindir+'MTC.dat','r')
+  mtc_name = 'MTC.dat'
+  for fn in os.listdir(vindir):
+    if fn.upper()=='MTC.DAT': mtc_name = fn
+  mz = open(vindir+mtc_name,'r')
   mtclist = mz.read().split('\n')
   mz.close()
   for l in mtclist:
@@ -213,7 +222,10 @@ def acf_getMTC( VIN, preferFile=False ):
       mtcdata = l
 
   try:
-    rz = open(vindir+'REF.dat','r')
+    ref_name = 'REF.dat'
+    for fn in os.listdir(vindir):
+      if fn.upper()=='REF.DAT': ref_name = fn
+    rz = open(vindir+ref_name,'r')
     reflist = rz.read().split('\n')
     rz.close()
     for l in reflist:

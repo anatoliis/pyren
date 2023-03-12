@@ -999,8 +999,9 @@ def readECUIds( elm ):
   return StartSession, DiagVersion, Supplier, Version, Soft, Std, VIN
 
 
-def findTCOM( addr, cmd, rsp ):
+def findTCOM( addr, cmd, rsp, pl_id = False ):
   ecuvhc = {}
+  pl_id = {}
   vehicle = ''
   print('Read models')
   file_list = mod_db_manager.get_file_list_from_clip('Vehicles/TCOM_*.[Xx]ml')
@@ -1013,7 +1014,7 @@ def findTCOM( addr, cmd, rsp ):
       vehTypeCode = vh.getAttribute("vehTypeCode")
       vehTCOM     = vh.getAttribute("TCOM")
       vehicle = vehiclename+'#'+vehTCOM;
-
+      pl_id[vehTypeCode] = {}
       #print vehicle
 
       connector = vh.getElementsByTagName("Connector")
@@ -1024,9 +1025,13 @@ def findTCOM( addr, cmd, rsp ):
         if eculist:
           ecukind = eculist.item(0).getElementsByTagName("EcuKind")
           for ek in ecukind:
+            id = ek.getAttribute("idFamily")
+            pl_id[vehTypeCode][id] = {}
+            pl_id[vehTypeCode][id]['refs'] = []
             ecuref = ek.getElementsByTagName("EcuRef")
             for er in ecuref:
               ecuname = er.getAttribute("name")
+              pl_id[vehTypeCode][id]['refs'].append(ecuname)
               if ecuname in list(ecuvhc.keys()):
                 ecuvhc[ecuname].append(vehicle)
               else:
@@ -1036,9 +1041,14 @@ def findTCOM( addr, cmd, rsp ):
         if eculist:
           ecukind = eculist.item(0).getElementsByTagName("EcuKind")
           for ek in ecukind:
+            id = ek.getAttribute("idFamily")
+            if id not in pl_id[vehTypeCode].keys():
+              pl_id[vehTypeCode][id] = {}
+              pl_id[vehTypeCode][id]['refs'] = []
             ecuref = ek.getElementsByTagName("EcuRef")
             for er in ecuref:
               ecuname = er.getAttribute("name")
+              pl_id[vehTypeCode][id]['refs'].append(ecuname)
               if ecuname in list(ecuvhc.keys()):
                 ecuvhc[ecuname].append(vehicle)
               else:
@@ -1047,15 +1057,34 @@ def findTCOM( addr, cmd, rsp ):
   se = ScanEcus( None )
   print('Loading Uces.xml')
   se.read_Uces_file(True)
-  #print ecuvhc
-  for r in list(se.allecus.keys()):
-    if se.allecus[r]['dst']!=addr: continue
-    if se.allecus[r]['ids'][0]!=cmd: continue
-    if se.compare_ecu( se.allecus[r]['ids'], rsp, cmd ):
-      try:
-        print(r, se.allecus[r]['doc'], se.allecus[r]['ids'], ecuvhc[r])
-      except:
-        print()
+  
+  if pl_id:
+    #save pl_id
+    for pl in pl_id.keys():
+      for id in pl_id[pl].keys():
+        attr = set()
+        for r in pl_id[pl][id]['refs']:
+          if r in se.allecus.keys():
+            #attr.add(se.allecus[r]['stdType']+"#"+se.allecus[r]['dst']+"#"+se.allecus[r]['startDiagReq'])
+            attr.add(se.allecus[r]['dst']+"#"+se.allecus[r]['startDiagReq'])
+          #else:
+          #  print(r)
+        del pl_id[pl][id]['refs']
+        pl_id[pl][id] = attr
+    pickle.dump( pl_id, open( './cache/pl_id_attr.p', "wb" ) )
+  else:
+    #print found ecus
+    for r in list(se.allecus.keys()):
+      if se.allecus[r]['dst']!=addr: continue
+      if se.allecus[r]['ids'][0]!=cmd: continue
+      if se.compare_ecu( se.allecus[r]['ids'], rsp, cmd ):
+        try:
+          print(r, se.allecus[r]['doc'], se.allecus[r]['ids'], ecuvhc[r])
+        except:
+          print()
+    
+
+
 def generateSavedEcus( eculist, fileName ):  
   se  = ScanEcus( 0 )
   se.read_Uces_file( all = True )
@@ -1077,6 +1106,8 @@ def generateSavedEcus( eculist, fileName ):
 if __name__ == "__main__":
 
   mod_db_manager.find_DBs()
+
+  #findTCOM( '', '', '', pl_id=True)
 
   # 10016,10074 savedEcus.p_gen  
   if len(sys.argv)==3: generateSavedEcus( sys.argv[1], sys.argv[2] )

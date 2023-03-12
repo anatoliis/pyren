@@ -6,6 +6,7 @@ import mod_db_manager
 import mod_utils
 from mod_optfile   import *
 from mod_scan_ecus import families as families
+from mod_scan_ecus import findTCOM as findTCOM
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
@@ -202,7 +203,7 @@ def main():
   mod_utils.chkDirTree()
   mod_db_manager.find_DBs()
 
-  '''Check direcories'''
+  '''Check directories'''
   if  not os.path.exists('../BVMEXTRACTION'):
     print("Can't find MTC database. (../BVMEXTRACTION)")
     exit()
@@ -213,8 +214,6 @@ def main():
   #change serial port baud rate 
   if mod_globals.opt_speed<mod_globals.opt_rate and not mod_globals.opt_demo:
     elm.port.soft_boudrate( mod_globals.opt_rate )
-
-
 
   print("Loading language ")
   sys.stdout.flush()
@@ -229,6 +228,13 @@ def main():
   SEFname = "savedEcus.p" 
   if mod_globals.opt_can2:
     SEFname = "savedEcus2.p" 
+
+  pl_id_cache = './cache/pl_id_attr.p'
+  if os.path.isfile(pl_id_cache):                         #if cache exists
+    pl_id = pickle.load( open( pl_id_cache, "rb" ) )        #load it
+  else:                                                   #else
+    findTCOM('', '', '', True)                              #make cache
+    pl_id = pickle.load( open( pl_id_cache, "rb" ) )        #load it
 
   if mod_globals.opt_demo and len(mod_globals.opt_ecuid)>0:
     # demo mode with predefined ecu list
@@ -297,7 +303,10 @@ def main():
       if 'mo' in list(m.keys()) and m['mo']!='':
         print("%2s : %s : %s" % (m['idf'],m['sref'],m['mo'].NOM))
     
-        acf_MTC_generateDefaults( m, mtc )
+        attr = []
+        if platform in pl_id.keys() and m['idf'] in pl_id[platform].keys():
+          attr = pl_id[platform][m['idf']]
+        acf_MTC_generateDefaults( m, mtc, attr )
         #acf_MTC_findDiff( m, mtc, elm )
     
       else:
