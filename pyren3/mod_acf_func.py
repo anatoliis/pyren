@@ -2,6 +2,7 @@
 
 import sys
 import os
+import time
 import mod_globals
 import zipfile
 import pickle
@@ -30,6 +31,61 @@ class ACE():
     self.req = {}
     self.dat = {}
 
+def get_alternative_refs( platform ):
+  #finds more frequent use of ref1 from --ref otion in REF.DAT
+  if mod_globals.opt_ref =='': return {}
+
+  start_time = time.time()
+
+  res = {}
+  alt = {}
+  for aref in mod_globals.opt_ref.split(';'):
+    aref = aref.strip()
+    if (len(aref)==23 or len(aref)==24) and ' ' in aref:
+      #ref pair defined compleatle
+      idf,refPair = aref.split(':')
+      res[idf] = refPair
+      continue
+    idf,ref1 = aref.split(':')
+    if len(ref1)==10:
+      alt[aref] = {}
+  
+  #find in REF.DAT
+  try:
+    vindir = '../BVMEXTRACTION/'+platform+'/'
+    ref_name = 'REF.dat'
+    for fn in os.listdir(vindir):
+      if fn.upper()=='REF.DAT': ref_name = fn
+    rz = open(vindir+ref_name,'r')
+    reflist = rz.read().split('\n')
+    rz.close()
+    for l in reflist:
+      if l == '': continue
+      ll = l[l.find(':')+1:].split(';')
+      for e in ll:
+        for a in alt.keys():
+          if e.startswith(a):
+            if e not in alt[a].keys():
+              alt[a][e] = 1
+            else:
+              alt[a][e] += 1
+  except:
+    print("\n\nREF.dat is absent!!!\n\n")
+
+  for a in alt.keys():
+    max = list(alt[a].keys())[0]
+    for ak in alt[a].keys():
+      if alt[a][ak]>alt[a][max]: max = ak
+    idf,refPair = max.split(':')
+    res[idf] = refPair
+
+  end_time = time.time()
+  print( "Ref search took:", int(end_time-start_time), " sec" )
+  print( res )
+
+  return res
+
+    
 def acf_find_in_sirev( ref2, platform ):
   global errone
   global zip
@@ -76,10 +132,16 @@ def acf_loadModules( de, refdata, platform ):
 
   module_list = []
 
+  #first check mod_globals.opt_ref for alternatives
+  alt = get_alternative_refs( platform )
+
   for r in refdata.split(';'):
     try:
       idf, r1 = r.split(':')
-      ref1,ref2 = r1.split(' ')
+      if idf in alt.keys():
+        ref1,ref2 = alt[idf].split(' ')
+      else:
+        ref1,ref2 = r1.split(' ')
     except:
       continue
 

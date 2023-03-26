@@ -872,6 +872,15 @@ if osname != 'android':
 
     if __name__ == '__main__':
         os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
+        if len(sys.argv)>1 and sys.argv[1]=='update':
+            res = update_from_gitlab()
+            if res == 0:
+                print( "Done")
+            elif res == 1:
+                print( "No connection with gitlab.com")
+            elif res == 2:
+                print( "UnZip error")
+            exit()
         main()
 
 else:
