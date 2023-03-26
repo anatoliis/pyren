@@ -69,7 +69,7 @@ def acf_form_commands( m, cu, op ):
     m['acf_wc'][cu.RW] = acf_pack_command( True,  ace.req[cu.RW], cu.DW, m['acf_wc'][cu.RW], op.TW, op.MW)
     ace.req[cu.RW].SentDI[cu.DW].val = op.VW + ' #[' + cu.TE + ' : ' + op.TEX + '](' + op.MTC + ')'
 
-def acf_MTC_generateDefaults( m, mtc, attr ):
+def acf_MTC_generateDefaults( m, mtc ):
   """ m - module definition map """
   ''' mtc - list of options     '''
   ''' this function generates default values'''
@@ -133,30 +133,25 @@ def acf_MTC_generateDefaults( m, mtc, attr ):
   #print dumpn1
   #print dumpn2
 
-  scriptn = mod_globals.mtcdir+'/scripts/cmd_'+m['idf']+'_'+mod_globals.vin[-4:]+'_'+m['sref']+'.cmd'
+  scriptn = mod_globals.mtcdir+'/scripts/cmd_'+m['pin']+'_'+m['idf']+'_'+mod_globals.vin[-4:]+'_'+m['sref']+'.cmd'
   sf = open(scriptn,'wt')
 
   #print "--------------- Write Commands --------------------"
-  attr = list(attr)
-  attr_dst = ''
-  attr_ses = ''
-  if len(attr)>0:
-    attr_dst, attr_ses = attr[0].split('#')
-  if len(attr)>1:
-    attr_dst = attr_dst + ' #'
-    attr_ses = attr_ses + ' #'
-    for a in attr[1:]:
-      dst,ses = a.split('#')
-      attr_dst = attr_dst + ' ' + dst
-      attr_ses = attr_ses + ' ' + ses
 
   # write preamble
   sf.write('# ' + mod_globals.vin + '\n\n')
-  sf.write('$addr = ' + attr_dst +'\n\n')
-  sf.write('can500  # init can macro\n\n')
+  sf.write('$addr = ' + m['dst'] +'\n\n')
+  sf.write('#idTx = ' + m['idTx'] + ' idRx = ' + m['idRx'] + '\n\n')
+  if m['pin'].startswith('can'):
+    if m['brp']=='0':
+      sf.write('can500  # init can macro\n\n')
+    else:
+      sf.write('can250  # init can macro\n\n')
+  else:
+    sf.write('fast  # init iso macro\n\n')
   sf.write('delay 1\n\n')
   sf.write('# open session\n')
-  sf.write('session ' + attr_ses + '\n\n')
+  sf.write('session ' + m['startDiagReq'] + '\n\n')
   sf.write('# configuration\n')
 
   # save write commands

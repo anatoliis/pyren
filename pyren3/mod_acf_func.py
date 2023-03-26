@@ -100,9 +100,13 @@ def acf_loadModules( de, refdata, platform ):
 
     for k in de:
       if k['idf']==idf:
+        m['pin'] = k['pin']
         m['dst'] = k['dst']
+        m['idRx'] = k['idRx']
+        m['idTx'] = k['idRx']
         m['startDiagReq'] = k['startDiagReq']
         m['ecuname'] = k['ecuname']
+        m['brp'] = k['brp']
         break
 
     module_list.append(m)

@@ -1003,10 +1003,19 @@ def findTCOM( addr, cmd, rsp, pl_id = False ):
   ecuvhc = {}
   pl_id = {}
   vehicle = ''
+
+  se = ScanEcus( None )
+  print('Loading Uces.xml')
+  se.read_Uces_file(True)
+  
   print('Read models')
   file_list = mod_db_manager.get_file_list_from_clip('Vehicles/TCOM_*.[Xx]ml')
   for file in file_list:
     vehicle = ''
+
+    #skip syntetic lada vesta
+    if '087' in file: continue
+    
     DOMTree = xml.dom.minidom.parse(mod_db_manager.get_file_from_clip(file))
     vh = DOMTree.documentElement
     if vh.hasAttribute("defaultText"):
@@ -1020,59 +1029,80 @@ def findTCOM( addr, cmd, rsp, pl_id = False ):
       connector = vh.getElementsByTagName("Connector")
       cannetwork = connector.item(0).getElementsByTagName("CANNetwork")
       isonetwork = connector.item(0).getElementsByTagName("ISONetwork")
+      addreses = {}
+
       for pin in cannetwork:
+        bus = pin.getAttribute("canH")
+        CANNetworkParams = pin.getElementsByTagName("CANNetworkParams")
+        brp = CANNetworkParams.item(0).getAttribute("brp")
+        bus = bus+':'+brp #brp is a can bus speed
+        CanIds = pin.getElementsByTagName("CanId")
+        addreses[bus] = {}
+        for CanId in CanIds:
+          targetAddress = CanId.getAttribute("targetAddress")
+          idTx = CanId.getAttribute("idTx")
+          idRx = CanId.getAttribute("idRx")
+          addreses[bus][targetAddress] = { 'idTx': idTx, 'idRx': idRx }
+        
+        pl_id[vehTypeCode][bus] = {}  
         eculist = pin.getElementsByTagName("EcuList")
         if eculist:
           ecukind = eculist.item(0).getElementsByTagName("EcuKind")
           for ek in ecukind:
             id = ek.getAttribute("idFamily")
-            pl_id[vehTypeCode][id] = {}
-            pl_id[vehTypeCode][id]['refs'] = []
+            pl_id[vehTypeCode][bus][id] = {}
+            pl_id[vehTypeCode][bus][id]['refs'] = []
             ecuref = ek.getElementsByTagName("EcuRef")
             for er in ecuref:
               ecuname = er.getAttribute("name")
-              pl_id[vehTypeCode][id]['refs'].append(ecuname)
+              pl_id[vehTypeCode][bus][id]['refs'].append(ecuname)
               if ecuname in list(ecuvhc.keys()):
                 ecuvhc[ecuname].append(vehicle)
               else:
                 ecuvhc[ecuname] = [vehicle]                
       for pin in isonetwork:
+        bus = '7'
+        pl_id[vehTypeCode][bus] = {}
         eculist = pin.getElementsByTagName("EcuList")
         if eculist:
           ecukind = eculist.item(0).getElementsByTagName("EcuKind")
           for ek in ecukind:
             id = ek.getAttribute("idFamily")
-            if id not in pl_id[vehTypeCode].keys():
-              pl_id[vehTypeCode][id] = {}
-              pl_id[vehTypeCode][id]['refs'] = []
+            if id not in pl_id[vehTypeCode][bus].keys():
+              pl_id[vehTypeCode][bus][id] = {}
+              pl_id[vehTypeCode][bus][id]['refs'] = []
             ecuref = ek.getElementsByTagName("EcuRef")
             for er in ecuref:
               ecuname = er.getAttribute("name")
-              pl_id[vehTypeCode][id]['refs'].append(ecuname)
+              pl_id[vehTypeCode][bus][id]['refs'].append(ecuname)
               if ecuname in list(ecuvhc.keys()):
                 ecuvhc[ecuname].append(vehicle)
               else:
                 ecuvhc[ecuname] = [vehicle]
 
-  se = ScanEcus( None )
-  print('Loading Uces.xml')
-  se.read_Uces_file(True)
-  
-  if pl_id:
-    #save pl_id
-    for pl in pl_id.keys():
-      for id in pl_id[pl].keys():
-        attr = set()
-        for r in pl_id[pl][id]['refs']:
-          if r in se.allecus.keys():
-            #attr.add(se.allecus[r]['stdType']+"#"+se.allecus[r]['dst']+"#"+se.allecus[r]['startDiagReq'])
-            attr.add(se.allecus[r]['dst']+"#"+se.allecus[r]['startDiagReq'])
-          #else:
-          #  print(r)
-        del pl_id[pl][id]['refs']
-        pl_id[pl][id] = attr
-    pickle.dump( pl_id, open( './cache/pl_id_attr.p', "wb" ) )
-  else:
+      if pl_id:
+        for bus in pl_id[vehTypeCode].keys():
+          for id in pl_id[vehTypeCode][bus].keys():
+            attr = set()
+            for r in pl_id[vehTypeCode][bus][id]['refs']:
+              if r in se.allecus.keys():
+                #attr.add(se.allecus[r]['stdType']+"#"+se.allecus[r]['dst']+"#"+se.allecus[r]['startDiagReq'])
+                faddr = se.allecus[r]['dst']
+                if bus[:1]!='7':
+                  if faddr in addreses[bus].keys():
+                    faddr = faddr+'#'+addreses[bus][faddr]['idTx']+'#'+addreses[bus][faddr]['idRx']
+                  else:
+                    faddr = faddr+'##'
+                attr.add(faddr+"#"+se.allecus[r]['startDiagReq'])
+              #else:
+              #  print(r)
+            del pl_id[vehTypeCode][bus][id]['refs']
+            pl_id[vehTypeCode][bus][id] = attr
+
+      vehTypeCode = ''
+
+      
+  if not pl_id:
     #print found ecus
     for r in list(se.allecus.keys()):
       if se.allecus[r]['dst']!=addr: continue
@@ -1082,7 +1112,10 @@ def findTCOM( addr, cmd, rsp, pl_id = False ):
           print(r, se.allecus[r]['doc'], se.allecus[r]['ids'], ecuvhc[r])
         except:
           print()
-    
+
+  if pl_id:
+    pickle.dump( pl_id, open( './cache/platform_attr.p', "wb" ) )
+
 
 
 def generateSavedEcus( eculist, fileName ):  

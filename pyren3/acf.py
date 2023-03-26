@@ -14,46 +14,10 @@ import pickle
 from   mod_acf_func     import ACE
 
 mod_globals.os = os.name
- 
-if mod_globals.os == 'nt':
-  import pip
-  
-  try:
-    import serial
-  except ImportError:
-    pip.main(['install','pyserial'])
 
-  try:
-    import colorama
-  except ImportError:
-    pip.main(['install','colorama'])
-    try:
-      import colorama
-    except ImportError:
-      print("\n\n\n\t\t\tGive me access to the Internet for download modules\n\n\n")
-      sys.exit()
-  colorama.init()
-else:
-  # let's try android
-  try:
-    import androidhelper as android
-    mod_globals.os = 'android'
-  except:
-    try:
-      import android
-      mod_globals.os = 'android'
-    except:
-      pass
-  
-if mod_globals.os != 'android':    
-  try:
-    import serial
-    from serial.tools  import list_ports
-    #import ply
-  except ImportError:
-    print("\n\n\n\tPleas install additional modules")
-    print("\t\t>sudo easy_install pyserial")
-    sys.exit()
+import serial
+import colorama
+from serial.tools  import list_ports
     
 from mod_elm       import ELM
 from mod_scan_ecus import ScanEcus
@@ -146,6 +110,16 @@ def optParser():
       dest="vinnum",
       default="")
 
+  parser.add_argument("--ref",
+      help="alternative ref",
+      dest="ref",
+      default="")
+
+  parser.add_argument("--mtc",
+      help="alternative mtc",
+      dest="mtc",
+      default="")
+
   parser.add_argument("-vv", "--verbose",
       help="show parameter explanations",
       dest="verbose",
@@ -157,8 +131,6 @@ def optParser():
       dest="verbose2",
       default=False,
       action="store_true")
-
-
 
   options = parser.parse_args()
   
@@ -186,6 +158,8 @@ def optParser():
     mod_globals.vin           = options.vinnum
     mod_globals.opt_verbose   = options.verbose
     mod_globals.opt_verbose2  = options.verbose2
+    mod_globals.opt_ref       = options.ref
+    mod_globals.opt_mtc       = options.mtc
 
     if options.dev=='' or len(options.dev)!=4 or options.dev[0:2]!='10':
       mod_globals.opt_dev       = False
@@ -207,61 +181,43 @@ def main():
   if  not os.path.exists('../BVMEXTRACTION'):
     print("Can't find MTC database. (../BVMEXTRACTION)")
     exit()
-    
-  print('Opening ELM')
-  elm = ELM( mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log )
-
-  #change serial port baud rate 
-  if mod_globals.opt_speed<mod_globals.opt_rate and not mod_globals.opt_demo:
-    elm.port.soft_boudrate( mod_globals.opt_rate )
 
   print("Loading language ")
-  sys.stdout.flush()
-                                         #loading language data
   lang = optfile("Location/DiagOnCAN_"+mod_globals.opt_lang+".bqm",True)
   mod_globals.language_dict = lang.dict
   print("Done")
   
-  print('Loading ECUs list')
-  se  = ScanEcus(elm)                    #Prepare list of all ecus
- 
-  SEFname = "savedEcus.p" 
-  if mod_globals.opt_can2:
-    SEFname = "savedEcus2.p" 
+  if not mod_globals.opt_demo:
+    # load connection attributes from savedEcus.p
+    print('Opening ELM')
+    elm = ELM( mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log )
+  
+    #change serial port baud rate 
+    if mod_globals.opt_speed<mod_globals.opt_rate and not mod_globals.opt_demo:
+      elm.port.soft_boudrate( mod_globals.opt_rate )
+  
+    print('Loading ECUs list')
+  
+    #load savedEcus.p
+    se = ScanEcus(elm)                    #Prepare list of all ecus
+    se.scanAllEcus()                      #First scan of all ecus
+    de = se.detectedEcus
+  
+    if mod_globals.vin=='':
+      print('Reading VINs')
+      VIN = getVIN( de, elm )
+      mod_globals.vin = VIN
 
-  pl_id_cache = './cache/pl_id_attr.p'
-  if os.path.isfile(pl_id_cache):                         #if cache exists
-    pl_id = pickle.load( open( pl_id_cache, "rb" ) )        #load it
-  else:                                                   #else
-    findTCOM('', '', '', True)                              #make cache
-    pl_id = pickle.load( open( pl_id_cache, "rb" ) )        #load it
-
-  if mod_globals.opt_demo and len(mod_globals.opt_ecuid)>0:
-    # demo mode with predefined ecu list
-    se.read_Uces_file( all = True )    
-    se.detectedEcus = []
-    for i in mod_globals.opt_ecuid.split(','):
-      if  i in list(se.allecus.keys()):
-        se.allecus[i]['ecuname']=i
-        se.allecus[i]['idf']=se.allecus[i]['ModelId'][2:4]
-        if se.allecus[i]['idf'][0]=='0': 
-          se.allecus[i]['idf'] = se.allecus[i]['idf'][1]
-        se.allecus[i]['pin'] = 'can' 
-        se.detectedEcus.append( se.allecus[i] )    
   else:
-    if not os.path.isfile(SEFname) or mod_globals.opt_scan: 
-      # choosing model 
-      se.chooseModel( mod_globals.opt_car )  #choose model of car for doing full scan
-    
-    # Do this check every time
-    se.scanAllEcus()                       #First scan of all ecus
- 
-  de = se.detectedEcus
 
-  if mod_globals.vin=='':
-    print('Reading VINs')
-    VIN = getVIN( de, elm )
-    mod_globals.vin = VIN
+    #load connection attribute from platform_attr
+    pl_id_cache = './cache/platform_attr.p'
+    if os.path.isfile(pl_id_cache):                         #if cache exists
+      pl_id = pickle.load( open( pl_id_cache, "rb" ) )        #load it
+    else:                                                   #else
+      findTCOM('', '', '', True)                              #make cache
+      pl_id = pickle.load( open( pl_id_cache, "rb" ) )        #load it
+    #but we do not have platform yet, so load data and then continue
 
   VIN = mod_globals.vin
   
@@ -274,19 +230,56 @@ def main():
   #print 'Finding MTC'
   vindata, mtcdata, refdata, platform = acf_getMTC( VIN )
   
-  #print vindata
-  
   if vindata=='' or mtcdata=='' or refdata=='':
     print("ERROR!!! Can't find MTC data in database")
     exit()
   
+  #print vindata  
   print("\tPlatform:",platform)
   print("\tvindata:",vindata)
   print("\tmtcdata:",mtcdata)
   print("\trefdata:",refdata)
   
   mtc = mtcdata.replace(' ','').replace('\n','').replace('\r','').replace('\t','').split(';')
-  
+
+  #now we may continue to prepare connection attributes in demo mode
+  if mod_globals.opt_demo:
+    de = []
+    for bus_brp in pl_id[platform].keys():
+      brp = ''
+      if ':' in bus_brp:
+        bus,brp = bus_brp.split(':')
+      else:
+        bus = bus_brp
+      
+      for idf in pl_id[platform][bus_brp].keys():
+        ent = {}
+        ent['idf'] = idf
+        ent['ecuname'] = ''
+        if bus == '6':
+          ent['pin'] = 'can'
+          ent['pin1'] = '6'
+          ent['pin2'] = '14'
+        elif bus == '13':
+          ent['pin'] = 'can2'
+          ent['pin1'] = '13'
+          ent['pin2'] = '12'
+        else:
+          ent['pin'] = 'iso'
+          ent['pin1'] = '7'
+          ent['pin2'] = '15'
+        ent['brp'] = brp
+        ent['vehTypeCode'] = platform
+        ent['startDiagReq'] = ''
+        for a in pl_id[platform][bus_brp][idf]:
+          ent['dst'],ent['idRx'],ent['idTx'],starts = a.split('#')
+          if ent['startDiagReq'] == '':
+            ent['startDiagReq'] = starts
+          else:
+            ent['startDiagReq'] += ('#' + starts)
+        
+        de.append( ent )
+    
   print('Loading Modules')
   module_list = acf_loadModules( de, refdata, platform )
   
@@ -303,10 +296,7 @@ def main():
       if 'mo' in list(m.keys()) and m['mo']!='':
         print("%2s : %s : %s" % (m['idf'],m['sref'],m['mo'].NOM))
     
-        attr = []
-        if platform in pl_id.keys() and m['idf'] in pl_id[platform].keys():
-          attr = pl_id[platform][m['idf']]
-        acf_MTC_generateDefaults( m, mtc, attr )
+        acf_MTC_generateDefaults( m, mtc )
         #acf_MTC_findDiff( m, mtc, elm )
     
       else:
