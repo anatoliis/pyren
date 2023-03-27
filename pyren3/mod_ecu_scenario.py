@@ -17,7 +17,7 @@ def playScenario(command, ecu, elm):
   path = "EcuRenault/Scenarios/"
   scenarioName,scenarioData = command.scenario.split('#')
 
-  scenarioData = scenarioData.upper()[:-4]+'.xml'
+  scenarioData = scenarioData[:-4]+'.xml'
 
   showable = False
   if scenarioName.lower().startswith('scm'):
@@ -48,10 +48,14 @@ def playScenario(command, ecu, elm):
     
   if not mod_db_manager.file_in_clip(os.path.join(path,scenarioData)):
     return
-    
-  lines = [line.rstrip('\n') for line in mod_db_manager.get_file_from_clip(os.path.join(path,scenarioData))]
+  
+  scenFile = mod_db_manager.get_file_from_clip(os.path.join(path,scenarioData)).read()
+  if isinstance(scenFile, (bytes, bytearray)):
+    scenFile = scenFile.decode("utf-8", errors='ignore')
+  lines = scenFile.split('\n')
   
   for l in lines:
+    l = l.rstrip('\r')
     pa = re.compile(r'name=\"(\w+)\"\s+value=\"(\w+)\"')
     ma = pa.search( l )
     if ma:

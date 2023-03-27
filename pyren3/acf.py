@@ -272,7 +272,10 @@ def main():
         ent['vehTypeCode'] = platform
         ent['startDiagReq'] = ''
         for a in pl_id[platform][bus_brp][idf]:
-          ent['dst'],ent['idRx'],ent['idTx'],starts = a.split('#')
+          if ent['pin'] == 'iso':
+            ent['dst'] = a.split('#')[0]
+          else:
+            ent['dst'],ent['idRx'],ent['idTx'],starts = a.split('#')
           if ent['startDiagReq'] == '':
             ent['startDiagReq'] = starts
           else:

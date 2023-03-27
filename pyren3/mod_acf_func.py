@@ -46,9 +46,15 @@ def get_alternative_refs( platform ):
       idf,refPair = aref.split(':')
       res[idf] = refPair
       continue
-    idf,ref1 = aref.split(':')
+    if ':' in aref:
+      idf,ref1 = aref.split(':')
+    else:
+      print("ERROR in --ref option. ECU family not defined (" + aref + ")" )
+      continue
     if len(ref1)==10:
       alt[aref] = {}
+    else:
+      print("ERROR. Wrong --ref option", aref )
   
   #find in REF.DAT
   try:
@@ -154,6 +160,9 @@ def acf_loadModules( de, refdata, platform ):
     m['sref'] = ref2
     m['mo']=''
     m['dst'] = ''
+    m['pin'] = 'undef'
+    m['idRx'] = ''
+    m['idTx'] = ''
     m['ecuname'] = ''
     m['startDiagReq'] = '10C0'
     if ref2 + '.dat' in zipflist:
