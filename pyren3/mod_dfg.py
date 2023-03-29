@@ -68,7 +68,7 @@ class class_dfg:
           if vehTypeCode.upper()==platform.upper():
             self.tcom = TCOM
             break
-      self.dfgFile = 'Vehicles/DFG/DFG_'+self.tcom+'.xml'
+      self.dfgFile = 'Vehicles/DFG/DFG_'+self.tcom+'.Xml'
     else:
       vhcls = []
       file_list = mod_db_manager.get_file_list_from_clip('Vehicles/DFG/DFG_*.[Xx]ml')

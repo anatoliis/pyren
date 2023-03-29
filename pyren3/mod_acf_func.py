@@ -51,10 +51,11 @@ def get_alternative_refs( platform ):
     else:
       print("ERROR in --ref option. ECU family not defined (" + aref + ")" )
       continue
-    if len(ref1)==10:
-      alt[aref] = {}
-    else:
-      print("ERROR. Wrong --ref option", aref )
+    for r in ref1.split(','):
+      if len(r)==10:
+        alt[idf+':'+r] = {}
+      else:
+        print("ERROR. Wrong --ref option", aref )
   
   #find in REF.DAT
   try:
@@ -78,11 +79,25 @@ def get_alternative_refs( platform ):
   except:
     print("\n\nREF.dat is absent!!!\n\n")
 
+  #now we have to remove emty records in alt
+  for a in alt.copy().keys():
+    if len( alt[a] ) == 0:
+      del alt[a]
+  
+  gmax = {}
+  maxval = 0
   for a in alt.keys():
     max = list(alt[a].keys())[0]
+    maxval = alt[a][max]
     for ak in alt[a].keys():
-      if alt[a][ak]>alt[a][max]: max = ak
+      if alt[a][ak]>alt[a][max]: 
+        max = ak
+        maxval = alt[a][ak]
     idf,refPair = max.split(':')
+    if idf in gmax.keys() and maxval < gmax[idf]:
+      continue
+    else:
+      gmax[idf] = maxval
     res[idf] = refPair
 
   end_time = time.time()

@@ -293,6 +293,26 @@ class ECU:
     r1, r2 = self.get_id( name )
     if r1!='none': return r1, r2
     return 'none','unknown name' 
+  
+  def acf_ready( self ):
+    #check if scen_auto_config among commands and scenaium exists
+    res = False
+    c = ''
+    for c in self.Commands.keys():
+      if 'scen_auto_config' in self.Commands[c].scenario:
+        res = True
+        break
+    if res:
+      #check if scenario exists
+      path = "EcuRenault/Scenarios/"
+      scenarioName,scenarioData = self.Commands[c].scenario.split('#')
+      scenarioData = scenarioData[:-4]+'.xml'
+      if not mod_db_manager.file_in_clip(os.path.join(path,scenarioData)):
+        return ''
+      else:
+        return c
+    else:
+      return ''
     
   def run_cmd( self, name, param = '', partype = 'HEX' ):
     if name not in list(self.Commands.keys()):
@@ -981,6 +1001,7 @@ class ECU:
       if self.States : menu.append("ETA : States list")
       if self.Identifications : menu.append("IDA : Identifications list")
       if mod_globals.opt_ddt : menu.append("DDT : DDT screens")
+      if self.acf_ready() != '': menu.append("ACI : Auto Config Info")
       menu.append("<Up>")
       choice = Choice(menu, "Choose :")
       if choice[0]=="<Up>":
@@ -1047,6 +1068,11 @@ class ECU:
         ddt = DDT(self.elm, self.ecudata, langmap)
         del(ddt)
         #gc.collect ()
+        continue
+
+      if choice[0][:3]=="ACI":
+        acf_cmd = self.acf_ready()
+        executeCommand( self.Commands[acf_cmd], self, self.elm, header )
         continue
 
       fav_sc = self.screens[int(choice[1]) - 1]
