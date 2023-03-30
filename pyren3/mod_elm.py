@@ -639,7 +639,7 @@ class ELM:
                 self.port.soft_boudrate(230400)
 
     def __del__(self):
-        if not mod_globals.opt_demo:
+        if not mod_globals.opt_demo and not isinstance(self.port, int):
             print('*' * 40)
             print('*       RESETTING ELM')
             #if self.port.ka_timer:
