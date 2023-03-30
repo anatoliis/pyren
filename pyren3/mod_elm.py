@@ -404,8 +404,12 @@ class Port:
             print("\r\t\t\t\t\rChecking port speed:", s, end=' ')
             sys.stdout.flush ()
             
-            self.hdr.baudrate = s
-            self.hdr.flushInput ()
+            try:
+                self.hdr.baudrate = s
+                self.hdr.flushInput ()
+            except:
+                continue
+
             self.write ("\r")
             
             # search > string
