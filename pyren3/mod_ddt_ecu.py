@@ -237,7 +237,7 @@ class DDTECU():
     
     '''      0         1         2         3         4         5         6         7      '''
     '''      01234567890123456789012345678901234567890123456789012345678901234567890123456'''
-    #IdRsp = '61 80 82 00 41 86 46 04 41 46 4A 82 00 41 86 46 D1 00 30 00 00 48 00 05 09 05'
+    #IdRsp = '61 80 77 01 20 98 43 11 33 36 38 10 09 60 14 44 52 AD 00 14 00 00 81 22 00 00'
     '''                           -- --------                ----- -----                  '''
     '''              DiagVersion--+      |                     |     +--Version           '''
     '''                        Supplier--+                     +--Soft                    '''
@@ -297,8 +297,6 @@ class DDTECU():
       fname = mod_globals.opt_ddtxml
       self.ecufname = mod_globals.ddtroot+'/ecus/'+fname
     else:
-      #vehTypeCode = 'x81'
-      #Address = '0D'
       problist = ecuSearch(vehTypeCode, Address, DiagVersion, Supplier, Soft, Version, eculist)
 
       while 1:
