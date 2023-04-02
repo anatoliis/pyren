@@ -681,7 +681,8 @@ class DDTECU():
       value = dValues[d.Name].get().strip()
     else:
       value = 0
-    value = self.getValueFromInput(d, value)
+    #value = self.getValueFromInput(d, value)
+    value = self.getHex(d.Name, value)
 
     # prepare parameters for extraction
     littleEndian = True if rdi.Endian == "Little" else False
@@ -927,6 +928,32 @@ class DDTECU():
     conf_v = {}
     config_ann = []
     
+    #check for duplication
+    all_did = set()
+    dup_did = set()
+
+    for r in sorted( list(self.requests.values()), key = lambda x: x.SentBytes):
+      if r.SentBytes[0:2].upper() == '3B':
+        if r.SentBytes[2:4].upper() in all_did:
+          dup_did.add(r.SentBytes[2:4].upper())
+        all_did.add( r.SentBytes[2:4].upper() )
+      if r.SentBytes[0:2].upper() == '2E':
+        if r.SentBytes[2:6].upper() in all_did:
+          dup_did.add(r.SentBytes[2:6].upper())
+        all_did.add( r.SentBytes[2:6].upper() )
+    
+    if len(dup_did)>0:
+      config_ann.append('### WARNING '*3 + '###')
+      config_ann.append('# Commands have more then one parameter set')
+      #second pass
+      for r in sorted( list(self.requests.values()), key = lambda x: x.SentBytes):
+        if r.SentBytes[0:2].upper() == '3B' and r.SentBytes[2:4].upper() in dup_did:
+          config_ann.append('# ' + r.SentBytes) 
+        if r.SentBytes[0:2].upper() == '2E' and r.SentBytes[2:6].upper() in dup_did:
+           config_ann.append('# ' + r.SentBytes)  
+      config_ann.append('### WARNING '*3 + '###')
+      config_ann.append('')
+
     sentValues = {}
     #for r in self.requests.values ():
     for r in sorted( list(self.requests.values()), key = lambda x: x.SentBytes):

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import gc
+import os
 import datetime
 import copy
 import time
@@ -121,6 +122,93 @@ class InfoDialog (tkinter.simpledialog.Dialog):
             if mod_globals.none_val not in t:
                 self.txt.insert(tk.END, t + '---\n')
 
+class FindDialog (tkinter.simpledialog.Dialog):
+    def __init__(self, parent, ecu ):
+
+        self.ecu = ecu
+
+        self.top = tk.Toplevel (parent)
+        self.top.title ('Find Dialog')
+        self.top.geometry ("500x300+50+50")
+        self.top.bind ('<Escape>', self.close)
+
+        topFrame = tk.Frame (self.top)
+        topFrame.pack(side=tk.TOP, expand=False, fill='x')
+
+        self.pattern = ''
+        self.findEnt = tk.Entry(topFrame, relief=tk.GROOVE, borderwidth=1, textvariable=self.pattern)
+        self.findEnt.pack (side=tk.LEFT, expand=True, fill='both')
+        tk.Button (topFrame, text='Find', command=self.find).pack (side=tk.RIGHT)
+        self.findEnt.bind('<Return>', self.find)
+
+        mdlFrame = tk.Frame (self.top)
+        mdlFrame.pack(side=tk.BOTTOM, expand=True, fill='both')
+
+        self.listBox = tk.Listbox(mdlFrame)
+        self.listBox.pack (side=tk.BOTTOM, padx=5, pady=5, expand=True, fill='both')
+        self.listBox.bind('<Double 1>', self.double_click)
+
+        self.find()
+
+    def double_click( self, event = '' ):
+        self.choise = self.listBox.get(self.listBox.curselection())
+        if '@' in self.choise:
+            #self.choise = self.choise.split('@')[0]
+            self.top.destroy ()
+            return self.choise
+
+    def find(self, event = '' ):
+
+        ns = {'ns0': 'http://www-diag.renault.com/2002/ECU',
+              'ns1': 'http://www-diag.renault.com/2002/screens'}
+
+        self.listBox.delete( 0, tk.END )
+        self.pattern = self.findEnt.get()
+
+        for k in self.ecu.screen.Screens.keys():
+            scr = self.ecu.screen.Screens[k]
+            
+            delym = '@'
+
+            try:
+                if type(scr) is not str:
+                    scrName = scr.attrib['Name']
+                    displays = scr.findall ("ns1:Display", ns)
+                    for displ in displays:
+                        DataName = displ.attrib["DataName"]
+                        RequestName = displ.attrib["RequestName"]
+                        line = k + delym + scrName + '/' + RequestName + '/' + DataName
+                        if self.pattern in line:
+                            self.listBox.insert (tk.END, line )
+                else:
+                    scrName = scr
+                    if scr in self.ecu.requests.keys():
+                        for rdi in self.ecu.requests[scr].ReceivedDI.keys():
+                            line = k + delym + scrName + '/' + scr + '/' + rdi
+                            if self.pattern in line:
+                                self.listBox.insert (tk.END, line )
+                                self.listBox.itemconfig(tk.END, {'bg' : 'yellow'})
+                        for sdi in self.ecu.requests[scr].SentDI.keys():
+                            line = k + delym + scrName + '/' + scr + '/' + sdi
+                            if self.pattern in line:
+                                self.listBox.insert (tk.END, line )
+                                self.listBox.itemconfig(tk.END, {'bg' : 'yellow'})
+
+            except:
+                print( 'Find Exception ' + scr )
+
+    def show(self):
+        self.top.deiconify ()
+        self.top.wait_window ()
+        return self.choise
+    
+    def close(self):
+        self.choise = ''
+        self.top.destroy ()
+       
+
+
+
 class ListDialog (tkinter.simpledialog.Dialog):
     def __init__(self, parent, text, arr ):
         self.top = tk.Toplevel (parent)
@@ -133,11 +221,22 @@ class ListDialog (tkinter.simpledialog.Dialog):
             self.L.insert (tk.END, i)
         self.L.pack (side=tk.TOP, padx=5, pady=5, expand=True, fill='both')
 
-        tk.Button (self.top, text='Close', command=self.close).pack (side=tk.LEFT)
-        tk.Button (self.top, text='Load', command=self.load).pack (side=tk.RIGHT)
+        b_fr = tk.Frame (self.top)
+        b_fr.pack (side=tk.BOTTOM)
+        
+        tk.Button (b_fr, text='Close', command=self.close).pack (side=tk.LEFT)
+        tk.Button (b_fr, text='Other', command=self.other).pack (side=tk.RIGHT)
+        tk.Button (b_fr, text='Load', command=self.load).pack (side=tk.RIGHT)
 
     def close(self):
         self.choise = ''
+        self.top.destroy ()
+
+    def other(self):
+        f = tkinter.filedialog.askopenfile(mode='r')
+        if f is None:
+            return
+        self.choise = f.name
         self.top.destroy ()
 
     def load(self):
@@ -185,6 +284,7 @@ class DDTScreen (tk.Frame):
         
         # init local variables
         self.Screens = {}
+        self.ScreensMenu = {}
         # self.Labels  = {}
         self.decu = decu
         self.decu.screen = self
@@ -467,7 +567,7 @@ class DDTScreen (tk.Frame):
         self.update_dInputs()
     
     def OnScreenChange(self, item):
-        self.loadScreen (self.Screens[item])
+        self.loadScreen (self.ScreensMenu[item])
     
     def resizeEvent(self, event):
         # filter first resize
@@ -496,22 +596,27 @@ class DDTScreen (tk.Frame):
                     except:
                         tkinter.messagebox.showinfo ("Wrong dump file", "Wrong file name " + f + " in ./dumps folder")
                         return ""
-        if len (flist) == 0:
-            tkinter.messagebox.showinfo ("Wrong dump file", "No appropriate dump file in ./dumps folder")
-            return ""
+        #if len (flist) == 0:
+        #    tkinter.messagebox.showinfo ("Wrong dump file", "No appropriate dump file in ./dumps folder")
+        #    return ""
     
-        ch = ListDialog (self.root, "Choose dump for roll back", flist).show ()
+        ch = ListDialog (self.root, "Choose dump file", flist).show ()
     
         try:
-            fname = './dumps/' + ch.split ("#")[1].strip ()
+            if "#" in ch:
+                fname = './dumps/' + ch.split ("#")[1].strip ()
+            elif os.path.isfile( ch ):
+                fname = ch
+            else:
+                tkinter.messagebox.showinfo ("Wrong dump file", "Can't find a file")
+                return ""
         except:
             tkinter.messagebox.showinfo ("Wrong dump file", "No appropriate dump file in ./dumps folder")
             return ""
-    
         # check dump file
-        if self.decu.ecufname.split ('/')[-1][:-4] not in fname:
-            tkinter.messagebox.showinfo ("Wrong dump file", "The name of dump file should contains the name of current xml.")
-            return ""
+        #if self.decu.ecufname.split ('/')[-1][:-4] not in fname:
+        #    tkinter.messagebox.showinfo ("Wrong dump file", "The name of dump file should contains the name of current xml.")
+        #    return ""
     
         return fname
     
@@ -623,9 +728,34 @@ class DDTScreen (tk.Frame):
 
         # show confirmation dialog if approve is True
         confirmed = True
-        xText = '\n\n'
+        xText = f'#The macro made by mod_ddt from file {fname}\n\n'
+        xText += f'$addr = {self.decu.cecu["dst"]}\n\n'
+        if self.decu.cecu["pin"] == 'can' and self.decu.cecu["brp"] == '0':
+            xText += f'can500  # init can macro\n\n'
+        elif self.decu.cecu["pin"] == 'can' and self.decu.cecu["brp"] == '1':
+            xText += f'can250  # init can macro\n\n'
+        else:
+            xText += f'fast  # init iso macro\n\n'
+        xText += f'delay 1\n\n'
+        xText += f'# open session\n\n'
+        xText += f'session {self.decu.cecu["startDiagReq"]}\n\n'
+        xText += f'# configuration\n\n'
+
         for i in conf_1:
-            xText += "%s\n" % (i)
+            xText += f'{i}\n'
+        xText += f'\n'
+
+        #find reset
+        reset_command = ''
+        for req in self.decu.requests.keys():
+            if self.decu.requests[req].SentBytes == '1101':
+                reset_command = req
+                break
+        if reset_command!='':
+            xText += f'#Reset command: {req}\n'
+            xText += f'#{self.decu.requests[req].SentBytes}\n\n'
+
+        xText += f'exit\n'
 
         dialog = InfoDialog(self.root, xText, hnid=False)
         self.root.wait_window(dialog.top)
@@ -809,6 +939,10 @@ class DDTScreen (tk.Frame):
         except:
             pass
         try:
+            if self.ScreensMenu is not None: del(self.ScreensMenu)
+        except:
+            pass
+        try:
             if self.dDisplay is not None: del(self.dDisplay)
         except:
             pass
@@ -948,6 +1082,16 @@ class DDTScreen (tk.Frame):
         dialog = InfoDialog (self.root, xText)
         self.root.wait_window (dialog.top)
     
+    def find(self):
+        scr_name = FindDialog(self.root, self.decu ).show()
+        if '@' in scr_name:
+            key = scr_name.split('@')[0]
+            if key in self.Screens.keys() :
+                #self.loadSyntheticScreen (self.Screens[key])
+                #else:
+                self.loadScreen (self.Screens[key])
+        return
+
     def torqpids(self):
         fname = ''
         fname = tkinter.filedialog.asksaveasfilename (defaultextension=".csv",
@@ -1005,8 +1149,6 @@ class DDTScreen (tk.Frame):
                         fcsv.write(cs.encode('utf-8'))
         fcsv.close()
         del(usedmnemo)
-
-        
 
     def initUI(self):
     
@@ -1066,6 +1208,7 @@ class DDTScreen (tk.Frame):
         
         self.toolsmenu = tk.Menu (self.menubar, tearoff=0)
         self.toolsmenu.add_command (label="Make torque PIDs", command=self.torqpids, accelerator="Ctrl+t")
+        self.toolsmenu.add_command (label="Find", command=self.find, accelerator="Ctrl+f")
         self.toolsmenu.add_command (label="Clear logs", command=self.clearLogs, accelerator="Ctrl+k")
         self.toolsmenu.add_command (label="Save logs to file", command=self.saveLogs, accelerator="Ctrl+s")
         self.menubar.add_cascade (label="Tools", menu=self.toolsmenu)
@@ -1116,7 +1259,7 @@ class DDTScreen (tk.Frame):
                 if len(screens):
                     for scr in screens:
                         scrname = scr.attrib["Name"]
-                        self.Screens[scrname] = scr
+                        self.ScreensMenu[scrname] = scr
                         catmenu.add_command (label=scrname, command=lambda item=scrname: self.OnScreenChange (item))
         self.menubar.add_cascade (label="Screens", menu=self.ecumenu)
         self.root.config (menu=self.menubar)
@@ -1263,8 +1406,8 @@ class DDTScreen (tk.Frame):
     def loadScreen(self, scr):
 
         # reset Expert mode with every screen changing
-        # mod_globals.opt_exp = False
-        # self.expertmode.set(False)
+        mod_globals.opt_exp = False
+        self.expertmode.set(False)
         self.changeMode()
 
         self.currentscreen = scr
@@ -1303,14 +1446,15 @@ class DDTScreen (tk.Frame):
                 max_y = h
                 # print xrLeft, xrTop, xrHeight, xrWidth
         
+        deb_time1 = time.time()
         # main frame re-create
         self.ddt.delete ('all')
         self.ddt.update_idletasks ()
-        
+
         for o in self.dObj:
-            o.place_forget ()
+            o.destroy() # place_forget ()
         for f in self.dFrames:
-            f.place_forget ()
+            f.destroy() # place_forget ()
         
         self.dValue = {}  # value indexed by DataName
         self.iValue = {}  # value indexed by DataName param with choise
@@ -1341,7 +1485,7 @@ class DDTScreen (tk.Frame):
         
         scx = min ([scx, 20])
         scy = min ([scy, _minInputHeight, _minButtonHeight, 10])
-        
+
         # set scroll region
         self.ddtcnv.config (scrollregion=(0, 0, max_x // scx, max_y // scy))
         # self.ddtfrm.config(width=max_x/scx, height=max_y/scy)
@@ -1353,7 +1497,7 @@ class DDTScreen (tk.Frame):
             os_event = "<Button-2>"
         else:
             os_event = "<Button-3>"
-        
+
         # load labels (just descriptions of fields)
         labels = scr.findall ("ns1:Label", ns)
         if len(labels):
@@ -1444,7 +1588,7 @@ class DDTScreen (tk.Frame):
                         self.images[-1] = self.images[-1].zoom (3, 3)
                         self.images[-1] = self.images[-1].subsample (x1 * 3 // xrWidth, y1 * 3 // xrHeight)
                         idg = self.ddt.create_image (xrLeft, xrTop, image=self.images[-1], anchor='nw')
-        
+
         # load displays (show values)
         dispalys = scr.findall ("ns1:Display", ns)
         if len(dispalys):
@@ -1707,7 +1851,7 @@ class DDTScreen (tk.Frame):
                 
                 obj.place (width=xrWidth, height=xrHeight)
                 self.dObj.append (obj)
-        
+
         # clear elm cache
         self.decu.clearELMcache ()
 
@@ -1758,9 +1902,9 @@ class DDTScreen (tk.Frame):
         self.ddt.update_idletasks()
 
         for o in self.dObj:
-            o.place_forget()
+            o.destroy() # place_forget()
         for f in self.dFrames:
-            f.place_forget()
+            f.destroy() # place_forget()
 
         self.dValue = {}  # value indexed by DataName
         self.iValue = {}  # value indexed by DataName param with choise
