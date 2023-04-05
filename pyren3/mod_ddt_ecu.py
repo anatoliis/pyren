@@ -1221,11 +1221,6 @@ def ecuSearch(vehTypeCode, Address, DiagVersion, Supplier, Soft, Version, el, in
 
   for k in list(t.keys()):
     for ai in t[k]['AutoIdents']:
-      #dist = 0
-      #dist = dist + minDist(DiagVersion, ai['DiagVersion']) * 1000  # weight
-      #dist = dist + minDist(Supplier, ai['Supplier']) * 1  # weight
-      #dist = dist + minDist(Soft, ai['Soft']) * 1  # weight
-      #dist = dist + minDist(Version, ai['Version']) * 1  # weight
       dist = AutoIdents_distance( DiagVersion, Supplier, Soft, Version, ai )
 
       if vehTypeCode.upper() in t[k]['Projects'] or dist == 0:
@@ -1248,5 +1243,4 @@ def ecuSearch(vehTypeCode, Address, DiagVersion, Supplier, Soft, Version, el, in
   if len(cand) == 0 and kOther != '':
     cand[kOther] = minOther
 
-  return list(cand.keys())
-
+  return list(dict(sorted(cand.items(), key=lambda x:x[1])).keys())
