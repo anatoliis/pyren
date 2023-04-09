@@ -230,7 +230,7 @@ def acf_MTC_findDiff( m, mtc, elm ):
         #acf_form_commands( m, cu, op )
         break
 
-def acf_MTC_optinInfluence( m, option ):
+def acf_MTC_optinInfluence( m, option, allmtc ):
   ''' m - module definition map '''
   ''' option - option name from MTC list '''
   ''' this function finds dependent parameters in one module'''
@@ -260,7 +260,7 @@ def acf_MTC_optinInfluence( m, option ):
     #check every mtc
     for op in cu.opts:
       if option not in op.MTC: continue
-      res = acf_MTC_compare(op.MTC, option)
+      res = acf_MTC_compare(op.MTC, allmtc)
       if res:
         tmpMTC = op.MTC.split()
         if op.MTC.startswith('SAUF'): continue
@@ -271,22 +271,25 @@ def acf_MTC_optinInfluence( m, option ):
   
   return out
   
-def acf_MTC_optionsExplorer( de, option ):
+def acf_MTC_optionsExplorer( de, option, allmtc ):
   ''' de - list of all ecus '''
   ''' option - option name from MTC list '''
   ''' this function finds dependent parameters in every module'''
   
-  print('################### ', '%-10s'%(option), ' #########################')
+  res = []
+
+  res.append(f'################### {option:10}  #########################')
   
   for m in de:
     if 'sref' not in list(m.keys()) or m['sref']=='': continue
     if 'sref' in list(m.keys()):
       if 'mo' in list(m.keys()) and m['mo']!='':    
-        out = acf_MTC_optinInfluence( m, option )
+        out = acf_MTC_optinInfluence( m, option, allmtc )
         if len(out)>0:
-          print('-'*30,"  Family : ",m['idf'], ' : ', m['fam_txt'])
-          print(out)
-          
+          res.append(f"---------------------  Family : {m['idf']} : {m['fam_txt']}")
+          res.append(out)
+
+  return res       
   
   
   

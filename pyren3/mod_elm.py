@@ -330,7 +330,7 @@ class Port:
             print('*' * 40)
             print('*       Connection to ELM was lost')
             mod_globals.opt_demo = True
-
+        
         if type(byte) == str:
             byte = byte.encode()
 
@@ -485,6 +485,7 @@ class Port:
         self.hdr.timeout = 1
         self.hdr.baudrate = boudrate
         
+        time.sleep (0.1)
         self.write ("\r")
         
         # search >

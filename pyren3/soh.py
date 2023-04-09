@@ -477,8 +477,8 @@ class tl:
             y1 = float(line['volt'][i*2+1])
             self.CV.create_line(tx + x0 * xm, ty + (ymax - y0) * ym, tx + x1 * xm, ty + (ymax - y1) * ym, width=1, fill=f )
 
-        if hist:
-            return
+        #if hist:
+        #    return
 
         self.findPoints( line )
 
@@ -498,6 +498,13 @@ class tl:
         except:
             Tc = int(line['temp'])
 
+        # average interval among points
+        interval = (line['volt'][-2] - line['volt'][0]) / len(line['volt']) * 2
+        
+        #points in 50ms (take in to account only odds)
+        # 50ms radius of zone for local min/max
+        radius = int(.1 / interval ) * 2 + 1
+
         self.T0 = line['volt'][0]
         u = 2
         mean = 0
@@ -509,29 +516,21 @@ class tl:
         self.V0 = mean // count
 
         # find first min
-        min = line['volt'][u-1]
-        while line['volt'][u+1]-min < 0.25 and u<len(line['volt']):
-            if line['volt'][u+1]<min:
-                min = line['volt'][u+1]
-                self.T1 = line['volt'][u]
+        smin = min(list(line['volt'][u-5:u+radius:2]))
+        while line['volt'][u+1]!=smin:
             u += 2
-        self.V1 = min
+        self.T1 = line['volt'][u]
+        self.V1 = smin
 
         # find first max
-        max = min
-        while max - line['volt'][u+1] < 0.25 and u<len(line['volt']):
-            if line['volt'][u+1]>max:
-                max = line['volt'][u+1]
+        while line['volt'][u+1]<max(list(line['volt'][u-1:u+radius:2])) and u<len(line['volt'])-radius-1:
             u += 2
 
         # find second min
-        min = line['volt'][u-1]
-        while line['volt'][u+1]-min < 0.25 and u<len(line['volt']):
-            if line['volt'][u+1]<min:
-                min = line['volt'][u+1]
-                self.T2 = line['volt'][u]
+        while line['volt'][u+1]>min(list(line['volt'][u-1:u+radius:2])) and u<len(line['volt'])-radius-1:
             u += 2
-        self.V2 = min
+        self.T2 = line['volt'][u]
+        self.V2 = line['volt'][u+1]
 
         self.vth1 = 0
         tpol = [ 2.40384615e-09, -7.79428904e-08, -6.37383450e-06,  8.12208625e-05, 1.06745338e-02,  1.97290210e-01]
@@ -552,6 +551,7 @@ class tl:
         else:
             self.l_volt.config(fg='black', bg = "red")
 
+        print( (self.V2-self.V1)/(self.T2-self.T1)/8*100, self.V1, self.V2) 
         return
 
     def axis( self, top ):
@@ -570,7 +570,7 @@ class tl:
             else:
                 self.CV.create_line( tx+x*xm, ty, tx+x*xm, self.ch-ty, width=0, dash=(5,5), fill='lightgray')
 
-            self.CV.create_text(tx+x*xm, self.ch-ty//2., text=str(x), justify=tk.CENTER, font="Verdana 8")
+            self.CV.create_text(tx+x*xm, self.ch-ty//2., text=str(x)[:4], justify=tk.CENTER, font="Verdana 8")
             x = x + 0.2
 
         y = 0

@@ -105,6 +105,12 @@ def optParser():
       default=False,
       action="store_true")
 
+  parser.add_argument("--exp",
+      help="Explore options",
+      dest="exp",
+      default=False,
+      action="store_true")
+
   parser.add_argument("--vin",
       help="vin number",
       dest="vinnum",
@@ -160,6 +166,7 @@ def optParser():
     mod_globals.opt_verbose2  = options.verbose2
     mod_globals.opt_ref       = options.ref
     mod_globals.opt_mtc       = options.mtc
+    mod_globals.opt_exp       = options.exp
 
     if options.dev=='' or len(options.dev)!=4 or options.dev[0:2]!='10':
       mod_globals.opt_dev       = False
@@ -305,9 +312,11 @@ def main():
       else:
         print("%2s : %s :   " % (m['idf'],m['sref']))      
   
-  #for option in mtc:
-  #  acf_MTC_optionsExplorer( de, option )
-  
+  if mod_globals.opt_exp:
+    for option in sorted(mtc):
+      res = acf_MTC_optionsExplorer( module_list, option, mtc )
+      for l in res:
+        print( l )
 
 if __name__ == '__main__':  
   main()

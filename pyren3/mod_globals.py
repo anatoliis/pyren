@@ -36,6 +36,8 @@ opt_stn       = False    #STN(PIC24) ELM327 which has ability to automatically s
 opt_sd        = False    #separate doc files
 opt_performance = False
 opt_minordtc  = False
+opt_ref       = ""       #alternative ref set for acf
+opt_mtc       = ""       #alternative mtc set for acf
 dumpName = ""
 
 state_scan    = False

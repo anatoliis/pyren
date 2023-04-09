@@ -1197,10 +1197,10 @@ def AutoIdents_distance( DiagVersion, Supplier, Soft, Version, ai ):
     #catch not hex supplier with len 6
     pass
 
-  d = distance( DiagVersion, ai['DiagVersion']) * 0.25
-  d = d + distance( Supplier, ai['Supplier']) * 0.25
-  d = d + distance( Soft, ai['Soft']) * 0.25
-  d = d + distance( Version, ai['Version']) * 0.25
+  d = distance( DiagVersion, ai['DiagVersion']) * 0.35
+  d = d + distance( Supplier, ai['Supplier']) * 0.35
+  d = d + distance( Soft, ai['Soft']) * 0.15
+  d = d + distance( Version, ai['Version']) * 0.15
 
   return round( d, 4 )
 

@@ -126,6 +126,7 @@ class FindDialog (tkinter.simpledialog.Dialog):
     def __init__(self, parent, ecu ):
 
         self.ecu = ecu
+        self.choise = ''
 
         self.top = tk.Toplevel (parent)
         self.top.title ('Find Dialog')
@@ -1083,6 +1084,12 @@ class DDTScreen (tk.Frame):
         self.root.wait_window (dialog.top)
     
     def find(self):
+
+        restart = False
+        if self.start:
+           self.startStop()
+           restart = True
+
         scr_name = FindDialog(self.root, self.decu ).show()
         if '@' in scr_name:
             key = scr_name.split('@')[0]
@@ -1090,6 +1097,10 @@ class DDTScreen (tk.Frame):
                 #self.loadSyntheticScreen (self.Screens[key])
                 #else:
                 self.loadScreen (self.Screens[key])
+
+        if restart:
+           self.startStop()
+
         return
 
     def torqpids(self):
@@ -1417,6 +1428,19 @@ class DDTScreen (tk.Frame):
             self.loadSyntheticScreen(scr)
             return
 
+        #debug
+        #deb_time1 = time.time()
+        #print( "#"*50 )
+
+        # stop ratary. Do not read ELM
+        restart = False
+        if self.start:
+           self.startStop()
+           restart = True
+
+        #debug
+        #print( f"DEBUG POINT1: {time.time()-deb_time1}")
+
         ns = {'ns0': 'http://www-diag.renault.com/2002/ECU',
               'ns1': 'http://www-diag.renault.com/2002/screens'}
 
@@ -1446,7 +1470,6 @@ class DDTScreen (tk.Frame):
                 max_y = h
                 # print xrLeft, xrTop, xrHeight, xrWidth
         
-        deb_time1 = time.time()
         # main frame re-create
         self.ddt.delete ('all')
         self.ddt.update_idletasks ()
@@ -1855,6 +1878,9 @@ class DDTScreen (tk.Frame):
         # clear elm cache
         self.decu.clearELMcache ()
 
+        if restart:
+           self.startStop()
+
         # request to update dInputs
         self.update_dInputs ()
 
@@ -1874,8 +1900,13 @@ class DDTScreen (tk.Frame):
         if len (self.sReq_lst):
             self.startScreen ()
 
-
     def loadSyntheticScreen(self, rq):
+
+        # stop ratary. Do not read ELM
+        restart = False
+        if self.start:
+           self.startStop()
+           restart = True
 
         read_cmd = self.decu.requests[rq].SentBytes
         if read_cmd[:2]=='21':
@@ -2034,6 +2065,10 @@ class DDTScreen (tk.Frame):
 
         # clear elm cache
         self.decu.clearELMcache ()
+
+        # restart if need
+        if restart:
+           self.startStop()
 
         # request to update dInputs
         self.update_dInputs ()

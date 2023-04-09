@@ -78,12 +78,12 @@ def optParser():
       default="")
 
   parser.add_argument("-s",
-      help="com port speed configured on ELM {38400[default],57600,115200,230400,500000} DEPRECATED",
+      help="com port speed configured on ELM {38400[default],115200,230400,500000} DEPRECATED",
       dest="speed",
       default="38400")
 
   parser.add_argument("-r",
-      help="com port rate during diagnostic session {38400[default],57600,115200,230400,500000}",
+      help="com port rate during diagnostic session {38400[default],115200,230400,500000}",
       dest="rate",
       default="38400",)
 
