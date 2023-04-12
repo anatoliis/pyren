@@ -188,8 +188,9 @@ def acf_loadModules( de, refdata, platform ):
       if k['idf']==idf:
         m['pin'] = k['pin']
         m['dst'] = k['dst']
-        m['idRx'] = k['idRx']
-        m['idTx'] = k['idRx']
+        if 'idRx' in k.keys() and 'idTx' in k.keys():
+          m['idRx'] = k['idRx']
+          m['idTx'] = k['idRx']
         m['startDiagReq'] = k['startDiagReq']
         m['ecuname'] = k['ecuname']
         m['brp'] = k['brp']
