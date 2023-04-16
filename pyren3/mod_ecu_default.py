@@ -106,8 +106,8 @@ def get_default_std_a( df, mn, se, elm, calc, getDTCmnemo ):
     else: 
       chr_val = '' # I'm no sure that it is right
       
-    if str(chr_val).encode("utf-8") in list(df[dtc].caracter.keys()):
-      interpretation = df[dtc].caracter[str(chr_val).encode("utf-8")]
+    if str(chr_val) in list(df[dtc].caracter.keys()):
+      interpretation = df[dtc].caracter[str(chr_val)]
     else:
       interpretation = ''
 
@@ -327,8 +327,8 @@ def get_default_failflag( df, mn, se, elm, calc ):
       tmp_interp = calc.calculate(interp)
     
       interpretation = ""
-      if str(tmp_interp).encode("utf-8") in list(df[dtc].caracter.keys()):
-        interpretation = df[dtc].caracter[str(tmp_interp).encode("utf-8")]
+      if str(tmp_interp) in list(df[dtc].caracter.keys()):
+        interpretation = df[dtc].caracter[str(tmp_interp)]
       else:
         interpretation = ""
     
