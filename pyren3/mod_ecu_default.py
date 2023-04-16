@@ -218,8 +218,8 @@ def get_default_std_b( df, mn, se, elm, calc, getDTCmnemo ):
     else:
       chr_val = '' # I'm no sure that it is right
     
-    if str(chr_val).encode("utf-8") in list(df[dtc].caracter.keys()):
-      interpretation = df[dtc].caracter[str(chr_val).encode("utf-8")]
+    if str(chr_val) in list(df[dtc].caracter.keys()):
+      interpretation = df[dtc].caracter[str(chr_val)]
     else:
       interpretation = ''
       

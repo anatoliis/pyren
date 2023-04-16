@@ -180,7 +180,10 @@ def file_in_clip( pattern ):
         return pattern in glob.glob(pattern)
     else:
         file_list = mod_globals.clip_arc.namelist()
-        return pattern in file_list
+        for l in file_list:
+            if pattern.lower() == l.lower():
+                return l
+        return ''
 
 def extract_from_clip_to_cache( filename ):
     if mod_globals.clip_arc == '':
