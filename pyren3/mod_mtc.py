@@ -81,13 +81,14 @@ def acf_buildFull( platf ):
   ref_name = 'REF.dat'
   for fn in os.listdir(plDIR):
     if fn.upper()=='REF.DAT': ref_name = fn
-  reff = open(plDIR + '/' + ref_name, 'rt')
-  ref_list = csv.reader(reff, delimiter=';')
-  for i in ref_list:
-    if i:
-      for item in range(len(i)):
-        i[item] = ''.join([c if ord(c) < 128 else 'X' for c in i[item]]).replace('XXX', 'X')
-      ref[int(i[0][:10])] = [i[0][11:]] + i[1:]
+  if os.path.exists(plDIR + '/' + ref_name):
+    reff = open(plDIR + '/' + ref_name, 'rt')
+    ref_list = csv.reader(reff, delimiter=';')
+    for i in ref_list:
+      if i:
+        for item in range(len(i)):
+          i[item] = ''.join([c if ord(c) < 128 else 'X' for c in i[item]]).replace('XXX', 'X')
+        ref[int(i[0][:10])] = [i[0][11:]] + i[1:]
 
   all_vin = open(plDIR+'/all_vin.csv', 'w')
 
@@ -123,7 +124,9 @@ def acf_buildFull( platf ):
                     data = d[2] + d[1] + d[0]
                   except:
                       pass
-                  outl = data+'#'+VIN+'#'+' '.join(vr[1:])+'#'+' '.join(mtc[int(vr[1])])+'#'+'_'.join(ref[int(vr[2])])
+                  outl = data+'#'+VIN+'#'+' '.join(vr[1:])+'#'+' '.join(mtc[int(vr[1])])
+                  if vr[2]!='' and int(vr[2]) in ref.keys():
+                    outl += '#'+'_'.join(ref[int(vr[2])])
                   all_vin.write(outl+'\n')
   all_vin.close()
   print("\n\n File: "+plDIR+"/all_vin.csv is build\n\n")
