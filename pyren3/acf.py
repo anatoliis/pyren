@@ -313,10 +313,11 @@ def main():
         print("%2s : %s :   " % (m['idf'],m['sref']))      
   
   if mod_globals.opt_exp:
-    for option in sorted(mtc):
-      res = acf_MTC_optionsExplorer( module_list, option, mtc )
-      for l in res:
-        print( l )
+    with open( '../MTCSAVE/'+VIN+'/mtcexp.txt', 'w' ) as f:
+      for option in sorted(mtc):
+        res = acf_MTC_optionsExplorer( module_list, option, mtc )
+        for l in res:
+          f.write( l + '\n' )
 
 if __name__ == '__main__':  
   main()

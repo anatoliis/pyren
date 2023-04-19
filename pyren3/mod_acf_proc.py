@@ -262,12 +262,8 @@ def acf_MTC_optinInfluence( m, option, allmtc ):
       if option not in op.MTC: continue
       res = acf_MTC_compare(op.MTC, allmtc)
       if res:
-        tmpMTC = op.MTC.split()
         if op.MTC.startswith('SAUF'): continue
-        #if len(tmpMTC)==2 and tmpMTC[0]=='SAUF' and tmpMTC[1]!=option: continue
-        out = out + '%-100s;%-30s;%-10s;%s\n'%(cu.DI, op.MTC, op.VW, op.TEX)
-        #out = out + '%-100s;%-30s;%-10s;%s\n'%(cu.TE, op.MTC, op.VW, op.TEX)
-        #break
+        out = out + '%-70s;%-15s;%-15s;%s\n'%(cu.DI, op.VW, op.MTC, op.TEX)
   
   return out
   
