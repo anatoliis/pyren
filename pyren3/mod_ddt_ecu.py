@@ -1058,7 +1058,7 @@ class DDTECU():
 
   def bukva( self, bt, l, sign=False):
     S1 = chr ((bt - l) % 26 + ord ('A'))
-    ex = int (bt - l) / 26
+    ex = int (bt - l) // 26
     if ex:
       S2 = chr ((ex - 1) % 26 + ord ('A'))
       S1 = S2 + S1

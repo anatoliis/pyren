@@ -1157,7 +1157,7 @@ class DDTScreen (tk.Frame):
                         cs = cs + l_Unit + '","'
                         cs = cs + l_header + '"\n'
 
-                        fcsv.write(cs.encode('utf-8'))
+                        fcsv.write(cs)
         fcsv.close()
         del(usedmnemo)
 
