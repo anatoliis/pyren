@@ -287,7 +287,7 @@ class DDTECU():
         
     hash = Address+DiagVersion+Supplier+Soft+Version
 
-    print('Address:"%s" DiagVersion:"%s" Supplier:"%s" Soft:"%s" Version:"%s"'%( Address, DiagVersion, Supplier, Soft, Version))
+    print('Address="%s" DiagVersion="%s" Supplier="%s" Soft="%s" Version="%s"'%( Address, DiagVersion, Supplier, Soft, Version))
 
     eculist = mod_ddt_utils.loadECUlist()
 
@@ -1205,6 +1205,10 @@ def AutoIdents_distance( DiagVersion, Supplier, Soft, Version, ai ):
   return round( d, 4 )
 
 def ecuSearch(vehTypeCode, Address, DiagVersion, Supplier, Soft, Version, el, interactive = True):
+
+  # fix address problem for Nav
+  if Address=='57':
+    Address='58'
 
   if Address not in list(el.keys()):
     return []

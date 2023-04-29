@@ -1102,7 +1102,7 @@ def findTCOM( addr, cmd, rsp, pl_id = False ):
       vehTypeCode = ''
 
       
-  if not pl_id:
+  if cmd!='' and rsp!='':
     #print found ecus
     for r in list(se.allecus.keys()):
       if se.allecus[r]['dst']!=addr: continue
