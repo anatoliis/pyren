@@ -166,9 +166,14 @@ def get_file_from_clip( filename ):
         if filename.startswith('../'):
             filename = filename[3:]
         try:
+            for an in mod_globals.clip_arc.NameToInfo:
+                if filename.lower() == an.lower():
+                    filename = an
+                    break
             f = mod_globals.clip_arc.open(filename, mode)
             return f
-        except:
+        except Exception as e:
+            #print(e)
             fn = filename.split('/')[-1]
             lfn = fn.lower()
             filename = filename.replace(fn,lfn)
