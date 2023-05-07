@@ -149,7 +149,21 @@ https://www.youtube.com/watch?v=DazsvlnLCoA
 * **CLIP database** required for CLIP mode (not included you must own it)
 * **DDT2000 database** required for DDT mode (not included, you must own it)
 
-## Installation on Windows
+## Prepare Windows Installation
+
+Download and install the python3 from https://www.python.org/downloads/
+**Do not forget to select the option "Add pytho.exe to PATH" during installation**
+
+## Installation on Windows withot CLIP
+
+Download and unpack the latest pyren3 from 
+https://gitlab.com/py_ren/pyren/-/archive/pyren3/pyren-pyren3.zip
+
+place DB files pyrendata*.zip and DDT2000data*.zip next to the PYREN.BAT
+
+That's all. Run PYREN.BAT 
+
+## Installation on Windows with CLIP
 
 Check that you have CLIP database installed 
 ```
@@ -160,6 +174,8 @@ This directory should contains at least the next subdirectories
 * EcuRenault
 * Location
 * Vehicles
+
+If you don't have CLIP installed then you may use prepared archives in zip with a name like pyrendata_xxx.zip
 
 Install pyren
 ```
@@ -197,7 +213,10 @@ You have to get the next directory tree
 To get better performance change `Latency Timer` of the OBDLink COM port to `1ms`.  
 
 How to (first point): https://forscan.org/forum/viewtopic.php?f=4&t=1763 
+
 ## Installation on MacOS and Linux
+
+Please install **python3-tk** first.
 
 For running under MacOS or Linux you need just to copy the same directory tree as in Windows installation above
 
@@ -217,6 +236,7 @@ sl4a/scripts
 |   |- <other modules>
 |- _pyren_launcher.py   
 ```
+**Another alternative is to install qpyren3. It's an apk file compatible with this pyren3 and DBs.**
 
 
 # User guide
