@@ -152,9 +152,9 @@ https://www.youtube.com/watch?v=DazsvlnLCoA
 ## Prepare Windows Installation
 
 Download and install the python3 from https://www.python.org/downloads/
-**Do not forget to select the option "Add pytho.exe to PATH" during installation**
+**Do not forget to select the option "Add python.exe to PATH" during installation**
 
-## Installation on Windows withot CLIP
+## Installation on Windows without CLIP
 
 Download and unpack the latest pyren3 from 
 https://gitlab.com/py_ren/pyren/-/archive/pyren3/pyren-pyren3.zip
@@ -216,7 +216,7 @@ How to (first point): https://forscan.org/forum/viewtopic.php?f=4&t=1763
 
 ## Installation on MacOS and Linux
 
-Please install **python3-tk** first.
+Please install **python3-tk** package first.
 
 For running under MacOS or Linux you need just to copy the same directory tree as in Windows installation above
 
