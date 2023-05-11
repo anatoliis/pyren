@@ -959,7 +959,7 @@ def readECUIds( elm ):
     # vinRsp = '61 81 56 46 31 30 30 30 30 30 30 30 30 30 30 30 30 30 30 00 00 00 00 00 00 00 00'
     if len(vinRsp)>55 and 'NR' not in vinRsp:
       VIN = vinRsp[6:56].strip().replace('00', '30').replace(' ', '')
-      VIN = bytes.fromhex(VIN).decode('utf-8')
+      VIN = bytes.fromhex(VIN).decode('utf-8', errors='ignore' )
 
   else:
     try:
