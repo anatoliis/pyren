@@ -412,26 +412,21 @@ class ECU:
     if mod_globals.opt_csv and mod_globals.ext_cur_DTC == '000000':
       # prepare to csv save
       self.minimumrefreshrate = 0
-      csvline = "sep=\\t\n"
-      csvline += "Time"
+      #csvline = "sep=\\t\n"
+      csvline = "Time"
       nparams = 0
       for dr in datarefs:
         if dr.type=='State':
-          if mod_globals.opt_csv_only:
-            csvline += ";" + self.States[dr.name].codeMR
-          else:
-            csvline += ";" + self.States[dr.name].codeMR + ":" + self.States[dr.name].label
+          csvline += ";" + self.States[dr.name].codeMR + ":" + self.States[dr.name].label
           nparams += 1
         if dr.type=='Parameter':
-          if mod_globals.opt_csv_only:
-            csvline += ";" + self.Parameters[dr.name].codeMR
-          else:
-            csvline += (";" + self.Parameters[dr.name].codeMR + ":" +self.Parameters[dr.name].label + " [" + self.Parameters[dr.name].unit + "]")
+          csvline += (";" + self.Parameters[dr.name].codeMR + ":" +self.Parameters[dr.name].label + " [" + self.Parameters[dr.name].unit + "]")
           nparams += 1
       if mod_globals.opt_usrkey: csvline += ";User events"
       csvline = pyren_encode(csvline)
       if nparams:
-        csv_filename = datetime.now().strftime("%y_%m_%d_%H_%M_%S")
+        csv_start_time = datetime.now().timestamp()
+        csv_filename = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
         #here the problem with russian letters. and very long name
         csv_filename = csv_filename+'_'+self.ecudata['ecuname']+'_'+path
         csv_filename += ".csv"
@@ -485,16 +480,12 @@ class ECU:
       
       if mod_globals.opt_csv_human and csvf!=0:
         csvline = csvline + "\n"
-        #csvline = csvline.replace('.',',')
-        #csvline = csvline.replace(',','.')
-        csvline = csvline.replace(';','\t')
+        csvline = csvline.replace(',','.')
+        csvline = csvline.replace(';',',')
         csvf.write(pyren_decode(csvline).encode('utf8'))
-        #if mod_globals.os == 'nt' or mod_globals.os == 'android':
-        #  csvf.write(pyren_decode(csvline).encode('cp1251')  if mod_globals.opt_csv_human else csvline)
-        #else:
-        #  csvf.write(pyren_decode(csvline).encode('utf8')  if mod_globals.opt_csv_human else csvline)
         csvf.flush() 
-        csvline = datetime.now().strftime("%H:%M:%S.%f")
+        time_delata = datetime.now().timestamp()-csv_start_time
+        csvline = datetime.fromtimestamp(time_delata).strftime("%S.%f")[:-3]
 
       #Collect all the requests from the current screen
       if mod_globals.opt_performance and self.elm.performanceModeLevel > 1 and mod_globals.opt_csv_only:
@@ -660,6 +651,9 @@ class ECU:
     clearScreen()
     print('Generating a file. Please wait...')
     
+    if len(responseHistory):
+      startTime = next(iter(responseHistory))
+
     for reqTime, reqCache in responseHistory.items():
       for req, rsp in reqCache.items():
         if req.startswith('22') and len(req) > 6:
@@ -670,10 +664,11 @@ class ECU:
           self.elm.rsp_cache[req] = rsp
 
       csvline = csvline + "\n"
-      csvline = csvline.replace(';','\t')
+      csvline = csvline.replace(',','.')
+      csvline = csvline.replace(';',',')
       csvf.write(pyren_decode(csvline).encode('utf8'))
       csvf.flush()
-      csvline = datetime.fromtimestamp(reqTime/1000.0).strftime("%H:%M:%S.%f")[:-3]
+      csvline = datetime.fromtimestamp((reqTime-startTime)/1000).strftime("%S.%f")[:-3]
 
       for dr in datarefs:
         datastr = dr.name

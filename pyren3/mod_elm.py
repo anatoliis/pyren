@@ -127,6 +127,8 @@ negrsp = {"10": "NR: General Reject",
           "92": "NR: Voltage Too High",
           "93": "NR: Voltage Too Low"}
 
+def log_tmstr():
+    return datetime.now ().strftime ("%x %H:%M:%S.%f")[:21].ljust(21,'0')
 
 # noinspection PyBroadException,PyUnresolvedReferences
 class Port:
@@ -534,7 +536,7 @@ class ELM:
     srvsDelay = 0  # the delay next command requested by service
     lastCMDtime = 0  # time when last command was sent to bus
     portTimeout = 5  # timeout of port (com or tcp)
-    elmTimeout = 0  # timeout set by ATST
+    elmTimeout = 'FF'  # timeout set by ATST
     performanceModeLevel = 1 # number of dataids, that can be sent in one 22 request
     
     # error counters
@@ -608,8 +610,7 @@ class ELM:
         self.ATCFC0 = mod_globals.opt_cfc0
 
         if self.lf != 0:
-            tmstr = datetime.now ().strftime ("%x %H:%M:%S.%f")[:-3]
-            self.lf.write('#' * 60 + "\n#[" + tmstr + "] Check ELM type\n" + '#' * 60 + "\n")
+            self.lf.write('#' * 60 + "\n#[" + log_tmstr() + "] Check ELM type\n" + '#' * 60 + "\n")
             self.lf.flush()
 
         # check OBDLink
@@ -784,8 +785,7 @@ class ELM:
                     #self.mlf.write (line + '\n')
 
                     #debug
-                    tmstr = datetime.now().strftime("%H:%M:%S.%f")[:-3]
-                    self.mlf.write(tmstr + ' : ' + line + '\n')
+                    self.mlf.write(log_tmstr() + ' : ' + line + '\n')
                 
                 if frameBuffLen >= coalescing_frames:
                     if self.monitorSendAllow is None or not self.monitorSendAllow.isSet ():
@@ -899,8 +899,7 @@ class ELM:
 
                 # save log
                 if self.lf:
-                    tmstr = datetime.now().strftime("%H:%M:%S.%f")[:-3]
-                    self.lf.write('mon: '+tmstr + ' : ' + line + '\n')
+                    self.lf.write('mon: '+log_tmstr() + ' : ' + line + '\n')
 
                 if frameBuffLen >= coalescing_frames:
                     if self.monitorSendAllow is None or not self.monitorSendAllow.isSet():
@@ -1078,12 +1077,10 @@ class ELM:
         
         # save log
         if self.vf != 0 and 'NR' not in rsp :
-            tmstr = datetime.now ().strftime ("%H:%M:%S.%f")[:-3]
-
             tmp_addr = self.currentaddress
             if self.currentaddress in list(dnat.keys()):
                 tmp_addr = dnat[self.currentaddress]
-            self.vf.write (tmstr + ";" + tmp_addr + ";" + req + ";" + rsp + "\n")
+            self.vf.write (log_tmstr() + ";" + tmp_addr + ";" + req + ";" + rsp + "\n")
             self.vf.flush ()
         
         return rsp
@@ -1122,8 +1119,7 @@ class ELM:
             
             # log switching event
             if self.lf != 0:
-                tmstr = datetime.now ().strftime ("%H:%M:%S.%f")[:-3]
-                self.lf.write ("#[" + tmstr + "]" + "Switch to dev mode\n")
+                self.lf.write ("#[" + log_tmstr() + "]" + "Switch to dev mode\n")
                 self.lf.flush ()
                 
         # If we are on CAN and there was more than keepAlive seconds of silence
@@ -1132,8 +1128,7 @@ class ELM:
             
             # log KeepAlive event
             if self.lf != 0:
-                tmstr = datetime.now ().strftime ("%H:%M:%S.%f")[:-3]
-                self.lf.write ("#[" + tmstr + "]" + "KeepAlive\n")
+                self.lf.write ("#[" + log_tmstr() + "]" + "KeepAlive\n")
                 self.lf.flush ()
                 
             # send keepalive
@@ -1188,8 +1183,7 @@ class ELM:
             
             # log switching event
             if self.lf != 0:
-                tmstr = datetime.now ().strftime ("%H:%M:%S.%f")[:-3]
-                self.lf.write ("#[" + tmstr + "]" + "Switch back from dev mode\n")
+                self.lf.write ("#[" + log_tmstr() + "]" + "Switch back from dev mode\n")
                 self.lf.flush ()
                 
                 # add srvsDelay to time gap before send next command
@@ -1205,13 +1199,11 @@ class ELM:
                     self.lf.write ("#[" + str (tc - tb) + "] rsp:" + line + ":" + negrsp[line[6:8]] + "\n")
                     self.lf.flush ()
                 if self.vf != 0:
-                    tmstr = datetime.now ().strftime ("%H:%M:%S.%f")[:-3]
-
                     tmp_addr = self.currentaddress
                     if self.currentaddress in list(dnat.keys()):
                         tmp_addr = dnat[self.currentaddress]
 
-                    self.vf.write (tmstr + ";" + tmp_addr + ";" + command + ";" + line + ";" + negrsp[line[6:8]] + "\n")
+                    self.vf.write (log_tmstr() + ";" + tmp_addr + ";" + command + ";" + line + ";" + negrsp[line[6:8]] + "\n")
                     self.vf.flush ()
 
         return cmdrsp
@@ -1355,13 +1347,11 @@ class ELM:
             # check for negative response (repeat the same as in cmd())
             if result[:2] == '7F' and result[4:6] in list(negrsp.keys ()):
                 if self.vf != 0:
-                    tmstr = datetime.now ().strftime ("%H:%M:%S.%f")[:-3]
-
                     #debug
                     #print result
 
                     self.vf.write (
-                        tmstr + ";" + dnat[self.currentaddress] + ";" + command + ";" + result + ";" + negrsp[result[4:6]] + "\n")
+                        log_tmstr() + ";" + dnat[self.currentaddress] + ";" + command + ";" + result + ";" + negrsp[result[4:6]] + "\n")
                     self.vf.flush ()
                 return "NR:" + result[4:6] + ':' + negrsp[result[4:6]]
             else:
@@ -1419,9 +1409,8 @@ class ELM:
             # print "Size error: ", result
             if result[:2] == '7F' and result[4:6] in list(negrsp.keys()):
                 if self.vf != 0:
-                    tmstr = datetime.now().strftime("%H:%M:%S.%f")[:-3]
                     self.vf.write(
-                        tmstr + ";" + dnat[self.currentaddress] + ";" + command + ";" + result + ";" + negrsp[
+                        log_tmstr() + ";" + dnat[self.currentaddress] + ";" + command + ";" + result + ";" + negrsp[
                             result[4:6]] + "\n")
                     self.vf.flush()
                 return "NR:" + result[4:6] + ':' + negrsp[result[4:6]]
@@ -1626,9 +1615,8 @@ class ELM:
             # print "Size error: ", result
             if result[:2] == '7F' and result[4:6] in list(negrsp.keys()):
                 if self.vf != 0:
-                    tmstr = datetime.now().strftime("%H:%M:%S.%f")[:-3]
                     self.vf.write(
-                        tmstr + ";" + dnat[self.currentaddress] + ";" + command + ";" + result + ";" + negrsp[
+                        log_tmstr() + ";" + dnat[self.currentaddress] + ";" + command + ";" + result + ";" + negrsp[
                             result[4:6]] + "\n")
                     self.vf.flush()
                 return "NR:" + result[4:6] + ':' + negrsp[result[4:6]]
@@ -1670,21 +1658,24 @@ class ELM:
         Fc = 0  # Current frame
         Fn = len (raw_command)  # Number of frames
 
-        if Fn > 1 or len(raw_command[0])>15: # set elm timeout to 300ms for first response
-            # corrected timeout  RT * 1000ms / 4ms / 2 (on a half of RT)
-            corr_tout = int( 75 - (self.response_time * 125) )
-            if corr_tout > 0x20:
-                cmdTxt = 'ATST' + hex(corr_tout)[-2:].zfill(2)
-                self.send_raw(cmdTxt)
-            else: # it seems too long roundtrip
-                self.send_raw('ATST20')
+        if Fn > 1 or len(raw_command[0])>15: 
+            # set elm timeout to minimum among 3 values
+            #   1) 300ms constant
+            #   2) 2 * self.response_time in ms
+            #   3) 5s / (number of farmes in cmd)
+            min_tout = min( 300, 2*self.response_time*1000, 5000./(len(raw_command)+1))
+            if min_tout<4:
+                min_tout = 4 # not less then 4ms
+            self.elmTimeout = hex(int(min_tout//4))[2:].zfill(2)
+            self.send_raw('ATST' + self.elmTimeout)
+            self.send_raw('ATAT1')
 
         while Fc < Fn:
 
             # enable responses
             frsp = ''
             if not self.ATR1:
-                frsp = self.send_raw ('at r1')
+                frsp = self.send_raw ('AT R1')
                 self.ATR1 = True
             
             tb = time.time ()  # time of sending (ff)
@@ -1849,9 +1840,8 @@ class ELM:
             #print "Size error: ", result
             if result[:2] == '7F' and result[4:6] in list(negrsp.keys ()):
                 if self.vf != 0:
-                    tmstr = datetime.now ().strftime ("%H:%M:%S.%f")[:-3]
                     self.vf.write (
-                        tmstr + ";" + dnat[self.currentaddress] + ";" + command + ";" + result + ";" + negrsp[
+                        log_tmstr() + ";" + dnat[self.currentaddress] + ";" + command + ";" + result + ";" + negrsp[
                             result[4:6]] + "\n")
                     self.vf.flush ()
                 return "NR:" + result[4:6] + ':' + negrsp[result[4:6]]
@@ -1867,8 +1857,7 @@ class ELM:
         # save command to log
         if self.lf != 0:
             # tm = str(time.time())
-            tmstr = datetime.now ().strftime ("%H:%M:%S.%f")[:-3]
-            self.lf.write (">[" + tmstr + "]" + command + "\n")
+            self.lf.write (">[" + log_tmstr() + "]" + command + "\n")
             self.lf.flush ()
         
         # send command
@@ -1890,8 +1879,7 @@ class ELM:
             if command in self.buff:
                 break
             elif self.lf != 0:
-                tmstr = datetime.now ().strftime ("%H:%M:%S.%f")[:-3]
-                self.lf.write ("<[" + tmstr + "]" + self.buff + "(shifted)" + command + "\n")
+                self.lf.write ("<[" + log_tmstr() + "]" + self.buff + "(shifted)" + command + "\n")
                 self.lf.flush ()
         
         # count errors
@@ -1961,7 +1949,6 @@ class ELM:
         self.notSupportedCommands = {}
 
         if self.lf != 0:
-            tmstr = datetime.now ().strftime ("%x %H:%M:%S.%f")[:-3]
             self.lf.write('#' * 60 + "\n# Init CAN\n" + '#' * 60 + "\n")
             self.lf.flush()
 
@@ -2105,8 +2092,7 @@ class ELM:
         self.notSupportedCommands = {}
 
         if self.lf != 0:
-            tmstr = datetime.now ().strftime ("%x %H:%M:%S.%f")[:-3]
-            self.lf.write ('#' * 60 + "\n#[" + tmstr + "] Init ISO\n" + '#' * 60 + "\n")
+            self.lf.write ('#' * 60 + "\n#[" + log_tmstr() + "] Init ISO\n" + '#' * 60 + "\n")
             self.lf.flush ()
         self.check_answer (self.cmd ("at ws"))
         self.check_answer (self.cmd ("at e1"))
