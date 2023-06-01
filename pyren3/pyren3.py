@@ -214,6 +214,12 @@ def optParser():
       default=False,
       action="store_true")
 
+  parser.add_argument("--excel",
+      help="Save csv in excel compatible format",
+      dest="excel",
+      default=False,
+      action="store_true")
+
   options = parser.parse_args()
   
   if not options.port and mod_globals.os != 'android':
@@ -260,6 +266,13 @@ def optParser():
       print("Development MODE")
       mod_globals.opt_dev       = True
       mod_globals.opt_devses    = options.dev
+    mod_globals.opt_excel     = options.excel
+    if mod_globals.opt_excel:
+      mod_globals.opt_csv_sep = ';'
+      mod_globals.opt_csv_dec = ','
+    else:
+      mod_globals.opt_csv_sep = ','
+      mod_globals.opt_csv_dec = '.'
     
 def main():
   '''Main function'''

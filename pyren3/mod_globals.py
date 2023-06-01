@@ -17,6 +17,9 @@ opt_scan      = False
 opt_csv       = False
 opt_csv_only  = False
 opt_csv_human = False
+opt_csv_sep   = ","
+opt_csv_dec   = "."
+opt_excel     = False
 opt_usrkey    = ""
 opt_verbose   = False
 opt_cmd       = False
@@ -38,7 +41,7 @@ opt_performance = False
 opt_minordtc  = False
 opt_ref       = ""       #alternative ref set for acf
 opt_mtc       = ""       #alternative mtc set for acf
-dumpName = ""
+dumpName      = ""
 
 state_scan    = False
 

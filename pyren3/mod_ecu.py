@@ -412,7 +412,8 @@ class ECU:
     if mod_globals.opt_csv and mod_globals.ext_cur_DTC == '000000':
       # prepare to csv save
       self.minimumrefreshrate = 0
-      #csvline = "sep=\\t\n"
+      if mod_globals.opt_excel:
+        csvline = "sep="+mod_globals.opt_csv_sep+"\n"
       csvline = "Time"
       nparams = 0
       for dr in datarefs:
@@ -425,7 +426,7 @@ class ECU:
       if mod_globals.opt_usrkey: csvline += ";User events"
       csvline = pyren_encode(csvline)
       if nparams:
-        csv_start_time = datetime.now().timestamp()
+        csv_start_time = int(round(time.time() * 1000))
         csv_filename = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
         #here the problem with russian letters. and very long name
         csv_filename = csv_filename+'_'+self.ecudata['ecuname']+'_'+path
@@ -436,7 +437,8 @@ class ECU:
         csv_filename = csv_filename.replace(' ','_')
         #if mod_globals.os == 'android':
         #  csv_filename = csv_filename.encode("ascii","ignore")
-        csvf = open("./csv/"+pyren_encode(csv_filename), "wb")
+        csvf = open("./csv/"+pyren_encode(csv_filename), "w", encoding='utf-8' )
+        csvf.write('\ufeff')
 
     DTCpos = path.find('DTC')
     if DTCpos > 0:
@@ -480,12 +482,15 @@ class ECU:
       
       if mod_globals.opt_csv_human and csvf!=0:
         csvline = csvline + "\n"
-        csvline = csvline.replace(',','.')
-        csvline = csvline.replace(';',',')
-        csvf.write(pyren_decode(csvline).encode('utf8'))
+        csvline = csvline.replace('.',mod_globals.opt_csv_dec)
+        csvline = csvline.replace(',',mod_globals.opt_csv_dec)
+        csvline = csvline.replace(';',mod_globals.opt_csv_sep)
+        csvf.write(csvline)
         csvf.flush() 
-        time_delata = datetime.now().timestamp()-csv_start_time
-        csvline = datetime.fromtimestamp(time_delata).strftime("%S.%f")[:-3]
+        time_diff = int(round(time.time() * 1000))-csv_start_time
+        time_sec = str(time_diff//1000)
+        time_ms = str((time_diff)%1000)
+        csvline = time_sec.zfill(2)+mod_globals.opt_csv_dec+time_ms.zfill(3)
 
       #Collect all the requests from the current screen
       if mod_globals.opt_performance and self.elm.performanceModeLevel > 1 and mod_globals.opt_csv_only:
@@ -664,11 +669,15 @@ class ECU:
           self.elm.rsp_cache[req] = rsp
 
       csvline = csvline + "\n"
-      csvline = csvline.replace(',','.')
-      csvline = csvline.replace(';',',')
-      csvf.write(pyren_decode(csvline).encode('utf8'))
+      csvline = csvline.replace('.',mod_globals.opt_csv_dec)
+      csvline = csvline.replace(',',mod_globals.opt_csv_dec)
+      csvline = csvline.replace(';',mod_globals.opt_csv_sep)
+      csvf.write(csvline)
       csvf.flush()
-      csvline = datetime.fromtimestamp((reqTime-startTime)/1000).strftime("%S.%f")[:-3]
+      time_diff = reqTime-startTime
+      time_sec = str(time_diff//1000)
+      time_ms = str((time_diff)%1000)
+      csvline = time_sec.zfill(2)+mod_globals.opt_csv_dec+time_ms.zfill(3)
 
       for dr in datarefs:
         datastr = dr.name
@@ -678,7 +687,7 @@ class ECU:
         if dr.type=='Parameter':
           datastr, help, csvd = get_parameter( self.Parameters[dr.name], self.Mnemonics, self.Services, self.elm, self.calc )
         if csvf!=0 and (dr.type=='State' or dr.type=='Parameter'):
-          csvline += ";" + pyren_encode(csvd)
+          csvline += ';' + csvd
     
     csvf.close()
 
