@@ -1662,8 +1662,8 @@ class ELM:
             # set elm timeout to minimum among 3 values
             #   1) 300ms constant
             #   2) 2 * self.response_time in ms
-            #   3) 4.7s // (number of farmes in cmd) (5s session timeout - 300ms safety gap)
-            min_tout = min( 300, 2*self.response_time*1000, 4700.//(len(raw_command)+1))
+            #   3) 4.7s // (number of farmes in cmd) (5s session timeout - 300ms safety gap - 16ms windows timer discret)
+            min_tout = min( 300, 2*self.response_time*1000, 4700.//len(raw_command)-16)
             if min_tout<4:
                 min_tout = 4 # not less then 4ms
             self.elmTimeout = hex(int(min_tout//4))[2:].zfill(2)
