@@ -730,17 +730,18 @@ class DDTScreen (tk.Frame):
         # show confirmation dialog if approve is True
         confirmed = True
         xText = f'#The macro made by mod_ddt from file {fname}\n\n'
-        xText += f'$addr = {self.decu.cecu["dst"]}\n\n'
-        if self.decu.cecu["pin"] == 'can' and self.decu.cecu["brp"] == '0':
-            xText += f'can500  # init can macro\n\n'
-        elif self.decu.cecu["pin"] == 'can' and self.decu.cecu["brp"] == '1':
-            xText += f'can250  # init can macro\n\n'
-        else:
-            xText += f'fast  # init iso macro\n\n'
-        xText += f'delay 1\n\n'
-        xText += f'# open session\n\n'
-        xText += f'session {self.decu.cecu["startDiagReq"]}\n\n'
-        xText += f'# configuration\n\n'
+        if self.decu.cecu != None:
+            xText += f'$addr = {self.decu.cecu["dst"]}\n\n'
+            if self.decu.cecu["pin"] == 'can' and self.decu.cecu["brp"] == '0':
+                xText += f'can500  # init can macro\n\n'
+            elif self.decu.cecu["pin"] == 'can' and self.decu.cecu["brp"] == '1':
+                xText += f'can250  # init can macro\n\n'
+            else:
+                xText += f'fast  # init iso macro\n\n'
+            xText += f'delay 1\n\n'
+            xText += f'# open session\n\n'
+            xText += f'session {self.decu.cecu["startDiagReq"]}\n\n'
+            xText += f'# configuration\n\n'
 
         for i in conf_1:
             xText += f'{i}\n'

@@ -339,6 +339,16 @@ class DDTECU():
     
     #print et.dump(root)
 
+    try:
+      funcs = root.findall('ns0:Target/ns0:Function', ns)
+      if funcs:
+        for fun in funcs:
+          self.Addr = can.attrib["Address"]
+          if len(self.Addr):
+            self.Addr = hex(int(self.Addr))[2:]
+    except:
+      self.Addr = None
+
     cans = root.findall('ns0:Target/ns0:CAN', ns) #xdoc.findall("CAN")
     if cans:
       for can in cans:
