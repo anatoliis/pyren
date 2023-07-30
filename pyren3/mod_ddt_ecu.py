@@ -691,8 +691,8 @@ class DDTECU():
       value = dValues[d.Name].get().strip()
     else:
       value = 0
-    #value = self.getValueFromInput(d, value)
-    value = self.getHex(d.Name, value)
+    value = self.getValueFromInput(d, value)
+    #value = self.getHex(d.Name, value)
 
     # prepare parameters for extraction
     littleEndian = True if rdi.Endian == "Little" else False
