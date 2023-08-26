@@ -132,7 +132,11 @@ class ecu_state:
                 itext = defaultText
               self.caracter[ivalue]=itext
     
-    xmlstr = opt["State\\"+self.name]
+    try:
+      xmlstr = opt["State\\"+self.name]
+    except:
+      return
+
     odom = xml.dom.minidom.parseString( xmlstr.encode( "utf-8" ) )
     odoc = odom.documentElement
     
@@ -171,5 +175,6 @@ class ecu_states:
             mdom = xml.dom.minidom.parseString(tempStateXml)
             mdocElem = mdom.documentElement
             state = ecu_state( mdocElem, opt, tran )
-            state_list[state.name] = state
+            if state.computation != '':
+              state_list[state.name] = state
         
