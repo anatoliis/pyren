@@ -564,6 +564,9 @@ class DDTLauncher():
             if result == 'yes':
                 mod_globals.opt_demo = True
                 self.elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
+                if mod_globals.opt_obdlink == True:
+                    self.elm.ATCFC0 = False
+                    mod_globals.opt_cfc0 = False
             else:
                 raise Exception('elm is not connected')
                 return
