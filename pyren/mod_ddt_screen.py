@@ -1090,7 +1090,7 @@ class DDTScreen (tk.Frame):
         
         self.settingsmenu = tk.Menu (self.menubar, tearoff=0)
         self.settingsmenu.add_separator ()
-        self.settingsmenu.add_checkbutton (label="Tranlate", onvalue=True, offvalue=False, variable=self.translated,
+        self.settingsmenu.add_checkbutton (label="Translate", onvalue=True, offvalue=False, variable=self.translated,
                                            command=self.repaint)
         self.settingsmenu.add_separator ()
         self.settingsmenu.add_checkbutton (label="Prefer Inputs from ECU", onvalue=True, offvalue=False,
