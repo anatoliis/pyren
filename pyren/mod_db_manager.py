@@ -105,7 +105,7 @@ def find_DBs():
                         os.remove(full_path)
 
     if not clip_found and not ddt_found:
-        print "ERROR: Neither CLIP nor DDT DB not found"
+        print "ERROR: CLIP nor DDT DB not found"
         exit()
     else:
         return
