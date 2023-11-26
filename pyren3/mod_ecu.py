@@ -177,6 +177,8 @@ class ECU:
       if service.startReq[:2] in AllowedList+['17','19']:
         if service.startReq[:2] == '19' and service.startReq[:4] != '1902':
           continue
+        if service.startReq[:2] == '22' and len(service.startReq) < 6:
+          continue
         pos = chr(ord(service.startReq[0])+4)+service.startReq[1]
         rsp = self.elm.request(service.startReq, pos, False)
         if ':' in rsp: continue

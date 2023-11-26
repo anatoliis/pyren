@@ -999,6 +999,8 @@ class DDTLauncher():
             if request.SentBytes[:2] in mod_elm.AllowedList + ['17', '19']:
                 if request.SentBytes[:2] == '19' and request.SentBytes[:2] != '1902':
                     continue
+                if request.SentBytes[:2] == '22' and len(request.SentBytes) < 6:
+                    continue
                 v_cmd.set(request.SentBytes)
                 e_cmd.update()
                 v_cnt.set(str(i)+'/'+str(max))

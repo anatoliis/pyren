@@ -390,6 +390,8 @@ class DDTECU():
       if request.SentBytes[:2] in AllowedList + ['17','19']:
         if request.SentBytes[:2] == '19' and request.SentBytes[:2] != '1902':
           continue
+        if request.SentBytes[:2] == '22' and len(request.SentBytes) < 6:
+          continue
         pos = chr(ord(request.SentBytes[0])+4)+request.SentBytes[1]
         rsp = self.elm.request(request.SentBytes, pos, False)
         if ':' in rsp: continue
@@ -734,12 +736,13 @@ class DDTECU():
     hmask = hmask[-bytes * 2:].zfill(bytes * 2)
 
     func_params = ' ' + lid + ' ' + str(rr.MinBytes) + ' ' + str(rdi.FirstByte) + ' ' + hmask + ' ' + value + '\n'
+    func_params_xor = ' ' + lid + ' ' + str(rr.MinBytes) + ' ' + str(rdi.FirstByte) + ' ' + hmask + ' ' + hmask + '\n'
 
     for f in ['exit_if','exit_if_not']:
       result += (f + func_params)
     if wr!=None:
-      for f in ['set_bits', 'xor_bits']:
-        result += (f + func_params)
+      result += ('set_bits' + func_params)
+      result += ('xor_bits' + func_params_xor)
 
     return result
 

@@ -345,7 +345,7 @@ def optParser():
       action="store_true")
 
   options = parser.parse_args()
-  
+
   if options.outfile=='' and not options.port and mod_globals.os != 'android':
     parser.print_help()
     iterator = sorted(list(list_ports.comports()))
