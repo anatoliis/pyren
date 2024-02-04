@@ -32,6 +32,7 @@ except ImportError:
 import mod_globals
 from mod_elm import AllowedList
 from mod_elm import dnat
+from mod_elm import pyren_time
 import xml.etree.ElementTree as et
 
 
@@ -436,13 +437,13 @@ class DDTScreen (tk.Frame):
 
                 self.decu.putToRotary(req)
 
-        tb = time.time ()
+        tb = pyren_time()
 
         # read results
         while not self.decu.rotaryResultsQueue.empty():
 
             # no longer then 100ms
-            if time.time()-tb > 0.1:
+            if pyren_time()-tb > 0.1:
                 break
 
             # get from input queue
@@ -451,7 +452,7 @@ class DDTScreen (tk.Frame):
             self.updateScreenValues(req,rsp)
 
         # re-launch update in x milliseconds
-        tb = time.time ()
+        tb = pyren_time()
         self.jid = self.root.after (self.updatePeriod, self.updateScreen)
         self.tl = tb
     
@@ -1430,7 +1431,7 @@ class DDTScreen (tk.Frame):
             return
 
         #debug
-        #deb_time1 = time.time()
+        #deb_time1 = pyren_time()
         #print( "#"*50 )
 
         # stop ratary. Do not read ELM
@@ -1440,7 +1441,7 @@ class DDTScreen (tk.Frame):
            restart = True
 
         #debug
-        #print( f"DEBUG POINT1: {time.time()-deb_time1}")
+        #print( f"DEBUG POINT1: {pyren_time()-deb_time1}")
 
         ns = {'ns0': 'http://www-diag.renault.com/2002/ECU',
               'ns1': 'http://www-diag.renault.com/2002/screens'}

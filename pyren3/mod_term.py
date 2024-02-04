@@ -225,7 +225,7 @@ def optParser():
   parser.add_argument("--caf",
       help="turn on CAN Auto Formatting. Available only for OBDLink",
       dest="caf",
-      default=False,
+      default=True,
       action="store_true")
 
   parser.add_argument("--n1c",
@@ -476,6 +476,8 @@ def term_cmd( c, elm ):
 
 def bit_cmd( l, elm, fnc='set_bits' ):
 
+    global var
+
     error_msg1 = '''ERROR: command should have 5 parameters: 
     <command> <lid> <rsp_len> <offset> <hex mask> <hex value>
         <lid> - ECUs local identifier. Length should be 2 simbols for KWP or 4 for CAN
@@ -498,7 +500,7 @@ def bit_cmd( l, elm, fnc='set_bits' ):
 
     '''
 
-    error_msg3 = '''ERROR: command should have 6 parameters: 
+    error_msg3 = '''ERROR: command should have 4 or 7 parameters: 
     <command> <lid> <rsp_len> <offset> <hex mask> <hex value> <label>
         <lid> - ECUs local identifier. Length should be 2 simbols for KWP or 4 for CAN
         <rsp_len> - lengt of command response including positive response bytes, equals MinBytes from ddt db
@@ -651,7 +653,10 @@ def bit_cmd( l, elm, fnc='set_bits' ):
 
     if fnc == 'value':
         res = (int_val*float(stp)+float(ofs))/float(div)
-        print('# LID(',lid,') =', res)
+        var['$rawValue'] = str(int_val)
+        var['$scaledValue'] = str(res)
+        var['$hexValue'] = hex(int_val)[2:].upper()
+        print('# LID(',lid,') $rawValue =', var['$rawValue'], ' $scaledValue =', var['$scaledValue'], ' $hexValue =', var['$hexValue'])
         return
 
     if rsp[:2]=='61':
@@ -665,10 +670,10 @@ def bit_cmd( l, elm, fnc='set_bits' ):
 def wait_kb( ttw ):
     global key_pressed
 
-    st = time.time()
+    st = mod_elm.pyren_time()
     kb = mod_utils.KBHit()
 
-    while(time.time()<(st+ttw)):
+    while(mod_elm.pyren_time()<(st+ttw)):
         if kb.kbhit():
             key_pressed = kb.getch()
         time.sleep(0.1)
@@ -727,14 +732,16 @@ def proc_line( l, elm ):
 
     # find veriable usage
     m = re.search('\$\S+', l)
-    while m:
-        vu = m.group(0)
-        if vu in list(var.keys()):
-            l = re.sub("\\" + vu, var[vu], l)
-        else:
-            print('Error: unknown variable', vu)
-            return
-        m = re.search('\$\S+', l)
+    if m:
+        while m:
+            vu = m.group(0)
+            if vu in list(var.keys()):
+                l = re.sub("\\" + vu, var[vu], l)
+            else:
+                print('Error: unknown variable', vu)
+                return
+            m = re.search('\$\S+', l)
+        print( "#(subst)", l)
 
     l_parts = l.split()
     if len(l_parts) > 0 and l_parts[0] in ['wait', 'sleep']:

@@ -130,6 +130,12 @@ negrsp = {"10": "NR: General Reject",
 def log_tmstr():
     return datetime.now ().strftime ("%x %H:%M:%S.%f")[:21].ljust(21,'0')
 
+def pyren_time():
+    if (sys.version_info[0]*100 + sys.version_info[1]) > 306:
+        return time.perf_counter_ns() / 1e9
+    else:
+        return time.time()
+
 # noinspection PyBroadException,PyUnresolvedReferences
 class Port:
     """This is a serial port or a TCP-connection
@@ -267,7 +273,7 @@ class Port:
       
       try:
   
-          if not self.rwLock and time.time () > self.lastReadTime + self.atKeepAlive:
+          if not self.rwLock and pyren_time() > self.lastReadTime + self.atKeepAlive:
         
             self.kaLock = True
             data = 'AT\r'
@@ -279,7 +285,7 @@ class Port:
               else:
                 self.hdr.write (data)
         
-              tb = time.time ()  # start time
+              tb = pyren_time()  # start time
               tmpBuff = ""
               while True:
                 if not mod_globals.opt_demo:
@@ -290,7 +296,7 @@ class Port:
                 if byte == '\r': byte = '\n'
             
                 tmpBuff += byte
-                tc = time.time ()
+                tc = pyren_time()
                 if '>' in tmpBuff:
                   return
                 if (tc - tb) > 0.01:
@@ -299,7 +305,7 @@ class Port:
               pass
 
       finally:
-        self.lastReadTime = time.time ()
+        self.lastReadTime = pyren_time()
         self.kaLock = False
         if self.ka_timer:
           self.ka_timer.cancel ()
@@ -371,7 +377,7 @@ class Port:
     
     def expect(self, pattern, time_out=1):
         
-        tb = time.time ()  # start time
+        tb = pyren_time()  # start time
         self.buff = ""
         try:
             while True:
@@ -382,19 +388,19 @@ class Port:
                 
                 if '\r' in byte: byte = byte.replace('\r', '\n')
                 self.buff += byte
-                tc = time.time ()
+                tc = pyren_time()
                 if pattern in self.buff:
-                    self.lastReadTime = time.time ()
+                    self.lastReadTime = pyren_time()
                     self.rwLock = False
                     return self.buff
                 if (tc - tb) > time_out:
-                    self.lastReadTime = time.time ()
+                    self.lastReadTime = pyren_time()
                     self.rwLock = False
                     return self.buff + "TIMEOUT"
         except:
             self.rwLock = False
             pass
-        self.lastReadTime = time.time ()
+        self.lastReadTime = pyren_time()
         self.rwLock = False
         return ''
     
@@ -415,7 +421,7 @@ class Port:
             self.write ("\r")
             
             # search > string
-            tb = time.time ()  # start time
+            tb = pyren_time()  # start time
             self.buff = ""
             while True:
                 if not mod_globals.opt_demo:
@@ -423,7 +429,7 @@ class Port:
                 else:
                     byte = '>'
                 self.buff += byte
-                tc = time.time ()
+                tc = pyren_time()
                 if '>' in self.buff:
                     mod_globals.opt_speed = s
                     print("\nStart COM speed: ", s)
@@ -466,7 +472,7 @@ class Port:
                 self.write ("at brd 8\r")
         
         # search OK
-        tb = time.time ()  # start time
+        tb = pyren_time()  # start time
         self.buff = ""
         while True:
             if not mod_globals.opt_demo:
@@ -477,7 +483,7 @@ class Port:
                 self.buff = ""
                 continue
             self.buff += byte
-            tc = time.time ()
+            tc = pyren_time()
             if 'OK' in self.buff:
                 break
             if (tc - tb) > 1:
@@ -491,7 +497,7 @@ class Port:
         self.write ("\r")
         
         # search >
-        tb = time.time ()  # start time
+        tb = pyren_time()  # start time
         self.buff = ""
         while True:
             if not mod_globals.opt_demo:
@@ -502,7 +508,7 @@ class Port:
                 self.buff = ""
                 continue
             self.buff += byte
-            tc = time.time ()
+            tc = pyren_time()
             if '>' in self.buff:
                 mod_globals.opt_rate = mod_globals.opt_speed
                 break
@@ -726,7 +732,7 @@ class ELM:
         coalescing_time = c_t
         coalescing_frames = c_f
         
-        lst = time.time ()  # last send time
+        lst = pyren_time()  # last send time
         frameBuff = ""
         frameBuffLen = 0
         buff = ""
@@ -747,7 +753,7 @@ class ELM:
             else:
                 byte = self.debugMonitor ()
 
-            ct = time.time ()  # current time
+            ct = pyren_time()  # current time
             if (ct - lst) > coalescing_time:  # and frameBuffLen>0:
                 if self.monitorSendAllow is None or not self.monitorSendAllow.isSet ():
                     self.monitorSendAllow.set ()
@@ -856,7 +862,7 @@ class ELM:
         coalescing_time = c_t
         coalescing_frames = c_f
 
-        lst = time.time()  # last send time
+        lst = pyren_time()  # last send time
         frameBuff = ""
         frameBuffLen = 0
         buff = ""
@@ -873,7 +879,7 @@ class ELM:
 
             byte = self.port.read()
 
-            ct = time.time()  # current time
+            ct = pyren_time()  # current time
             if (ct - lst) > coalescing_time:  # and frameBuffLen>0:
                 if self.monitorSendAllow is None or not self.monitorSendAllow.isSet():
                     self.monitorSendAllow.set()
@@ -992,9 +998,9 @@ class ELM:
         sendAllow.clear()
         self.nr78_startMonitor( self.waitFramesCallBack, sendAllow, 0.1, 1 )
 
-        beg = time.time ()
+        beg = pyren_time()
 
-        while not self.endWaitingFrames and ( time.time()-beg < timeout ):
+        while not self.endWaitingFrames and ( pyren_time()-beg < timeout ):
             time.sleep(0.01)
 
         #debug
@@ -1094,7 +1100,7 @@ class ELM:
         if command in list(self.notSupportedCommands.keys()):
             return self.notSupportedCommands[command]
         
-        tb = time.time ()  # start time
+        tb = pyren_time()  # start time
         
         devmode = False
         
@@ -1103,7 +1109,7 @@ class ELM:
         if ((tb - self.lastCMDtime) < (self.busLoad + self.srvsDelay)) and command.upper()[:2] not in ['AT','ST']:
             time.sleep (self.busLoad + self.srvsDelay - tb + self.lastCMDtime)
         
-        tb = time.time ()  # renew start time
+        tb = pyren_time()  # renew start time
 
         # save current session
         saveSession = self.startSession
@@ -1115,7 +1121,7 @@ class ELM:
             
             # open Development session
             self.start_session (mod_globals.opt_devses)
-            self.lastCMDtime = time.time ()
+            self.lastCMDtime = pyren_time()
             
             # log switching event
             if self.lf != 0:
@@ -1135,7 +1141,7 @@ class ELM:
             #if not mod_globals.opt_demo:
             #  self.port.reinit() #experimental
             self.send_cmd (self.startSession)
-            self.lastCMDtime = time.time ()  # for not to get into infinite loop
+            self.lastCMDtime = pyren_time()  # for not to get into infinite loop
         
         # send command and check for ask to wait
         cmdrsp = ""
@@ -1144,7 +1150,7 @@ class ELM:
             rep_count = rep_count - 1
             no_negative_wait_response = True
             
-            self.lastCMDtime = tc = time.time ()
+            self.lastCMDtime = tc = pyren_time()
             cmdrsp = self.send_cmd (command)
             
             self.checkIfCommandUnsupported(command, cmdrsp) # check if response for this command is NR:12
@@ -1165,7 +1171,7 @@ class ELM:
                 elif nr in ['78']:
                     self.send_raw ('at at 0')
                     self.send_raw ('at st ff')
-                    self.lastCMDtime = tc = time.time ()
+                    self.lastCMDtime = tc = pyren_time()
                     cmdrsp = self.send_cmd (command)
                     self.send_raw ('at at 1')
                     break
@@ -1179,7 +1185,7 @@ class ELM:
             # restore current session
             self.startSession = saveSession
             self.start_session (self.startSession)
-            self.lastCMDtime = time.time ()
+            self.lastCMDtime = pyren_time()
             
             # log switching event
             if self.lf != 0:
@@ -1195,7 +1201,7 @@ class ELM:
             if line.startswith ("7F") and len (line) == 8 and line[6:8] in list(negrsp.keys ()) and self.currentprotocol != "can":
                 # if not mod_globals.state_scan: print line, negrsp[line[6:8]]
                 if self.lf != 0:
-                    # tm = str (time.time ())
+                    # tm = str (pyren_time())
                     self.lf.write ("#[" + str (tc - tb) + "] rsp:" + line + ":" + negrsp[line[6:8]] + "\n")
                     self.lf.flush ()
                 if self.vf != 0:
@@ -1464,7 +1470,7 @@ class ELM:
     
 
         while Fc < Fn:
-            tb = time.time()  # time of sending (ff)
+            tb = pyren_time()  # time of sending (ff)
 
             if raw_command[Fc][:1] != '2':
                 Fc = Fc + 1
@@ -1517,11 +1523,11 @@ class ELM:
                     burst_size_request = 'STPX D:' + burst_size_command + ",R:1"
                     
                 # Ensure time gap between frames according to FlowControl
-                tc = time.time()  # current time
+                tc = pyren_time()  # current time
                 self.screenRefreshTime += ST /1000.
                 if (tc - tb) * 1000. < ST:
-                    target_time = time.time() + (ST / 1000. - (tc - tb))
-                    while time.time() < target_time:
+                    target_time = pyren_time() + (ST / 1000. - (tc - tb))
+                    while pyren_time() < target_time:
                         pass
                 tb = tc
 
@@ -1678,7 +1684,7 @@ class ELM:
                 frsp = self.send_raw ('AT R1')
                 self.ATR1 = True
             
-            tb = time.time ()  # time of sending (ff)
+            tb = pyren_time()  # time of sending (ff)
 
             if Fn > 1 and Fc == (Fn-1):  # set elm timeout to maximum for last response on long command
                 self.send_raw('ATSTFF')
@@ -1750,7 +1756,7 @@ class ELM:
                 cf = cf - 1
                 
                 # Ensure time gap between frames according to FlowControl
-                tc = time.time ()  # current time
+                tc = pyren_time()  # current time
                 if (tc - tb) * 1000. < ST:
                     time.sleep (ST / 1000. - (tc - tb))
                 tb = tc
@@ -1852,11 +1858,10 @@ class ELM:
         
         command = command.upper ()
         
-        tb = time.time ()  # start time
+        tb = pyren_time()  # start time
         
         # save command to log
         if self.lf != 0:
-            # tm = str(time.time())
             self.lf.write (">[" + log_tmstr() + "]" + command + "\n")
             self.lf.flush ()
         
@@ -1866,11 +1871,11 @@ class ELM:
         
         # receive and parse responce
         while True:
-            tc = time.time ()
+            tc = pyren_time()
             if mod_globals.opt_demo:
                 break
             self.buff = self.port.expect ('>', self.portTimeout)
-            tc = time.time ()
+            tc = pyren_time()
             if (tc - tb) > self.portTimeout and "TIMEOUT" not in self.buff:
                 self.buff += "TIMEOUT"
             if "TIMEOUT" in self.buff:
@@ -1903,7 +1908,6 @@ class ELM:
 
         # save responce to log
         if self.lf != 0:
-            # tm = str(time.time())
             self.lf.write ("<[" + str (round (roundtrip, 3)) + "]" + self.buff + "\n")
             self.lf.flush ()
         
@@ -1933,8 +1937,6 @@ class ELM:
             self.lastMessage = '\n\n\tFake adapter !!!\n\n'
         else:
             self.lastMessage = '\n\n\tBroken or unsupported adapter !!!\n\n'
-            
-            # sys.exit()
     
     def init_can(self):
 

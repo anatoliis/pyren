@@ -176,7 +176,7 @@ class DDT_MON():
       self.sendAllow.clear()  
       return
         
-    ct = time.time()
+    ct = mod_elm.pyren_time()
     
     for f in buf.split('\n'):
       f = f.strip()
@@ -433,7 +433,7 @@ def main():
 
   kb = KBHit()
 
-  lt = ct = time.time()
+  lt = ct = mod_elm.pyren_time()
     
   show_loc = threading.Event()
 
@@ -467,7 +467,7 @@ def main():
         #mon.framefilter = mon.framefilter + '<' + str(ord(c)) + '>'
     
     time.sleep( 0.03 )
-    ct = time.time()
+    ct = mod_elm.pyren_time()
     if (ct-lt)>0.1:
       lt = ct
       show_loc.set()

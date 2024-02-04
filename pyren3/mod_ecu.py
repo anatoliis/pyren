@@ -16,6 +16,7 @@ from mod_elm                import ELM
 from mod_elm                import snat
 from mod_elm                import dnat
 from mod_elm                import AllowedList
+from mod_elm                import pyren_time
 if mod_globals.os != 'android':    
   from mod_ddt                import DDT
 
@@ -428,7 +429,7 @@ class ECU:
       if mod_globals.opt_usrkey: csvline += ";User events"
       csvline = pyren_encode(csvline)
       if nparams:
-        csv_start_time = int(round(time.time() * 1000))
+        csv_start_time = int(round(pyren_time() * 1000))
         csv_filename = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
         #here the problem with russian letters. and very long name
         csv_filename = csv_filename+'_'+self.ecudata['ecuname']+'_'+path
@@ -453,7 +454,7 @@ class ECU:
 
     kb = KBHit()
 
-    tb = time.time()   #time of begining 
+    tb = pyren_time()   #time of begining 
 
     if len(datarefs)==0 and 'DE' not in path: return
     self.elm.clear_cache()
@@ -480,7 +481,7 @@ class ECU:
     while(True):
       
       strlst = []
-      datarefsRequestTime = int(round(time.time() * 1000))
+      datarefsRequestTime = int(round(pyren_time() * 1000))
       
       if mod_globals.opt_csv_human and csvf!=0:
         csvline = csvline + "\n"
@@ -489,7 +490,7 @@ class ECU:
         csvline = csvline.replace(';',mod_globals.opt_csv_sep)
         csvf.write(csvline)
         csvf.flush() 
-        time_diff = int(round(time.time() * 1000))-csv_start_time
+        time_diff = int(round(pyren_time() * 1000))-csv_start_time
         time_sec = str(time_diff//1000)
         time_ms = str((time_diff)%1000)
         csvline = time_sec.zfill(2)+mod_globals.opt_csv_dec+time_ms.zfill(3)
@@ -575,7 +576,7 @@ class ECU:
         if mod_globals.opt_demo:
           self.minimumrefreshrate = 1
 
-        tc = time.time()
+        tc = pyren_time()
         if ((tc - tb) < self.minimumrefreshrate):
           time.sleep(tb + self.minimumrefreshrate - tc)
         tb = tc
