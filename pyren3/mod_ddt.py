@@ -1059,7 +1059,7 @@ class DDTLauncher():
             self.v_addr.set(line[2])
             self.v_vin.set('')
         except:
-            pass
+            return
 
         tmpL = []
         self.carecus = []
