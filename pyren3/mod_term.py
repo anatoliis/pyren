@@ -706,6 +706,12 @@ def proc_line( l, elm ):
         print_help()
         return
 
+    if l in ['var']:
+        print("\n###### Variables #####")
+        for v in var.keys():
+            print( f'# {v:20} = {var[v]}')
+        return
+
     if l in ['cls']:
         mod_utils.clearScreen()
         return
@@ -716,6 +722,19 @@ def proc_line( l, elm ):
     elif l in list(macro.keys()):
         play_macro(l, elm)
         return
+
+    # find veriable usage
+    m = re.search('.+(\$\S+)', l)
+    if m:
+        while m:
+            vu = m.group(1)
+            if vu in list(var.keys()):
+                l = re.sub("\\" + vu, var[vu], l)
+            else:
+                print('Error: unknown variable', vu)
+                return
+            m = re.search('.+(\$\S+)', l)
+        print( "#(subst)", l)
 
     m = re.search('\$\S+\s*=\s*\S+', l)
     if m:
@@ -729,19 +748,6 @@ def proc_line( l, elm ):
                 var['$rxa'] = mod_elm.snat[var['$addr'].upper()]
                 elm.currentaddress = var['$addr'].upper()
         return
-
-    # find veriable usage
-    m = re.search('\$\S+', l)
-    if m:
-        while m:
-            vu = m.group(0)
-            if vu in list(var.keys()):
-                l = re.sub("\\" + vu, var[vu], l)
-            else:
-                print('Error: unknown variable', vu)
-                return
-            m = re.search('\$\S+', l)
-        print( "#(subst)", l)
 
     l_parts = l.split()
     if len(l_parts) > 0 and l_parts[0] in ['wait', 'sleep']:
@@ -874,7 +880,7 @@ def main():
     while True:
         print(var['$addr']+':'+var['$txa']+':'+var['$prompt'] + '#', end=' ')
         if len(cmd_lines)==0:
-            l = input().lower()
+            l = input()
         else:
             if cmd_ref<len(cmd_lines):
                 l = cmd_lines[cmd_ref].strip()
