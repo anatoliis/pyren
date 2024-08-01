@@ -486,7 +486,7 @@ def show_doc( addr, id ):
         return
 
     if mod_globals.doc_server_proc == None:
-        mod_globals.doc_server_proc = subprocess.Popen(["python", "-m", "SimpleHTTPServer", "59152"])
+        mod_globals.doc_server_proc = subprocess.Popen(["python3", "-m", "http.server", "59152"])
         atexit.register(kill_server)
 
     if mod_globals.opt_sd and id != '':
