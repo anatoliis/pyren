@@ -125,7 +125,7 @@ def get_file_list_from_clip( pattern ):
         fl =  glob.glob(os.path.join(mod_globals.cliproot, pattern))
     else:
         if '*' in pattern:
-            pattern = pattern.replace('*', '\d{3}')
+            pattern = pattern.replace('*', r'\d{3}')
         file_list = mod_globals.clip_arc.namelist()
         regex = re.compile(pattern)
         fl = list(filter(regex.search, file_list))
@@ -215,9 +215,9 @@ def file_in_ddt( pattern ):
     else:
         file_list = mod_globals.ddt_arc.namelist()
         if '(' in pattern:
-            pattern = pattern.replace('(','\(')
+            pattern = pattern.replace('(', r'\(')
         if ')' in pattern:
-            pattern = pattern.replace(')', '\)')
+            pattern = pattern.replace(')', r'\)')
         regex = re.compile(pattern)
         li = list(filter(regex.search, file_list))
     return len(li)
