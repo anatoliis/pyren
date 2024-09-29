@@ -12,4 +12,4 @@ session 10C0
 
 # configuration
 
-xor_bits 0054 4 4 80 80
+xor_bits 0054 4 4 80 00
