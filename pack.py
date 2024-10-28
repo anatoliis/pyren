@@ -7,13 +7,13 @@ import zipfile
 
 
 def zipdir(dirname, zip):
-    print("Folder process %s" % dirname)
+    print(("Folder process %s" % dirname))
     for root, dirs, files in os.walk(dirname, topdown=False):
         for name in files:
             filename = os.path.join(root, name)
             if ".pyc" in filename or ".DS_Store" in filename:  # or ".pyo" in filename:
                 continue
-            print("Adding source file %s" % filename)
+            print(("Adding source file %s" % filename))
             zip.write(filename)
 
 
@@ -24,16 +24,21 @@ def pack():
     if sys.platform[:3] == "win":
         default_file = "pyren_windows.zip"
     else:
-        print "Please add python in required sources for works."
+        print("Please add python in required sources for works.")
         exit(-1)
     # elif sys.platform[:3] == "dar":
     #     default_file = "pyren_macos.zip"
     # elif sys.platform[:3] == "lin":
     #     default_file = "pyren_linux.zip"
-    zip = zipfile.ZipFile("./Output/" + default_file, mode="w", compression=zipfile.ZIP_DEFLATED, allowZip64=True)
+    zip = zipfile.ZipFile(
+        "./Output/" + default_file,
+        mode="w",
+        compression=zipfile.ZIP_DEFLATED,
+        allowZip64=True,
+    )
     files = glob.glob("*.py")
     for file in files:
-        print("Adding source file %s" % file)
+        print(("Adding source file %s" % file))
         zip.write(file)
     if sys.platform[:3] == "win":
         zip.write("./PYREN.BAT")
@@ -63,10 +68,15 @@ def pack():
 def genddt2000():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     if not os.path.exists("/DDT2000data"):
-        print ("DDT2000data not found in ROOT /DDT2000data")
+        print("DDT2000data not found in ROOT /DDT2000data")
         exit(-1)
     default_file = "DDT2000data.zip"
-    zip = zipfile.ZipFile("./pyren/" + default_file, mode="w", compression=zipfile.ZIP_DEFLATED, allowZip64=True)
+    zip = zipfile.ZipFile(
+        "./pyren/" + default_file,
+        mode="w",
+        compression=zipfile.ZIP_DEFLATED,
+        allowZip64=True,
+    )
     os.chdir("/DDT2000data")
     if os.path.exists("./ecus"):
         zipdir("./ecus", zip)
@@ -90,13 +100,20 @@ def genddt2000():
     zip.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--pack', action="store_true", default=None,
-        help="Pack this as zip for runs PYREN.BAT or pyren.sh"
+        "--pack",
+        action="store_true",
+        default=None,
+        help="Pack this as zip for runs PYREN.BAT or pyren.sh",
     )
-    parser.add_argument('--gen_ddt_zip', action="store_true", default=None, help="Convert existant DDT2000data to zip")
+    parser.add_argument(
+        "--gen_ddt_zip",
+        action="store_true",
+        default=None,
+        help="Convert existant DDT2000data to zip",
+    )
     args = parser.parse_args()
     if args.pack:
         pack()

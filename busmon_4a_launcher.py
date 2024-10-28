@@ -8,7 +8,11 @@ import os
 import sys
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-pa = [os.path.abspath(name) for name in os.listdir(".") if os.path.isdir(name) and name.lower().startswith('pyren')][0]
+pa = [
+    os.path.abspath(name)
+    for name in os.listdir(".")
+    if os.path.isdir(name) and name.lower().startswith("pyren")
+][0]
 
 if len(sys.argv) == 1:
     sys.path.insert(0, pa)
@@ -16,7 +20,7 @@ if len(sys.argv) == 1:
     import bus_monitor
 
     # fake port for not to left empty. Do not comment it
-    sys.argv.append('-pbt')
+    sys.argv.append("-pbt")
 
     #### filtered mode
     # sys.argv.append('-f');sys.argv.append('flt.txt')
@@ -31,4 +35,4 @@ if len(sys.argv) == 1:
     bus_monitor.main()
 else:
     os.system("cd " + pa)
-    os.system("python bus_monitor.py " + (' '.join(sys.argv[1:])))
+    os.system("python bus_monitor.py " + (" ".join(sys.argv[1:])))

@@ -20,43 +20,47 @@ from os import listdir
 from os.path import isdir, isfile
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
-csvOptions = ['csv', 'csv_human', 'csv_only']
+csvOptions = ["csv", "csv_human", "csv_only"]
 
 osname = os.name
 
 currenPath = os.path.dirname(os.path.abspath(__file__))
 
-for f in listdir('.'):
-    if isdir('./' + f) and f.lower().startswith('pyren') and isdir('./' + f + '/serial'):
+for f in listdir("."):
+    if (
+        isdir("./" + f)
+        and f.lower().startswith("pyren")
+        and isdir("./" + f + "/serial")
+    ):
         sys.path.append(os.path.join(currenPath, f))
         sys.path.append(os.path.join(currenPath, f, "serial"))
 
-if osname == 'nt':
+if osname == "nt":
     import pip
 
     try:
         import serial
     except ImportError:
-        pip.main(['install', 'pyserial'])
+        pip.main(["install", "pyserial"])
 try:
     import androidhelper as android
 
-    osname = 'android'
+    osname = "android"
 except:
     try:
         import android
 
-        osname = 'android'
+        osname = "android"
     except:
         pass
 
 jnius_mode = False
 
-if osname == 'android':
+if osname == "android":
     try:
         from jnius import autoclass
 
@@ -71,12 +75,12 @@ if osname == 'android':
 
     if jnius_mode:
         try:
-            BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter')
-            BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
-            BluetoothSocket = autoclass('android.bluetooth.BluetoothSocket')
-            UUID = autoclass('java.util.UUID')
+            BluetoothAdapter = autoclass("android.bluetooth.BluetoothAdapter")
+            BluetoothDevice = autoclass("android.bluetooth.BluetoothDevice")
+            BluetoothSocket = autoclass("android.bluetooth.BluetoothSocket")
+            UUID = autoclass("java.util.UUID")
         except:
-            print "Error while using jnius"
+            print("Error while using jnius")
             sys.exit()
 
 
@@ -84,7 +88,7 @@ def update_from_gitlab():
     try:
         import os
         import zipfile
-        import urllib2
+        import urllib.request, urllib.error, urllib.parse
         import ssl
 
         try:
@@ -101,24 +105,27 @@ def update_from_gitlab():
         ctx.verify_mode = ssl.CERT_NONE
 
         h_user_agent = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3'
+            "User-Agent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3"
         }
-        req = urllib2.Request('https://gitlab.com/py_ren/pyren/-/archive/master/pyren-master.zip', headers=h_user_agent)
-        filedata = urllib2.urlopen(req, context=ctx, timeout=10)
+        req = urllib.request.Request(
+            "https://gitlab.com/py_ren/pyren/-/archive/master/pyren-master.zip",
+            headers=h_user_agent,
+        )
+        filedata = urllib.request.urlopen(req, context=ctx, timeout=10)
         datatowrite = filedata.read()
 
-        with open('./pyren_master.zip', 'wb') as f:
+        with open("./pyren_master.zip", "wb") as f:
             f.write(datatowrite)
     except:
         return 1
 
     try:
-        if os.path.isfile('./pyren_master.zip'):
-            with zipfile.ZipFile('./pyren_master.zip') as zip_file:
+        if os.path.isfile("./pyren_master.zip"):
+            with zipfile.ZipFile("./pyren_master.zip") as zip_file:
                 for src in zip_file.namelist():
-                    if src.endswith('exe'):
+                    if src.endswith("exe"):
                         continue
-                    arcname = src.replace('/', os.path.sep)
+                    arcname = src.replace("/", os.path.sep)
                     if os.path.altsep:
                         arcname = arcname.replace(os.path.altsep, os.path.sep)
                     arcname = os.path.splitdrive(arcname)[1].split(os.path.sep)[0]
@@ -135,63 +142,92 @@ def update_from_gitlab():
                     with source, target:
                         shutil.copyfileobj(source, target)
     except:
-        os.remove('./pyren_master.zip')
+        os.remove("./pyren_master.zip")
         return 2
 
-    os.remove('./pyren_master.zip')
+    os.remove("./pyren_master.zip")
 
     return 0
 
 
 def getPathList():
-    return ['./' + f for f in listdir('.') if isdir('./' + f) \
-            and f.lower().startswith('pyren') \
-            and isfile('./' + f + '/pyren.py')]
+    return [
+        "./" + f
+        for f in listdir(".")
+        if isdir("./" + f)
+        and f.lower().startswith("pyren")
+        and isfile("./" + f + "/pyren.py")
+    ]
 
 
 def getLangList():
     # if not os.path.exists('./Location'):
     #    return []
     # return [f[10:-4] for f in listdir('./Location') if f.lower().startswith('diagoncan_')]
-    return ['AL', 'CNT', 'CO', 'CR', 'CZ', 'DK', 'EL', 'FI', 'FR', 'GB', 'HG', 'IT', 'JP', 'NG', 'NL', 'PL', 'PO', 'RO',
-            'RU', 'SD', 'SL', 'SP', 'TR']
+    return [
+        "AL",
+        "CNT",
+        "CO",
+        "CR",
+        "CZ",
+        "DK",
+        "EL",
+        "FI",
+        "FR",
+        "GB",
+        "HG",
+        "IT",
+        "JP",
+        "NG",
+        "NL",
+        "PL",
+        "PO",
+        "RO",
+        "RU",
+        "SD",
+        "SL",
+        "SP",
+        "TR",
+    ]
 
 
 def getPortList():
     ret = []
-    if os.name != 'android':
+    if os.name != "android":
         if jnius_mode:
             try:
-                paired_devices = BluetoothAdapter.getDefaultAdapter().getBondedDevices().toArray()
+                paired_devices = (
+                    BluetoothAdapter.getDefaultAdapter().getBondedDevices().toArray()
+                )
                 for device in paired_devices:
                     desc = device.getName()
-                    de = unicode(desc.encode("ascii", "ignore"))
-                    ret.append(u'BT;' + de)
+                    de = str(desc.encode("ascii", "ignore"))
+                    ret.append("BT;" + de)
             except:
-                ret.append(u'BT;')
+                ret.append("BT;")
             return ret
 
         iterator = sorted(list(list_ports.comports()))
         for port, desc, hwid in iterator:
             try:
-                de = unicode(desc.encode("ascii", "ignore"))
-                ret.append(port + u';' + de)
+                de = str(desc.encode("ascii", "ignore"))
+                ret.append(port + ";" + de)
             except:
-                ret.append(port + ';')
-        if '192.168.0.10:35000;WiFi' not in ret:
-            ret.append('192.168.0.10:35000;WiFi')
+                ret.append(port + ";")
+        if "192.168.0.10:35000;WiFi" not in ret:
+            ret.append("192.168.0.10:35000;WiFi")
     else:
-        ret = ['BT', '192.168.0.10:35000']
+        ret = ["BT", "192.168.0.10:35000"]
     return ret
 
 
-class settings():
-    path = ''
-    port = ''
-    lang = 'RU'
-    speed = '38400'
-    logName = 'log.txt'
-    csvOption = 'csv'
+class settings:
+    path = ""
+    port = ""
+    lang = "RU"
+    speed = "38400"
+    logName = "log.txt"
+    csvOption = "csv"
     log = True
     cfc = False
     n1c = False
@@ -199,7 +235,7 @@ class settings():
     csv = False
     dump = True
     can2 = False
-    options = ''
+    options = ""
 
     def __init__(self):
         self.load()
@@ -211,13 +247,13 @@ class settings():
         if not os.path.isfile("./settings.p"):
             self.save()
 
-        f = open('./settings.p', 'rb')
+        f = open("./settings.p", "rb")
         tmp_dict = pickle.load(f)
         f.close()
         self.__dict__.update(tmp_dict)
 
     def save(self):
-        f = open('./settings.p', 'wb')
+        f = open("./settings.p", "wb")
         pickle.dump(self.__dict__, f)
         f.close()
 
@@ -228,134 +264,133 @@ def run(s, cmd):
 
     sys.path.insert(0, fullpath)
 
-    if cmd == 'pyren' or cmd == 'scan' or cmd == 'demo':
-        cmdr = __import__('pyren')
-    elif cmd == 'check':
-        cmdr = __import__('cmdr_chkelm')
-    elif cmd == 'mon':
-        cmdr = __import__('bus_monitor')
-    elif cmd == 'ddt':
-        cmdr = __import__('mod_ddt')
-    elif cmd == 'term':
-        cmdr = __import__('mod_term')
+    if cmd == "pyren" or cmd == "scan" or cmd == "demo":
+        cmdr = __import__("pyren")
+    elif cmd == "check":
+        cmdr = __import__("cmdr_chkelm")
+    elif cmd == "mon":
+        cmdr = __import__("bus_monitor")
+    elif cmd == "ddt":
+        cmdr = __import__("mod_ddt")
+    elif cmd == "term":
+        cmdr = __import__("mod_term")
 
-    if s.port.lower() == 'bt' or s.port == '':
-        s.port = 'bt'
-    sys.argv.append('-p' + s.port)
-    if cmd == 'demo':
-        sys.argv.append('--demo')
-    if cmd == 'scan' and cmd != 'term':
-        sys.argv.append('--scan')
+    if s.port.lower() == "bt" or s.port == "":
+        s.port = "bt"
+    sys.argv.append("-p" + s.port)
+    if cmd == "demo":
+        sys.argv.append("--demo")
+    if cmd == "scan" and cmd != "term":
+        sys.argv.append("--scan")
     if s.log:
-        sys.argv.append('--log=' + s.logName)
-    if s.speed != '38400':
-        sys.argv.append('-r' + s.speed)
-    if s.lang != '' and cmd != 'term' and cmd != 'ddt':
-        sys.argv.append('-L' + s.lang)
+        sys.argv.append("--log=" + s.logName)
+    if s.speed != "38400":
+        sys.argv.append("-r" + s.speed)
+    if s.lang != "" and cmd != "term" and cmd != "ddt":
+        sys.argv.append("-L" + s.lang)
     if s.cfc:
-        sys.argv.append('--cfc')
+        sys.argv.append("--cfc")
     if s.n1c:
-        sys.argv.append('--n1c')
+        sys.argv.append("--n1c")
     if s.si:
-        sys.argv.append('--si')
+        sys.argv.append("--si")
     if s.csv:
-        sys.argv.append('--' + s.csvOption)
-    if s.dump and cmd != 'term':
-        sys.argv.append('--dump')
-    if s.can2 and cmd != 'term':
-        sys.argv.append('--can2')
-    if s.options != '':
+        sys.argv.append("--" + s.csvOption)
+    if s.dump and cmd != "term":
+        sys.argv.append("--dump")
+    if s.can2 and cmd != "term":
+        sys.argv.append("--can2")
+    if s.options != "":
         sys.argv = sys.argv + s.options.split()
-    if cmd == 'term':
-        sys.argv.append('--dialog')
+    if cmd == "term":
+        sys.argv.append("--dialog")
         # sys.argv.append('--demo')
-    if cmd == 'ddt':
-        sys.argv.append('--demo')
+    if cmd == "ddt":
+        sys.argv.append("--demo")
     os.chdir(s.path)
     cmdr.main()
     sys.exit()
 
 
-if osname != 'android':
+if osname != "android":
     try:
         import serial
         from serial.tools import list_ports
     except ImportError:
-        print "\n\n\n\tPleas install additional modules"
-        print "\t\t>sudo easy_install pyserial"
+        print("\n\n\n\tPleas install additional modules")
+        print("\t\t>sudo easy_install pyserial")
         sys.exit()
     try:
         # Python2
-        import Tkinter as tk
-        import ttk
-        import tkFont
-        import tkMessageBox
-        import tkFileDialog
-        import tkSimpleDialog
+        import tkinter as tk
+        import tkinter.ttk
+        import tkinter.font
+        import tkinter.messagebox
+        import tkinter.filedialog
+        import tkinter.simpledialog
     except ImportError:
         # Python3
         import tkinter as tk
         import tkinter.ttk as ttk
-        import tkFont
-        import tkMessageBox
-        import tkFileDialog
-
+        import tkinter.font
+        import tkinter.messagebox
+        import tkinter.filedialog
 
     class desktopGUI(tk.Frame):
 
         save = None
 
         def guiDestroy(self):
-            self.root.eval('::ttk::CancelRepeat')
+            self.root.eval("::ttk::CancelRepeat")
             self.root.destroy()
 
         def cmd_Mon(self):
             self.saveSettings()
             self.guiDestroy()
-            run(self.save, 'mon')
+            run(self.save, "mon")
 
         def cmd_Check(self):
             self.saveSettings()
             self.guiDestroy()
-            run(self.save, 'check')
+            run(self.save, "check")
 
         def cmd_Demo(self):
             self.saveSettings()
             self.guiDestroy()
-            run(self.save, 'demo')
+            run(self.save, "demo")
 
         def cmd_Scan(self):
             self.saveSettings()
             self.guiDestroy()
-            run(self.save, 'scan')
+            run(self.save, "scan")
 
         def cmd_Start(self):
             self.saveSettings()
             self.guiDestroy()
-            run(self.save, 'pyren')
+            run(self.save, "pyren")
 
         def cmd_DDT(self):
             self.saveSettings()
             self.guiDestroy()
-            run(self.save, 'ddt')
+            run(self.save, "ddt")
 
         def cmd_Term(self):
             self.saveSettings()
             self.guiDestroy()
-            run(self.save, 'term')
+            run(self.save, "term")
 
         def cmd_Update(self):
             res = update_from_gitlab()
             if res == 0:
-                tkMessageBox.showinfo("Information", "Done")
+                tkinter.messagebox.showinfo("Information", "Done")
             elif res == 1:
-                tkMessageBox.showerror("Error", "No connection with gitlab.com")
+                tkinter.messagebox.showerror("Error", "No connection with gitlab.com")
             elif res == 2:
-                tkMessageBox.showerror("Error", "UnZip error")
+                tkinter.messagebox.showerror("Error", "UnZip error")
 
         def saveSettings(self):
             self.save.path = self.var_path.get()
-            self.save.port = self.var_port.get().split(';')[0]
+            self.save.port = self.var_port.get().split(";")[0]
             self.save.lang = self.var_lang.get()
             self.save.speed = self.var_speed.get()
             self.save.log = self.var_log.get()
@@ -387,7 +422,14 @@ if osname != 'android':
             self.var_log.set(self.save.log)
             self.var_logName.set(self.save.logName)
 
-            self.var_speedList = ['38400', '115200', '230400', '500000', '1000000', '2000000']
+            self.var_speedList = [
+                "38400",
+                "115200",
+                "230400",
+                "500000",
+                "1000000",
+                "2000000",
+            ]
             self.var_langList = getLangList()
             self.var_pathList = getPathList()
             self.var_portList = getPortList()
@@ -398,23 +440,23 @@ if osname != 'android':
 
             if len(self.var_lang.get()) == 0:
                 ll = self.var_langList
-                if 'RU' in ll:
-                    self.var_lang.set('RU')
-                elif 'GB' in ll:
-                    self.var_lang.set('GB')
+                if "RU" in ll:
+                    self.var_lang.set("RU")
+                elif "GB" in ll:
+                    self.var_lang.set("GB")
                 else:
                     self.var_lang.set(ll[0])
 
             if len(self.var_port.get()) == 0:
                 for p in self.var_portList:
                     self.var_port.set(p)
-                    if 'OBD' in p:
+                    if "OBD" in p:
                         break
 
         def __init__(self):
             self.save = settings()
             self.root = tk.Tk()
-            self.root.option_add('*Dialog.msg.font', 'Courier\ New 12')
+            self.root.option_add("*Dialog.msg.font", "Courier New 12")
             self.root.geometry("500x500")
             tk.Frame.__init__(self, self.root)
 
@@ -444,15 +486,17 @@ if osname != 'android':
             self.loadSettings()
 
             self.root.title("Pyren Launcher")
-            self.style = ttk.Style()
-            self.style.theme_use('classic')
+            self.style = tkinter.ttk.Style()
+            self.style.theme_use("classic")
 
             if sys.platform == "win32":
-                self.style.theme_use('winnative')
-            self.style.configure('.', background='#d9d9d9')
-            self.style.configure('.', foreground='#000000')
-            self.style.configure('.', font="TkDefaultFont")
-            self.style.map('.', background=[('selected', '#d9d9d9'), ('active', '#d9d9d9')])
+                self.style.theme_use("winnative")
+            self.style.configure(".", background="#d9d9d9")
+            self.style.configure(".", foreground="#000000")
+            self.style.configure(".", font="TkDefaultFont")
+            self.style.map(
+                ".", background=[("selected", "#d9d9d9"), ("active", "#d9d9d9")]
+            )
 
             self.root.geometry("500x420+0+28")
             self.root.title("Pyren launcher")
@@ -464,7 +508,7 @@ if osname != 'android':
             self.lPathSelector.place(relx=0.02, rely=0.0, relheight=0.13, relwidth=0.46)
             self.lPathSelector.configure(relief=tk.GROOVE)
             self.lPathSelector.configure(foreground="black")
-            self.lPathSelector.configure(text='''Version''')
+            self.lPathSelector.configure(text="""Version""")
             self.lPathSelector.configure(background="#d9d9d9")
             self.lPathSelector.configure(highlightbackground="#d9d9d9")
             self.lPathSelector.configure(highlightcolor="black")
@@ -474,7 +518,7 @@ if osname != 'android':
             self.lDBLanguage.place(relx=0.02, rely=0.14, relheight=0.13, relwidth=0.46)
             self.lDBLanguage.configure(relief=tk.GROOVE)
             self.lDBLanguage.configure(foreground="black")
-            self.lDBLanguage.configure(text='''DB Language''')
+            self.lDBLanguage.configure(text="""DB Language""")
             self.lDBLanguage.configure(background="#d9d9d9")
             self.lDBLanguage.configure(highlightbackground="#d9d9d9")
             self.lDBLanguage.configure(highlightcolor="black")
@@ -484,7 +528,7 @@ if osname != 'android':
             self.lPortSelector.place(relx=0.5, rely=0.0, relheight=0.27, relwidth=0.48)
             self.lPortSelector.configure(relief=tk.GROOVE)
             self.lPortSelector.configure(foreground="black")
-            self.lPortSelector.configure(text='''Port''')
+            self.lPortSelector.configure(text="""Port""")
             self.lPortSelector.configure(background="#d9d9d9")
             self.lPortSelector.configure(highlightbackground="#d9d9d9")
             self.lPortSelector.configure(highlightcolor="black")
@@ -494,7 +538,7 @@ if osname != 'android':
             self.lPortSpeed.place(relx=0.52, rely=0.12, relheight=0.13, relwidth=0.44)
             self.lPortSpeed.configure(relief=tk.GROOVE)
             self.lPortSpeed.configure(foreground="black")
-            self.lPortSpeed.configure(text='''Port Speed (only for USB-ELM)''')
+            self.lPortSpeed.configure(text="""Port Speed (only for USB-ELM)""")
             self.lPortSpeed.configure(background="#d9d9d9")
             self.lPortSpeed.configure(highlightbackground="#d9d9d9")
             self.lPortSpeed.configure(highlightcolor="black")
@@ -504,7 +548,7 @@ if osname != 'android':
             self.lOptions.place(relx=0.02, rely=0.69, relheight=0.13, relwidth=0.96)
             self.lOptions.configure(relief=tk.GROOVE)
             self.lOptions.configure(foreground="black")
-            self.lOptions.configure(text='''Other options''')
+            self.lOptions.configure(text="""Other options""")
             self.lOptions.configure(background="#d9d9d9")
             self.lOptions.configure(highlightbackground="#d9d9d9")
             self.lOptions.configure(highlightcolor="black")
@@ -514,7 +558,7 @@ if osname != 'android':
             self.lLog.place(relx=0.5, rely=0.28, relheight=0.135, relwidth=0.48)
             self.lLog.configure(relief=tk.GROOVE)
             self.lLog.configure(foreground="black")
-            self.lLog.configure(text='''ELM Log''')
+            self.lLog.configure(text="""ELM Log""")
             self.lLog.configure(background="#d9d9d9")
             self.lLog.configure(highlightbackground="#d9d9d9")
             self.lLog.configure(highlightcolor="black")
@@ -524,7 +568,7 @@ if osname != 'android':
             self.lCAN.place(relx=0.02, rely=0.43, relheight=0.25, relwidth=0.46)
             self.lCAN.configure(relief=tk.GROOVE)
             self.lCAN.configure(foreground="black")
-            self.lCAN.configure(text='''CAN''')
+            self.lCAN.configure(text="""CAN""")
             self.lCAN.configure(background="#d9d9d9")
             self.lCAN.configure(highlightbackground="#d9d9d9")
             self.lCAN.configure(highlightcolor="black")
@@ -534,7 +578,7 @@ if osname != 'android':
             self.lCSV.place(relx=0.02, rely=0.28, relheight=0.135, relwidth=0.46)
             self.lCSV.configure(relief=tk.GROOVE)
             self.lCSV.configure(foreground="black")
-            self.lCSV.configure(text='''Data logging''')
+            self.lCSV.configure(text="""Data logging""")
             self.lCSV.configure(background="#d9d9d9")
             self.lCSV.configure(highlightbackground="#d9d9d9")
             self.lCSV.configure(highlightcolor="black")
@@ -544,7 +588,7 @@ if osname != 'android':
             self.lKWP.place(relx=0.5, rely=0.43, relheight=0.125, relwidth=0.48)
             self.lKWP.configure(relief=tk.GROOVE)
             self.lKWP.configure(foreground="black")
-            self.lKWP.configure(text='''K-Line''')
+            self.lKWP.configure(text="""K-Line""")
             self.lKWP.configure(background="#d9d9d9")
             self.lKWP.configure(highlightbackground="#d9d9d9")
             self.lKWP.configure(highlightcolor="black")
@@ -556,7 +600,7 @@ if osname != 'android':
             self.mCFC.configure(foreground="#000000")
             self.mCFC.configure(highlightbackground="#d9d9d9")
             self.mCFC.configure(highlightcolor="black")
-            self.mCFC.configure(text='''--cfc''')
+            self.mCFC.configure(text="""--cfc""")
             self.mCFC.configure(width=40)
 
             self.mN1C = tk.Message(self.root)
@@ -565,7 +609,7 @@ if osname != 'android':
             self.mN1C.configure(foreground="#000000")
             self.mN1C.configure(highlightbackground="#d9d9d9")
             self.mN1C.configure(highlightcolor="black")
-            self.mN1C.configure(text='''--n1c''')
+            self.mN1C.configure(text="""--n1c""")
             self.mN1C.configure(width=40)
 
             self.mSI = tk.Message(self.root)
@@ -574,7 +618,7 @@ if osname != 'android':
             self.mSI.configure(foreground="#000000")
             self.mSI.configure(highlightbackground="#d9d9d9")
             self.mSI.configure(highlightcolor="black")
-            self.mSI.configure(text='''--si''')
+            self.mSI.configure(text="""--si""")
             self.mSI.configure(width=40)
 
             self.mCAN = tk.Message(self.root)
@@ -584,7 +628,7 @@ if osname != 'android':
             self.mCAN.configure(highlightbackground="#d9d9d9")
             self.mCAN.configure(highlightcolor="black")
             self.mCAN.configure(
-                text='''These options should be enabled for some fake chinese ELM. Any of them decrease data rate.'''
+                text="""These options should be enabled for some fake chinese ELM. Any of them decrease data rate."""
             )
             self.mCAN.configure(width=142)
 
@@ -594,7 +638,9 @@ if osname != 'android':
             self.mKWP.configure(foreground="#000000")
             self.mKWP.configure(highlightbackground="#d9d9d9")
             self.mKWP.configure(highlightcolor="black")
-            self.mKWP.configure(text='''Try Slow Init before Fast Init. It may helps with old ECUs''')
+            self.mKWP.configure(
+                text="""Try Slow Init before Fast Init. It may helps with old ECUs"""
+            )
             self.mKWP.configure(width=152)
 
             self.logName = tk.Entry(self.root)
@@ -672,7 +718,7 @@ if osname != 'android':
             self.lDump.place(relx=0.5, rely=0.56, relheight=0.12, relwidth=0.10)
             self.lDump.configure(relief=tk.GROOVE)
             self.lDump.configure(foreground="black")
-            self.lDump.configure(text='''Dump''')
+            self.lDump.configure(text="""Dump""")
             self.lDump.configure(background="#d9d9d9")
             self.lDump.configure(highlightbackground="#d9d9d9")
             self.lDump.configure(highlightcolor="black")
@@ -682,7 +728,7 @@ if osname != 'android':
             self.lCAN2.place(relx=0.62, rely=0.56, relheight=0.12, relwidth=0.10)
             self.lCAN2.configure(relief=tk.GROOVE)
             self.lCAN2.configure(foreground="black")
-            self.lCAN2.configure(text='''CAN 2''')
+            self.lCAN2.configure(text="""CAN 2""")
             self.lCAN2.configure(background="#d9d9d9")
             self.lCAN2.configure(highlightbackground="#d9d9d9")
             self.lCAN2.configure(highlightcolor="black")
@@ -733,7 +779,7 @@ if osname != 'android':
             self.btnStart.configure(foreground="#000000")
             self.btnStart.configure(highlightbackground="#d9d9d9")
             self.btnStart.configure(highlightcolor="black")
-            self.btnStart.configure(text='''Start pyren''')
+            self.btnStart.configure(text="""Start pyren""")
             self.btnStart.configure(width=70)
 
             self.btnDDT = tk.Button(self.root)
@@ -745,7 +791,7 @@ if osname != 'android':
             self.btnDDT.configure(foreground="#000000")
             self.btnDDT.configure(highlightbackground="#d9d9d9")
             self.btnDDT.configure(highlightcolor="black")
-            self.btnDDT.configure(text='''Start DDT''')
+            self.btnDDT.configure(text="""Start DDT""")
             self.btnDDT.configure(width=70)
 
             self.btnScan = tk.Button(self.root)
@@ -757,7 +803,7 @@ if osname != 'android':
             self.btnScan.configure(foreground="#000000")
             self.btnScan.configure(highlightbackground="#d9d9d9")
             self.btnScan.configure(highlightcolor="black")
-            self.btnScan.configure(text='''Scan''')
+            self.btnScan.configure(text="""Scan""")
             self.btnScan.configure(width=70)
 
             self.btnDemo = tk.Button(self.root)
@@ -769,7 +815,7 @@ if osname != 'android':
             self.btnDemo.configure(foreground="#000000")
             self.btnDemo.configure(highlightbackground="#d9d9d9")
             self.btnDemo.configure(highlightcolor="black")
-            self.btnDemo.configure(text='''Demo''')
+            self.btnDemo.configure(text="""Demo""")
             self.btnDemo.configure(width=82)
 
             self.btnCheck = tk.Button(self.root)
@@ -781,7 +827,7 @@ if osname != 'android':
             self.btnCheck.configure(foreground="#000000")
             self.btnCheck.configure(highlightbackground="#d9d9d9")
             self.btnCheck.configure(highlightcolor="black")
-            self.btnCheck.configure(text='''Check ELM''')
+            self.btnCheck.configure(text="""Check ELM""")
 
             self.btnMon = tk.Button(self.root)
             self.btnMon.place(relx=0.81, rely=0.84, height=22, width=90)
@@ -792,7 +838,7 @@ if osname != 'android':
             self.btnMon.configure(foreground="#000000")
             self.btnMon.configure(highlightbackground="#d9d9d9")
             self.btnMon.configure(highlightcolor="black")
-            self.btnMon.configure(text='''Monitor''')
+            self.btnMon.configure(text="""Monitor""")
 
             self.btnMac = tk.Button(self.root)
             self.btnMac.place(relx=0.81, rely=0.91, height=22, width=90)
@@ -803,7 +849,7 @@ if osname != 'android':
             self.btnMac.configure(foreground="#000000")
             self.btnMac.configure(highlightbackground="#d9d9d9")
             self.btnMac.configure(highlightcolor="black")
-            self.btnMac.configure(text='''Macro''')
+            self.btnMac.configure(text="""Macro""")
 
             self.btnUpg = tk.Button(self.root)
             self.btnUpg.place(relx=0.41, rely=0.91, height=22, width=100)
@@ -814,34 +860,34 @@ if osname != 'android':
             self.btnUpg.configure(foreground="#000000")
             self.btnUpg.configure(highlightbackground="#d9d9d9")
             self.btnUpg.configure(highlightcolor="black")
-            self.btnUpg.configure(text='''Update''')
+            self.btnUpg.configure(text="""Update""")
 
-            self.pathList = ttk.Combobox(self.root)
+            self.pathList = tkinter.ttk.Combobox(self.root)
             self.pathList.place(relx=0.04, rely=0.05, relheight=0.06, relwidth=0.41)
-            self.pathList.configure(values=['./pyren09a', './pyren09a'])
+            self.pathList.configure(values=["./pyren09a", "./pyren09a"])
             self.pathList.configure(values=self.var_pathList)
             self.pathList.configure(textvariable=self.var_path)
             self.pathList.configure(takefocus="")
 
-            self.portList = ttk.Combobox(self.root)
+            self.portList = tkinter.ttk.Combobox(self.root)
             self.portList.place(relx=0.52, rely=0.05, relheight=0.06, relwidth=0.43)
             self.portList.configure(values=self.var_portList)
             self.portList.configure(textvariable=self.var_port)
             self.portList.configure(takefocus="")
 
-            self.speedList = ttk.Combobox(self.root)
+            self.speedList = tkinter.ttk.Combobox(self.root)
             self.speedList.place(relx=0.54, rely=0.17, relheight=0.06, relwidth=0.41)
             self.speedList.configure(values=self.var_speedList)
             self.speedList.configure(textvariable=self.var_speed)
             self.speedList.configure(takefocus="")
 
-            self.csvList = ttk.Combobox(self.root)
+            self.csvList = tkinter.ttk.Combobox(self.root)
             self.csvList.place(relx=0.10, rely=0.33, relheight=0.06, relwidth=0.35)
             self.csvList.configure(values=self.var_csvOptions)
             self.csvList.configure(textvariable=self.var_csvOption)
             self.csvList.configure(takefocus="")
 
-            self.langList = ttk.Combobox(self.root)
+            self.langList = tkinter.ttk.Combobox(self.root)
             self.langList.place(relx=0.04, rely=0.185, relheight=0.06, relwidth=0.41)
             self.langList.configure(values=self.var_langList)
             self.langList.configure(textvariable=self.var_lang)
@@ -854,17 +900,16 @@ if osname != 'android':
         def __del__(self):
             pass
 
-
     def main():
         gui = desktopGUI()
 
-
-    if __name__ == '__main__':
+    if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
         main()
 
 else:
-    class androidGUI():
+
+    class androidGUI:
 
         save = None
         pl = []
@@ -874,32 +919,32 @@ else:
         def cmd_Mon(self):
             self.saveSettings()
             self.droid.fullDismiss()
-            run(self.save, 'mon')
+            run(self.save, "mon")
 
         def cmd_Check(self):
             self.saveSettings()
             self.droid.fullDismiss()
-            run(self.save, 'check')
+            run(self.save, "check")
 
         def cmd_Demo(self):
             self.saveSettings()
             self.droid.fullDismiss()
-            run(self.save, 'demo')
+            run(self.save, "demo")
 
         def cmd_Scan(self):
             self.saveSettings()
             self.droid.fullDismiss()
-            run(self.save, 'scan')
+            run(self.save, "scan")
 
         def cmd_Start(self):
             self.saveSettings()
             self.droid.fullDismiss()
-            run(self.save, 'pyren')
+            run(self.save, "pyren")
 
         def cmd_Term(self):
             self.saveSettings()
             self.droid.fullDismiss()
-            run(self.save, 'term')
+            run(self.save, "term")
 
         def cmd_Update(self):
             res = update_from_gitlab()
@@ -911,55 +956,69 @@ else:
                 self.droid.makeToast("UnZip error")
 
         def saveSettings(self):
-            self.save.path = self.pl[int(self.droid.fullQueryDetail("sp_version").result['selectedItemPosition'])]
-            self.save.lang = self.ll[int(self.droid.fullQueryDetail("sp_language").result['selectedItemPosition'])]
-            self.save.csvOption = self.csvl[int(self.droid.fullQueryDetail("sp_csv").result['selectedItemPosition'])]
+            self.save.path = self.pl[
+                int(
+                    self.droid.fullQueryDetail("sp_version").result[
+                        "selectedItemPosition"
+                    ]
+                )
+            ]
+            self.save.lang = self.ll[
+                int(
+                    self.droid.fullQueryDetail("sp_language").result[
+                        "selectedItemPosition"
+                    ]
+                )
+            ]
+            self.save.csvOption = self.csvl[
+                int(self.droid.fullQueryDetail("sp_csv").result["selectedItemPosition"])
+            ]
 
-            if self.droid.fullQueryDetail("rb_bt").result['checked'] == 'false':
-                self.save.port = self.droid.fullQueryDetail("in_wifi").result['text']
+            if self.droid.fullQueryDetail("rb_bt").result["checked"] == "false":
+                self.save.port = self.droid.fullQueryDetail("in_wifi").result["text"]
             else:
-                self.save.port = 'BT'
+                self.save.port = "BT"
 
-            self.save.speed = '38400'
+            self.save.speed = "38400"
 
-            self.save.logName = self.droid.fullQueryDetail("in_logname").result['text']
+            self.save.logName = self.droid.fullQueryDetail("in_logname").result["text"]
 
-            if self.droid.fullQueryDetail("cb_log").result['checked'] == 'false':
+            if self.droid.fullQueryDetail("cb_log").result["checked"] == "false":
                 self.save.log = False
             else:
                 self.save.log = True
 
-            if self.droid.fullQueryDetail("cb_cfc").result['checked'] == 'false':
+            if self.droid.fullQueryDetail("cb_cfc").result["checked"] == "false":
                 self.save.cfc = False
             else:
                 self.save.cfc = True
 
-            if self.droid.fullQueryDetail("cb_n1c").result['checked'] == 'false':
+            if self.droid.fullQueryDetail("cb_n1c").result["checked"] == "false":
                 self.save.n1c = False
             else:
                 self.save.n1c = True
 
-            if self.droid.fullQueryDetail("cb_si").result['checked'] == 'false':
+            if self.droid.fullQueryDetail("cb_si").result["checked"] == "false":
                 self.save.si = False
             else:
                 self.save.si = True
 
-            if self.droid.fullQueryDetail("cb_csv").result['checked'] == 'false':
+            if self.droid.fullQueryDetail("cb_csv").result["checked"] == "false":
                 self.save.csv = False
             else:
                 self.save.csv = True
 
-            if self.droid.fullQueryDetail("cb_dump").result['checked'] == 'false':
+            if self.droid.fullQueryDetail("cb_dump").result["checked"] == "false":
                 self.save.dump = False
             else:
                 self.save.dump = True
 
-            if self.droid.fullQueryDetail("cb_can2").result['checked'] == 'false':
+            if self.droid.fullQueryDetail("cb_can2").result["checked"] == "false":
                 self.save.can2 = False
             else:
                 self.save.can2 = True
 
-            self.save.options = self.droid.fullQueryDetail("in_options").result['text']
+            self.save.options = self.droid.fullQueryDetail("in_options").result["text"]
 
             self.save.save()
 
@@ -983,9 +1042,9 @@ else:
             self.droid.fullSetList("sp_csv", csvl)
             self.csvl = csvl
 
-            if self.save.port == '':
+            if self.save.port == "":
                 self.save.port = "192.168.0.10:35000"
-            if self.save.port.lower() == 'bt':
+            if self.save.port.lower() == "bt":
                 self.droid.fullSetProperty("rb_bt", "checked", "true")
                 self.droid.fullSetProperty("rb_wifi", "checked", "false")
                 self.droid.fullSetProperty("in_wifi", "text", "192.168.0.10:35000")
@@ -1032,7 +1091,7 @@ else:
 
             self.droid.fullSetProperty("in_options", "text", self.save.options)
 
-        lay = '''<?xml version="1.0" encoding="utf-8"?>
+        lay = """<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
@@ -1268,7 +1327,7 @@ else:
     
     </ScrollView>
 
-</RelativeLayout>'''
+</RelativeLayout>"""
 
         def eventloop(self):
             while True:
@@ -1305,12 +1364,10 @@ else:
         def __del__(self):
             self.droid.fullDismiss()
 
-
     def main():
         gui = androidGUI()
 
-
-    if __name__ == '__main__':
+    if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         # os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
         main()

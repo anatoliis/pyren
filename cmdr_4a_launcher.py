@@ -4,7 +4,7 @@
 # qpy:console
 
 # enter file name without .py
-cmdr_file = 'cmdr_odometr'
+cmdr_file = "cmdr_odometr"
 # cmdr_file = 'cmdr_example'
 
 
@@ -12,7 +12,11 @@ import os
 import sys
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-pa = [os.path.abspath(name) for name in os.listdir(".") if os.path.isdir(name) and name.lower().startswith('pyren')][0]
+pa = [
+    os.path.abspath(name)
+    for name in os.listdir(".")
+    if os.path.isdir(name) and name.lower().startswith("pyren")
+][0]
 
 if len(sys.argv) == 1:
     sys.path.insert(0, pa)
@@ -24,7 +28,7 @@ if len(sys.argv) == 1:
     cmdr = __import__(cmdr_file)
 
     #### fake port for not to left empty
-    sys.argv.append('-pbt')
+    sys.argv.append("-pbt")
 
     #### demo mode without connecting to car
     # sys.argv.append('--demo')
@@ -57,4 +61,4 @@ if len(sys.argv) == 1:
     cmdr.main()
 else:
     os.system("cd " + pa)
-    os.system("python " + cmdr_file + ".py " + (' '.join(sys.argv[1:])))
+    os.system("python " + cmdr_file + ".py " + (" ".join(sys.argv[1:])))

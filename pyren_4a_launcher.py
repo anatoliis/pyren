@@ -11,7 +11,7 @@ os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 pa = [
     os.path.abspath(name)
     for name in os.listdir(".")
-    if os.path.isdir(name) and name.lower().startswith('pyren')
+    if os.path.isdir(name) and name.lower().startswith("pyren")
 ][0]
 
 if len(sys.argv) == 1:
@@ -20,7 +20,7 @@ if len(sys.argv) == 1:
     import pyren
 
     # fake port to not leave it empty. do not remove
-    sys.argv.append('-pbt')
+    sys.argv.append("-pbt")
 
     #### demo mode without connecting to car
     # sys.argv.append('--demo')#; sys.argv.append('-e11476,11588')
@@ -58,4 +58,4 @@ if len(sys.argv) == 1:
     pyren.main()
 else:
     os.system("cd " + pa)
-    os.system("python pyren.py " + (' '.join(sys.argv[1:])))
+    os.system("python pyren.py " + (" ".join(sys.argv[1:])))

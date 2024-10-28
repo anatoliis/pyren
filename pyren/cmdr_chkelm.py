@@ -2,11 +2,11 @@
 
 import sys, os
 import time
-    
+
 import mod_globals
 import pyren
 
-cmdb = '''
+cmdb = """
 #v1.0 ;AC P; ATZ                   ; Z                  ; reset all
 #v1.0 ;AC P; ATE1                  ; E0, E1             ; Echo off, or on*
 #v1.0 ;AC P; ATL0                  ; L0, L1             ; Linefeeds off, or on
@@ -121,78 +121,93 @@ cmdb = '''
 #v2.1 ;AC  ; ATCTM1                ; CTM1               ; set Timer Multiplier to 1*
 #v2.1 ;AC  ; ATCTM5                ; CTM5               ; set Timer Multiplier to 5
 #v2.1 ;ACH ; ATZ                   ; Z                  ; reset all
-'''
+"""
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 try:
-  import androidhelper as android
-  mod_globals.os = 'android'
-except:
-  try:
-    import android
-    mod_globals.os = 'android'
-  except:
-    pass
+    import androidhelper as android
 
-if mod_globals.os != 'android':    
-  try:
-    import serial
-    from serial.tools  import list_ports
-  except ImportError:
-    sys.exit()
-    
-from mod_elm       import ELM
+    mod_globals.os = "android"
+except:
+    try:
+        import android
+
+        mod_globals.os = "android"
+    except:
+        pass
+
+if mod_globals.os != "android":
+    try:
+        import serial
+        from serial.tools import list_ports
+    except ImportError:
+        sys.exit()
+
+from mod_elm import ELM
+
 
 def main():
-  
-  pyren.optParser()
-  
-  good = 0
-  total= 0
-  pycom= 0
-  vers = ''
-  res  = ''
-  
-  print 'Opening ELM'
-  elm = ELM( mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log )
-  elm.portTimeout = 5
-  
-  for st in cmdb.split('#'):
-    cm = st.split(';')
 
-    if len(cm)>1:
-      if mod_globals.os == 'android' and 'A' not in cm[1].upper(): continue
-      if mod_globals.os != 'android' and 'C' not in cm[1].upper(): continue
-      
-      if len(cm[2].strip()):
-        
-        res = elm.send_raw(cm[2])
-        
-        #print res
-        
-        if 'H' in cm[1].upper(): continue
-        total += 1
-        
-        if '?' in res:
-          chre = '[FAIL]'
-          if 'P' in cm[1].upper(): pycom += 1
-        elif 'TIME' in res:
-          chre = '[TIMEOUT]'
-        else:
-          chre = '[OK]'
-          good += 1
-          vers = cm[0]
-        
-        print "%5s %10s %6s"%(cm[0], cm[2], chre)
-        sys.stdout.flush
-        
-  if pycom>0:
-    res = '\n\n\nUncompatible adapter on ARM core \n pyren would not work with it \n\n\n'
-  res = res + '\n\n\nResult: '+str(good)+' from '+str(total)+'\n Max version:'+vers+'\n\n\n\n\n\n\n'
-  
-  elm.lastMessage = res
+    pyren.optParser()
 
-if __name__ == '__main__':  
-  main()
+    good = 0
+    total = 0
+    pycom = 0
+    vers = ""
+    res = ""
+
+    print("Opening ELM")
+    elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
+    elm.portTimeout = 5
+
+    for st in cmdb.split("#"):
+        cm = st.split(";")
+
+        if len(cm) > 1:
+            if mod_globals.os == "android" and "A" not in cm[1].upper():
+                continue
+            if mod_globals.os != "android" and "C" not in cm[1].upper():
+                continue
+
+            if len(cm[2].strip()):
+
+                res = elm.send_raw(cm[2])
+
+                # print res
+
+                if "H" in cm[1].upper():
+                    continue
+                total += 1
+
+                if "?" in res:
+                    chre = "[FAIL]"
+                    if "P" in cm[1].upper():
+                        pycom += 1
+                elif "TIME" in res:
+                    chre = "[TIMEOUT]"
+                else:
+                    chre = "[OK]"
+                    good += 1
+                    vers = cm[0]
+
+                print("%5s %10s %6s" % (cm[0], cm[2], chre))
+                sys.stdout.flush
+
+    if pycom > 0:
+        res = "\n\n\nUncompatible adapter on ARM core \n pyren would not work with it \n\n\n"
+    res = (
+        res
+        + "\n\n\nResult: "
+        + str(good)
+        + " from "
+        + str(total)
+        + "\n Max version:"
+        + vers
+        + "\n\n\n\n\n\n\n"
+    )
+
+    elm.lastMessage = res
 
 
+if __name__ == "__main__":
+    main()
