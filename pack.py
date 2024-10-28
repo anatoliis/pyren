@@ -92,8 +92,10 @@ def genddt2000():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--pack', action="store_true", default=None,
-                        help="Pack this as zip for runs PYREN.BAT or pyren.sh")
+    parser.add_argument(
+        '--pack', action="store_true", default=None,
+        help="Pack this as zip for runs PYREN.BAT or pyren.sh"
+    )
     parser.add_argument('--gen_ddt_zip', action="store_true", default=None, help="Convert existant DDT2000data to zip")
     args = parser.parse_args()
     if args.pack:

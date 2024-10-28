@@ -15,10 +15,9 @@
 
 import os
 import shutil
-from os import listdir
-from os.path import isdir
-from os.path import isfile
 import sys
+from os import listdir
+from os.path import isdir, isfile
 
 try:
     import cPickle as pickle
@@ -33,9 +32,8 @@ currenPath = os.path.dirname(os.path.abspath(__file__))
 
 for f in listdir('.'):
     if isdir('./' + f) and f.lower().startswith('pyren') and isdir('./' + f + '/serial'):
-        sys.path.append(os.path.join(currenPath,f))
-        sys.path.append(os.path.join(currenPath,f,"serial"))
-
+        sys.path.append(os.path.join(currenPath, f))
+        sys.path.append(os.path.join(currenPath, f, "serial"))
 
 if osname == 'nt':
     import pip
@@ -81,6 +79,7 @@ if osname == 'android':
             print "Error while using jnius"
             sys.exit()
 
+
 def update_from_gitlab():
     try:
         import os
@@ -101,9 +100,11 @@ def update_from_gitlab():
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
 
-        h_user_agent = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3'}
+        h_user_agent = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3'
+        }
         req = urllib2.Request('https://gitlab.com/py_ren/pyren/-/archive/master/pyren-master.zip', headers=h_user_agent)
-        filedata = urllib2.urlopen(req, context=ctx, timeout = 10)
+        filedata = urllib2.urlopen(req, context=ctx, timeout=10)
         datatowrite = filedata.read()
 
         with open('./pyren_master.zip', 'wb') as f:
@@ -121,14 +122,14 @@ def update_from_gitlab():
                     if os.path.altsep:
                         arcname = arcname.replace(os.path.altsep, os.path.sep)
                     arcname = os.path.splitdrive(arcname)[1].split(os.path.sep)[0]
-                    rootDirLen = len(arcname)+1
+                    rootDirLen = len(arcname) + 1
                     dst = src[rootDirLen:]
                     filename = os.path.basename(src)
                     if not filename:
                         if dst and not os.path.exists(dst):
                             os.makedirs(dst)
                         continue
-                    
+
                     source = zip_file.open(src)
                     target = file(dst, "wb")
                     with source, target:
@@ -141,6 +142,7 @@ def update_from_gitlab():
 
     return 0
 
+
 def getPathList():
     return ['./' + f for f in listdir('.') if isdir('./' + f) \
             and f.lower().startswith('pyren') \
@@ -148,10 +150,12 @@ def getPathList():
 
 
 def getLangList():
-    #if not os.path.exists('./Location'):
+    # if not os.path.exists('./Location'):
     #    return []
-    #return [f[10:-4] for f in listdir('./Location') if f.lower().startswith('diagoncan_')]
-    return ['AL','CNT','CO','CR','CZ','DK','EL','FI','FR','GB','HG','IT','JP','NG','NL','PL','PO','RO','RU','SD','SL','SP','TR']
+    # return [f[10:-4] for f in listdir('./Location') if f.lower().startswith('diagoncan_')]
+    return ['AL', 'CNT', 'CO', 'CR', 'CZ', 'DK', 'EL', 'FI', 'FR', 'GB', 'HG', 'IT', 'JP', 'NG', 'NL', 'PL', 'PO', 'RO',
+            'RU', 'SD', 'SL', 'SP', 'TR']
+
 
 def getPortList():
     ret = []
@@ -235,7 +239,8 @@ def run(s, cmd):
     elif cmd == 'term':
         cmdr = __import__('mod_term')
 
-    if s.port.lower() == 'bt' or s.port == '': s.port = 'bt'
+    if s.port.lower() == 'bt' or s.port == '':
+        s.port = 'bt'
     sys.argv.append('-p' + s.port)
     if cmd == 'demo':
         sys.argv.append('--demo')
@@ -263,7 +268,7 @@ def run(s, cmd):
         sys.argv = sys.argv + s.options.split()
     if cmd == 'term':
         sys.argv.append('--dialog')
-        #sys.argv.append('--demo')
+        # sys.argv.append('--demo')
     if cmd == 'ddt':
         sys.argv.append('--demo')
     os.chdir(s.path)
@@ -403,7 +408,8 @@ if osname != 'android':
             if len(self.var_port.get()) == 0:
                 for p in self.var_portList:
                     self.var_port.set(p)
-                    if 'OBD' in p: break
+                    if 'OBD' in p:
+                        break
 
         def __init__(self):
             self.save = settings()
@@ -441,7 +447,8 @@ if osname != 'android':
             self.style = ttk.Style()
             self.style.theme_use('classic')
 
-            if sys.platform == "win32": self.style.theme_use('winnative')
+            if sys.platform == "win32":
+                self.style.theme_use('winnative')
             self.style.configure('.', background='#d9d9d9')
             self.style.configure('.', foreground='#000000')
             self.style.configure('.', font="TkDefaultFont")
@@ -532,7 +539,7 @@ if osname != 'android':
             self.lCSV.configure(highlightbackground="#d9d9d9")
             self.lCSV.configure(highlightcolor="black")
             self.lCSV.configure(width=240)
-            
+
             self.lKWP = tk.LabelFrame(self.root)
             self.lKWP.place(relx=0.5, rely=0.43, relheight=0.125, relwidth=0.48)
             self.lKWP.configure(relief=tk.GROOVE)
@@ -577,7 +584,8 @@ if osname != 'android':
             self.mCAN.configure(highlightbackground="#d9d9d9")
             self.mCAN.configure(highlightcolor="black")
             self.mCAN.configure(
-                text='''These options should be enabled for some fake chinese ELM. Any of them decrease data rate.''')
+                text='''These options should be enabled for some fake chinese ELM. Any of them decrease data rate.'''
+            )
             self.mCAN.configure(width=142)
 
             self.mKWP = tk.Message(self.root)
@@ -958,17 +966,20 @@ else:
         def loadSettings(self):
 
             pl = getPathList()
-            if self.save.path in pl: pl.insert(0, pl.pop(pl.index(self.save.path)))
+            if self.save.path in pl:
+                pl.insert(0, pl.pop(pl.index(self.save.path)))
             self.droid.fullSetList("sp_version", pl)
             self.pl = pl
 
             ll = getLangList()
-            if self.save.lang in ll: ll.insert(0, ll.pop(ll.index(self.save.lang)))
+            if self.save.lang in ll:
+                ll.insert(0, ll.pop(ll.index(self.save.lang)))
             self.droid.fullSetList("sp_language", ll)
             self.ll = ll
 
             csvl = csvOptions
-            if self.save.csvOption in csvl: csvl.insert(0, csvl.pop(csvl.index(self.save.csvOption)))
+            if self.save.csvOption in csvl:
+                csvl.insert(0, csvl.pop(csvl.index(self.save.csvOption)))
             self.droid.fullSetList("sp_csv", csvl)
             self.csvl = csvl
 
@@ -1262,7 +1273,8 @@ else:
         def eventloop(self):
             while True:
                 event = self.droid.eventWait(50).result
-                if event == None: continue
+                if event == None:
+                    continue
                 if event["name"] == "click":
                     id = event["data"]["id"]
                     if id == "bt_start":
