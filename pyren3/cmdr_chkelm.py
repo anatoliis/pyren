@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import os
 import sys
 
-import mod_globals
+import config
 import pyren3
+from mod_elm import ELM
 
 cmdb = """
 #v1.0 ;AC P; ATZ                   ; Z                  ; reset all
@@ -122,32 +122,9 @@ cmdb = """
 #v2.1 ;AC  ; ATCTM5                ; CTM5               ; set Timer Multiplier to 5
 #v2.1 ;ACH ; ATZ                   ; Z                  ; reset all
 """
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
-try:
-    import androidhelper as android
-
-    mod_globals.os = "android"
-except:
-    try:
-        import android
-
-        mod_globals.os = "android"
-    except:
-        pass
-
-if mod_globals.os != "android":
-    try:
-        import serial
-        from serial.tools import list_ports
-    except ImportError:
-        sys.exit()
-
-from mod_elm import ELM
 
 
 def main():
-
     pyren3.opt_parser()
 
     good = 0
@@ -157,16 +134,16 @@ def main():
     res = ""
 
     print("Opening ELM")
-    elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
-    elm.portTimeout = 5
+    elm = ELM(config.OPT_PORT, config.OPT_SPEED, config.OPT_LOG)
+    elm.port_timeout = 5
 
     for st in cmdb.split("#"):
         cm = st.split(";")
 
         if len(cm) > 1:
-            if mod_globals.os == "android" and "A" not in cm[1].upper():
+            if config.OS == "android" and "A" not in cm[1].upper():
                 continue
-            if mod_globals.os != "android" and "C" not in cm[1].upper():
+            if config.OS != "android" and "C" not in cm[1].upper():
                 continue
 
             if len(cm[2].strip()):

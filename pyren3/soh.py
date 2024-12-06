@@ -51,7 +51,7 @@ except ImportError:
     sys.exit()
 
 from mod_elm import ELM
-import mod_globals
+import config
 
 
 def set_Tk_var():
@@ -172,10 +172,10 @@ class tl:
 
         # start ELM
         try:
-            mod_globals.opt_speed = 38400
-            mod_globals.opt_rate = 230400
-            self.elm = ELM(p_name, mod_globals.opt_speed, "")
-            self.elm.port.soft_boudrate(mod_globals.opt_rate)
+            config.OPT_SPEED = 38400
+            mod_globals.OPT_RATE = 230400
+            self.elm = ELM(p_name, mod_globals.OPT_SPEED, "")
+            self.elm.port.soft_boudrate(mod_globals.OPT_RATE)
         except:
             tkinter.messagebox.showinfo(
                 "INFO", "ELM is not connected or incompatible. "

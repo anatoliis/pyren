@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 import xml.dom.minidom
-from xml.dom.minidom import parse
 
-import mod_globals
 from mod_ecu_mnemonic import *
 
 
@@ -42,7 +40,7 @@ def get_parameter(pr, mn, se, elm, calc, dataids={}):
         tmpmin = ""
         tmpmax = ""
 
-    if mod_globals.os == "android":
+    if mod_globals.OS == "android":
         return (
             "%-6s %-41s %8s %-5s" % (pr.codeMR, pr.label, pr.value, pr.unit),
             pr.helps,

@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 import xml.dom.minidom
-from xml.dom.minidom import parse
 
-import mod_globals
 from mod_ecu_mnemonic import *
 
 
@@ -23,12 +21,12 @@ def get_state(st, mn, se, elm, calc, dataids={}):
     else:
         st.value = str(tmp_val)
 
-    if mod_globals.opt_csv and mod_globals.opt_csv_only:
+    if mod_globals.OPT_CSV and mod_globals.OPT_CSV_ONLY:
         csv_val = str(tmp_val)
     else:
         csv_val = str(st.value)
 
-    if mod_globals.os == "android":
+    if mod_globals.OS == "android":
         st.value = " " * (8 - len(st.value) // 2) + str(st.value)
         return "%-6s %-41s %-16s" % (st.codeMR, st.label, st.value), st.helps, csv_val
     else:

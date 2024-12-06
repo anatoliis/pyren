@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-
+import argparse
 import copy
+import os
+import sys
 import xml.etree.ElementTree as et
 
-import mod_utils
-from mod_dfg import class_dfg
-from mod_mtc import acf_MTC_compare_doc
-from mod_optfile import *
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
-# from   mod_acf_func     import ACE
+import config
+from mod_db_manager import find_dbs
+from mod_dfg import ClassDfg
+from mod_elm import ELM
+from mod_mtc import acf_MTC_compare_doc, acf_buildFull, acf_get_mtc
+from mod_optfile import optfile
+from mod_scan_ecus import ScanEcus
+from mod_utils import chk_dir_tree, get_vin
 
 style = """
 div.zdiagnostic {
@@ -79,42 +81,6 @@ td.row_d {
 
 """
 
-
-mod_globals.os = os.name
-
-if mod_globals.os == "nt":
-    import colorama
-
-    colorama.init()
-else:
-    # let's try android
-    try:
-        import androidhelper as android
-
-        mod_globals.os = "android"
-    except:
-        try:
-            import android
-
-            mod_globals.os = "android"
-        except:
-            pass
-
-if mod_globals.os != "android":
-    try:
-        import serial
-        from serial.tools import list_ports
-
-    except ImportError:
-        print("\n\n\n\tPleas install additional modules")
-        print("\t\t>sudo easy_install pyserial")
-        sys.exit()
-
-from mod_scan_ecus import ScanEcus
-from mod_utils import *
-from mod_mtc import acf_getMTC
-from mod_mtc import acf_buildFull
-
 # global variables
 
 table_header = False
@@ -165,8 +131,7 @@ def getTitleAndRef(path, ff, root, title, l, rc=0):
     return root, title
 
 
-def convertXML(root, h_t, fns, ff, lid):
-
+def convert_xml(root, h_t, fns, ff, lid):
     global table_header
 
     for e in root.iter():
@@ -178,17 +143,11 @@ def convertXML(root, h_t, fns, ff, lid):
 
         e.set("v", 1)
 
-        # debug
-        # print e.tag
-        # xfile = ''
-
         if e.tag == "servinfo":
             et.SubElement(h_t, "h6", attrib={"class": "ref"}).text = e.attrib["id"]
             et.SubElement(h_t, "h6", attrib={"class": "ref"}).text = e.attrib[
                 "sieconfigid"
             ]
-            # debug
-            # xfile = e.attrib['id']
 
         elif e.tag == "title" and e.text:
             if fns[4] != "000000":
@@ -288,139 +247,139 @@ def convertXML(root, h_t, fns, ff, lid):
 
         elif e.tag == "list1":
             ni = et.SubElement(h_t, "ul", attrib={"class": "list1"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "list1-A":
             ni = et.SubElement(h_t, "ul", attrib={"class": "list1-A"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "list1-B":
             ni = et.SubElement(h_t, "ul", attrib={"class": "list1-B"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "list1-D":
             ni = et.SubElement(h_t, "ul", attrib={"class": "list1-D"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "list2":
             ni = et.SubElement(h_t, "ul", attrib={"class": "list2"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "list2-A":
             ni = et.SubElement(h_t, "ul", attrib={"class": "list1-A"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "list2-B":
             ni = et.SubElement(h_t, "ul", attrib={"class": "list2-B"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "list2-D":
             ni = et.SubElement(h_t, "ul", attrib={"class": "list2-D"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "list3":
             ni = et.SubElement(h_t, "ul", attrib={"class": "list3"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "list3-A":
             ni = et.SubElement(h_t, "ul", attrib={"class": "list3-A"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "list3-B":
             ni = et.SubElement(h_t, "ul", attrib={"class": "list3-B"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "list3-D":
             ni = et.SubElement(h_t, "ul", attrib={"class": "list3-D"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "item":
             ni = et.SubElement(h_t, "li", attrib={"class": "item"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "item-A":
             ni = et.SubElement(h_t, "li", attrib={"class": "item-A"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "item-B":
             ni = et.SubElement(h_t, "li", attrib={"class": "item-B"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "item-D":
             ni = et.SubElement(h_t, "li", attrib={"class": "item-D"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "ptxt":
             ni = et.SubElement(h_t, "p", attrib={"class": "ptxt"})
             ni.text = e.text
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "zdiagnostic":
             ni = et.SubElement(
                 h_t, "div", attrib={"class": "zdiagnostic", "id": lid + e.attrib["id"]}
             )
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "testgrp":
             ni = et.SubElement(
                 h_t, "div", attrib={"class": "testgrp", "id": lid + e.attrib["id"]}
             )
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "topic":
             ni = et.SubElement(
                 h_t, "div", attrib={"class": "topic", "id": lid + e.attrib["id"]}
             )
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "servinfosub":
             ni = et.SubElement(
                 h_t, "div", attrib={"class": "servinfosub", "id": lid + e.attrib["id"]}
             )
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "caution":
             ni = et.SubElement(h_t, "div", attrib={"class": "caution"})
             et.SubElement(ni, "p", attrib={"class": "ptxt"}).text = "Caution!!!"
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "warning":
             ni = et.SubElement(h_t, "div", attrib={"class": "warning"})
             et.SubElement(ni, "p", attrib={"class": "ptxt"}).text = "Warning!!!"
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "note":
             ni = et.SubElement(h_t, "div", attrib={"class": "note"})
             et.SubElement(ni, "p", attrib={"class": "ptxt"}).text = "Note!!!"
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "test1":
             ni = et.SubElement(h_t, "div", attrib={"class": "test1"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "action":
             ni = et.SubElement(h_t, "div", attrib={"class": "action"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "table":
             ni = et.SubElement(h_t, "table", attrib={"class": "table"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "thead":
             table_header = True
-            convertXML(e, h_t, fns, ff, lid)
+            convert_xml(e, h_t, fns, ff, lid)
             table_header = False
 
         elif e.tag == "row":
             ni = et.SubElement(h_t, "tr", attrib={"class": "row"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
         elif e.tag == "entry":
             if table_header:
                 ni = et.SubElement(h_t, "th", attrib={"class": "row_h"})
             else:
                 ni = et.SubElement(h_t, "td", attrib={"class": "row_d"})
-            convertXML(e, ni, fns, ff, lid)
+            convert_xml(e, ni, fns, ff, lid)
 
 
 def saveToSeparateFile(nel, dtc):
@@ -444,7 +403,7 @@ def saveToSeparateFile(nel, dtc):
     )
 
 
-def processXML(path, l, ff):
+def process_xml(path, l, ff):
 
     tree = et.parse(path + l)
     root = tree.getroot()
@@ -455,14 +414,14 @@ def processXML(path, l, ff):
 
     try:
         title = root.find("title").text.strip()
-    except:
+    except Exception:
         title = ""
 
-    try:
-        if title == "":  # check id documents refers to another
+    if title == "":  # check id documents refers to another
+        try:
             root, title = getTitleAndRef(path, ff, root, title, l)
-    except:
-        pass
+        except Exception:
+            pass
 
     lid = l[:-4]
 
@@ -481,10 +440,6 @@ def processXML(path, l, ff):
     if fns[4] != "000000" and fns[5] == "106":
         dtcId_106 = fns[4]
 
-    # add line to bookmark
-    # cop = et.SubElement(h_o, 'p')
-    # coa = et.SubElement(cop, 'a', href='#'+l[:-4]).text = title
-
     nel = et.Element("div")
     et.SubElement(nel, "hr", attrib={"id": lid})
 
@@ -493,9 +448,9 @@ def processXML(path, l, ff):
     else:
         et.SubElement(nel, "a", attrib={"href": "#home"}).text = "Up"
 
-    convertXML(root, nel, fns, ff, lid)
+    convert_xml(root, nel, fns, ff, lid)
 
-    if dtcId_106 != "" and mod_globals.opt_sd:
+    if dtcId_106 != "" and config.OPT_SD:
         saveToSeparateFile(nel, dtcId_106)
 
     return nel, lid, title
@@ -514,7 +469,7 @@ def f_symptom(dfg_fet, ff, of, pref, fetname, path):
     for s in dfg_fet["symptomId"]:
         for l in ff:
             if l.startswith(s):
-                nel, lid, title = processXML(path, l, ff)
+                nel, lid, title = process_xml(path, l, ff)
                 if l in of:
                     of.remove(l)
                     fet_t.append(nel)
@@ -536,8 +491,8 @@ def f_features(dfg_fun, ff, of, pref, funname, path):
     fun_t = et.Element("div")  # text
 
     for ek in list(dfg_fun["feature"].keys()):
-        if dfg_fun["feature"][ek]["codetext"] in list(mod_globals.language_dict.keys()):
-            fetname = mod_globals.language_dict[dfg_fun["feature"][ek]["codetext"]]
+        if dfg_fun["feature"][ek]["codetext"] in list(config.LANGUAGE_DICT.keys()):
+            fetname = config.LANGUAGE_DICT[dfg_fun["feature"][ek]["codetext"]]
         else:
             fetname = dfg_fun["feature"][ek]["codetext"]
         pref = dfg_fun["feature"][ek]["id_ppc"]
@@ -568,7 +523,7 @@ def f_functions(dfg_dom, ff, of, pref, domname, path):
         if l.startswith(pref):
             fns = l.split("_")
             if fns[4] != "000000":
-                nel, lid, title = processXML(path, l, ff)
+                nel, lid, title = process_xml(path, l, ff)
                 of.remove(l)
                 cop = et.SubElement(dom_dtc_o, "p")
                 et.SubElement(cop, "a", href="#" + lid).text = title
@@ -583,7 +538,7 @@ def f_functions(dfg_dom, ff, of, pref, domname, path):
         if l.startswith(pref):
             fns = l.split("_")
             if fns[5] == "102":
-                nel, lid, title = processXML(path, l, ff)
+                nel, lid, title = process_xml(path, l, ff)
                 of.remove(l)
                 cop = et.SubElement(dom_par_o, "p")
                 et.SubElement(cop, "a", href="#" + lid).text = title
@@ -593,10 +548,8 @@ def f_functions(dfg_dom, ff, of, pref, domname, path):
     et.SubElement(cop, "a", href="#" + pref + "_par").text = "Parameters"
 
     for fk in list(dfg_dom["function"].keys()):
-        if dfg_dom["function"][fk]["codetext"] in list(
-            mod_globals.language_dict.keys()
-        ):
-            funname = mod_globals.language_dict[dfg_dom["function"][fk]["codetext"]]
+        if dfg_dom["function"][fk]["codetext"] in list(config.LANGUAGE_DICT.keys()):
+            funname = config.LANGUAGE_DICT[dfg_dom["function"][fk]["codetext"]]
         else:
             funname = dfg_dom["function"][fk]["codetext"]
         pref = dfg_dom["function"][fk]["id_ppc"]
@@ -674,8 +627,8 @@ def generateHTML(path, mtc, vin, dfg, date_madc):
         )
         sys.stdout.flush()
 
-        if dfg.domain[dk]["codetext"] in list(mod_globals.language_dict.keys()):
-            domname = mod_globals.language_dict[dfg.domain[dk]["codetext"]]
+        if dfg.domain[dk]["codetext"] in list(config.LANGUAGE_DICT.keys()):
+            domname = config.LANGUAGE_DICT[dfg.domain[dk]["codetext"]]
         else:
             domname = dfg.domain[dk]["defaultText"]
         pref = dfg.domain[dk]["id_ppc"]
@@ -691,7 +644,7 @@ def generateHTML(path, mtc, vin, dfg, date_madc):
     tf = copy.deepcopy(of)
     for l in tf:
         try:
-            nel, lid, title = processXML(path, l, ff)
+            nel, lid, title = process_xml(path, l, ff)
         except:
             print(l)
         of.remove(l)
@@ -721,10 +674,8 @@ vin_opt = ""
 allvin = ""
 
 
-def optParser():
+def opt_parser():
     """Parsing of command line parameters. User should define at least com port name"""
-
-    import argparse
 
     global vin_opt
     global allvin
@@ -799,7 +750,7 @@ def optParser():
 
     options = parser.parse_args()
 
-    # if not options.port and mod_globals.os != 'android':
+    # if not options.port and config.os != 'android':
     #  parser.print_help()
     #  iterator = sorted(list(list_ports.comports()))
     #  print ""
@@ -809,16 +760,16 @@ def optParser():
     #  print ""
     #  exit(2)
     # else:
-    mod_globals.opt_port = options.port
-    mod_globals.opt_speed = int(options.speed)
-    mod_globals.opt_rate = int(options.rate)
-    mod_globals.opt_lang = options.lang
-    mod_globals.opt_log = options.logfile
-    mod_globals.opt_demo = options.demo
-    mod_globals.opt_scan = options.scan
-    mod_globals.opt_si = options.si
-    mod_globals.opt_cfc0 = options.cfc
-    mod_globals.opt_sd = options.sd
+    config.OPT_PORT = options.port
+    config.OPT_SPEED = int(options.speed)
+    config.OPT_RATE = int(options.rate)
+    config.OPT_LANG = options.lang
+    config.OPT_LOG = options.logfile
+    config.OPT_DEMO = options.demo
+    config.OPT_SCAN = options.scan
+    config.OPT_SI = options.si
+    config.OPT_CFC0 = options.cfc
+    config.OPT_SD = options.sd
     vin_opt = options.vinnum
     allvin = options.allvin
 
@@ -826,7 +777,7 @@ def optParser():
 def main():
     """Main function
 
-    1) if ../BVMEXTRACTION doesn't exist then  mod_globals.opt_demo=True which means that we would not guide with MTC
+    1) if ../BVMEXTRACTION doesn't exist then  config.opt_demo=True which means that we would not guide with MTC
        and will show all options
     2) if not demo mode and savedVIN.txt exists and not scan then check savedVIN.txt
        else getVIN
@@ -837,10 +788,10 @@ def main():
     global vin_opt
     global allvin
 
-    optParser()
+    opt_parser()
 
-    mod_utils.chk_dir_tree()
-    mod_db_manager.find_dbs()
+    chk_dir_tree()
+    find_dbs()
 
     if allvin != "":
         acf_buildFull(allvin)
@@ -848,18 +799,18 @@ def main():
 
     """If MTC database does not exists then demo mode"""
     if not os.path.exists("../BVMEXTRACTION"):
-        mod_globals.opt_demo = True
+        config.OPT_DEMO = True
 
     print("Loading language ")
     sys.stdout.flush()
 
     # loading language data
-    lang = optfile("Location/DiagOnCAN_" + mod_globals.opt_lang + ".bqm", True)
-    mod_globals.language_dict = lang.dict
+    lang = optfile("Location/DiagOnCAN_" + config.OPT_LANG + ".bqm", True)
+    config.LANGUAGE_DICT = lang.dict
     print("Done")
 
     # finding zip
-    # zipf = "../DocDB_"+mod_globals.opt_lang+".7ze"
+    # zipf = "../DocDB_"+config.opt_lang+".7ze"
     # if not os.path.exists(zipf):
     #  zipf = "../DocDB_GB.7ze"
     #  if not os.path.exists(zipf):
@@ -871,26 +822,25 @@ def main():
 
     VIN = ""
     if vin_opt == "" and (
-        not mod_globals.opt_demo
-        and (mod_globals.opt_scan or not os.path.exists("savedVIN.txt"))
+        not config.OPT_DEMO and (config.OPT_SCAN or not os.path.exists("savedVIN.txt"))
     ):
         print("Opening ELM")
-        elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
+        elm = ELM(config.OPT_PORT, config.OPT_SPEED, config.OPT_LOG)
 
         # change serial port baud rate
-        if mod_globals.opt_speed < mod_globals.opt_rate and not mod_globals.opt_demo:
-            elm.port.soft_boudrate(mod_globals.opt_rate)
+        if config.OPT_SPEED < config.OPT_RATE and not config.OPT_DEMO:
+            elm.port.soft_boudrate(config.OPT_RATE)
 
         print("Loading ECUs list")
         se = ScanEcus(elm)  # Prepare list of all ecus
 
         SEFname = "savedEcus.p"
 
-        if mod_globals.opt_demo and len(mod_globals.opt_ecu_id) > 0:
+        if config.OPT_DEMO and len(config.OPT_ECU_ID) > 0:
             # demo mode with predefined ecu list
             se.read_Uces_file(all=True)
             se.detectedEcus = []
-            for i in mod_globals.opt_ecu_id.split(","):
+            for i in config.OPT_ECU_ID.split(","):
                 if i in list(se.allecus.keys()):
                     se.allecus[i]["ecuname"] = i
                     se.allecus[i]["idf"] = se.allecus[i]["ModelId"][2:4]
@@ -899,14 +849,14 @@ def main():
                     se.allecus[i]["pin"] = "can"
                     se.detectedEcus.append(se.allecus[i])
         else:
-            if not os.path.isfile(SEFname) or mod_globals.opt_scan:
+            if not os.path.isfile(SEFname) or config.OPT_SCAN:
                 # choosing model
                 se.chooseModel(
-                    mod_globals.opt_car
+                    config.OPT_CAR
                 )  # choose model of car for doing full scan
 
             # Do this check every time
-            se.scanAllEcus()  # First scan of all ecus
+            se.scan_all_ecus()  # First scan of all ecus
 
         de = se.detectedEcus
 
@@ -930,7 +880,7 @@ def main():
 
     if len(VIN) != 17:
         print("Can't find any valid VIN. Switch to demo")
-        mod_globals.opt_demo = True
+        config.OPT_DEMO = True
     else:
         print("\tVIN     :", VIN)
 
@@ -940,17 +890,13 @@ def main():
     refdata = ""
     platform = ""
     if VIN != "":
-        # print 'Finding MTC'
-        vindata, mtcdata, refdata, platform = acf_getMTC(VIN, preferFile=True)
+        vindata, mtcdata, refdata, platform = acf_get_mtc(VIN, prefer_file=True)
 
         if vindata == "" or mtcdata == "" or refdata == "":
             print("ERROR!!! Can't find MTC data in database")
-            mod_globals.opt_demo = True
+            config.OPT_DEMO = True
 
         print("\tPlatform:", platform)
-        # print "\tvindata:",vindata
-        # print "\tmtcdata:",mtcdata
-        # print "\trefdata:",refdata
 
         mtc = (
             mtcdata.replace(" ", "")
@@ -965,7 +911,7 @@ def main():
         date_madc = vindata.split(";")[4]
 
     # choose and load DFG
-    dfg = class_dfg(platform)
+    dfg = ClassDfg(platform)
 
     if dfg.tcom == "146":
         dfg.tcom = "159"
@@ -988,7 +934,7 @@ def main():
     # try:
     # if dfg.tcom == '135' : dfg.tcom = '147'
     generateHTML(
-        "../DocDB_" + mod_globals.opt_lang + "/DocDb" + dfg.tcom + "/SIE/",
+        "../DocDB_" + config.OPT_LANG + "/DocDb" + dfg.tcom + "/SIE/",
         mtcdata.split(";"),
         VIN,
         dfg,

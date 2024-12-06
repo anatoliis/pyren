@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 
-import string
 import xml.dom.minidom
-from xml.dom.minidom import parse
 
-import mod_globals
 from mod_ecu_mnemonic import *
 from mod_ecu_screen import *
 from mod_ecu_service import *
@@ -57,7 +54,7 @@ def get_default_std_a(df, mn, se, elm, calc, getDTCmnemo):
             comp = comp.replace(m, "0x" + hex_val)
         isExists = calc.calculate(comp)
 
-        if not mod_globals.opt_minordtc:
+        if not config.OPT_MINOR_DTC:
             if isExists == 0:  # ignore error if it's definition does not exist
                 DTCs = DTCs[9:]
                 continue
@@ -77,17 +74,17 @@ def get_default_std_a(df, mn, se, elm, calc, getDTCmnemo):
 
         # if the self.status eq 1 then default is alive
         # if the self.status eq 2 then default is memorised
-        if not mod_globals.opt_minordtc:
+        if not config.OPT_MINOR_DTC:
             if df[dtc].status == 0:  # ignore error if it's definition does not exist
                 DTCs = DTCs[9:]
                 continue
 
         isAlive = ""
         if df[dtc].status == 1:
-            isAlive = mod_globals.language_dict.get("16882", "ALIVE")
+            isAlive = config.LANGUAGE_DICT.get("16882", "ALIVE")
         else:
-            isAlive = mod_globals.language_dict.get("646", "MEMORISED")
-        # if not mod_globals.opt_minordtc:
+            isAlive = config.LANGUAGE_DICT.get("646", "MEMORISED")
+        # if not config.opt_minordtc:
         #  if df[dtc].status==0: 		     #ignore error if it's definition does not exist
         #    DTCs = DTCs[9:]
         #    continue
@@ -111,7 +108,7 @@ def get_default_std_a(df, mn, se, elm, calc, getDTCmnemo):
             interpretation = ""
 
         description = df[dtc].label
-        if mod_globals.os == "android":
+        if config.OS == "android":
             defstr = "%-6s(DTC%-6s) %-41s %-6s %-10s" % (
                 df[dtc].agcdRef,
                 dtc + status,
@@ -186,7 +183,7 @@ def get_default_std_b(df, mn, se, elm, calc, getDTCmnemo):
             comp = comp.replace(m, "0x" + hex_val)
         isExists = calc.calculate(comp)
 
-        if not mod_globals.opt_minordtc:
+        if not mod_globals.OPT_MINOR_DTC:
             if isExists == 0:  # ignore error if it's definition does not exist
                 DTCs = DTCs[12:]
                 continue
@@ -206,16 +203,16 @@ def get_default_std_b(df, mn, se, elm, calc, getDTCmnemo):
 
         # if the self.status eq 1 then default is alive
         # if the self.status eq 2 then default is memorised
-        if not mod_globals.opt_minordtc:
+        if not mod_globals.OPT_MINOR_DTC:
             if df[dtc].status == 0:  # ignore error if it's definition does not exist
                 DTCs = DTCs[12:]
                 continue
 
         isAlive = ""
         if df[dtc].status == 1:
-            isAlive = mod_globals.language_dict.get("16882", "ALIVE")  # ALIVE
+            isAlive = mod_globals.LANGUAGE_DICT.get("16882", "ALIVE")  # ALIVE
         else:
-            isAlive = mod_globals.language_dict.get("646", "MEMORISED")  # MEMORISED
+            isAlive = mod_globals.LANGUAGE_DICT.get("646", "MEMORISED")  # MEMORISED
         # if df[dtc].status==0:      #ignore error if it's definition does not exist
         #   DTCs = DTCs[12:]
         #   continue
@@ -240,7 +237,7 @@ def get_default_std_b(df, mn, se, elm, calc, getDTCmnemo):
 
         description = df[dtc].label
 
-        if mod_globals.os == "android":
+        if mod_globals.OS == "android":
             defstr = "DTC%-6s (%s) %-41s %-6s %-10s" % (
                 dtc + dtcType,
                 df[dtc].agcdRef,
@@ -274,7 +271,7 @@ def get_default_std_b(df, mn, se, elm, calc, getDTCmnemo):
                 if l.split(":")[0] == interpretation:
                     hlpstr = hlpstr + "\t" + l + "\n"
 
-        if mod_globals.opt_verbose:
+        if mod_globals.OPT_VERBOSE:
             stBits = "{0:0>8b}".format(int(dtcStatus, 16))
             hlpstr = (
                 hlpstr + "\t----------- Status byte: " + dtcStatus + " -----------\n"
@@ -340,9 +337,9 @@ def get_default_failflag(df, mn, se, elm, calc):
             continue
         isAlive = ""
         if df[dtc].status == 1:
-            isAlive = mod_globals.language_dict.get("16882", "ALIVE")  # ALIVE
+            isAlive = mod_globals.LANGUAGE_DICT.get("16882", "ALIVE")  # ALIVE
         else:
-            isAlive = mod_globals.language_dict.get("646", "MEMORISED")  # MEMORISED
+            isAlive = mod_globals.LANGUAGE_DICT.get("646", "MEMORISED")  # MEMORISED
 
         # Now get the interpretation
 
@@ -367,7 +364,7 @@ def get_default_failflag(df, mn, se, elm, calc):
                 interpretation = ""
 
         description = df[dtc].label
-        if mod_globals.os == "android":
+        if mod_globals.OS == "android":
             defstr = "%-6s %-41s %-6s %-10s" % (
                 df[dtc].agcdRef,
                 description,

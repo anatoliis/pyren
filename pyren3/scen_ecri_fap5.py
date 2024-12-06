@@ -13,14 +13,14 @@ URL  -  scm:scen_ecri_fap5#scen_ecri_fap5_xxxxx.xml
 import time
 import xml.dom.minidom
 
+import config
 import mod_db_manager
-import mod_globals
 from mod_utils import KBHit, clear_screen, pyren_encode
 
 
 # def get_message( value ):
-#  if value.isdigit() and value in mod_globals.language_dict.keys():
-#    value = pyren_encode( mod_globals.language_dict[value] )
+#  if value.isdigit() and value in config.language_dict.keys():
+#    value = pyren_encode( config.language_dict[value] )
 #  print value
 
 
@@ -46,13 +46,13 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(mod_globals.language_dict.keys()):
-            value = pyren_encode(mod_globals.language_dict[value])
+        if value.isdigit() and value in list(config.LANGUAGE_DICT.keys()):
+            value = pyren_encode(config.LANGUAGE_DICT[value])
         return value
 
     def get_message_by_id(id):
-        if id.isdigit() and id in list(mod_globals.language_dict.keys()):
-            value = pyren_encode(mod_globals.language_dict[id])
+        if id.isdigit() and id in list(config.LANGUAGE_DICT.keys()):
+            value = pyren_encode(config.LANGUAGE_DICT[id])
         return value
 
     #
@@ -73,7 +73,7 @@ def run(elm, ecu, command, data):
     ScmSets = ScmRoom.getElementsByTagName("ScmSet")
 
     for Set in ScmSets:
-        setname = pyren_encode(mod_globals.language_dict[Set.getAttribute("name")])
+        setname = pyren_encode(config.LANGUAGE_DICT[Set.getAttribute("name")])
         ScmParams = Set.getElementsByTagName("ScmParam")
 
         for Param in ScmParams:
@@ -133,7 +133,7 @@ def run(elm, ecu, command, data):
     value7, datastr7 = ecu.get_st(ScmParam["State1"])
     kb = KBHit()
     while pyren_encode(value7) != pyren_encode(
-        mod_globals.language_dict[ScmParam["TOURNANT"]]
+        mod_globals.LANGUAGE_DICT[ScmParam["TOURNANT"]]
     ):
         value7, datastr7 = ecu.get_st(ScmParam["State1"])
         value5, datastr5 = ecu.get_pr(ScmParam["Param6"])
@@ -241,7 +241,7 @@ def run(elm, ecu, command, data):
         #    Check result
         #
         rescode = pyren_encode(value9)
-        result = pyren_encode(mod_globals.language_dict[ScmSet[rescode]])
+        result = pyren_encode(mod_globals.LANGUAGE_DICT[ScmSet[rescode]])
 
         clear_screen()
         print(pyren_encode(header))

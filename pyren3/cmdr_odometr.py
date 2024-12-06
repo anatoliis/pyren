@@ -1,39 +1,20 @@
 #!/usr/bin/env python3
-
 import os
+import pickle
 import sys
 
-import mod_globals
+import config
 import mod_utils
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
-try:
-    import androidhelper as android
-
-    mod_globals.os = "android"
-except:
-    try:
-        import android
-
-        mod_globals.os = "android"
-    except:
-        pass
-
-if mod_globals.os != "android":
-    try:
-        import serial
-        from serial.tools import list_ports
-    except ImportError:
-        sys.exit()
-
-from mod_scan_ecus import ScanEcus
+import pyren3
+from mod_db_manager import find_dbs
 from mod_ecu import ECU
-from mod_optfile import *
-from mod_utils import *
+from mod_elm import ELM
+from mod_optfile import optfile
+from mod_scan_ecus import ScanEcus
+from mod_utils import pyren_encode
 
 
-def prepareECUs():
+def prepare_ecus():
     """This function loads data for ECUs"""
 
     global elm
@@ -41,59 +22,56 @@ def prepareECUs():
     global se
     global lang
 
-    pyren.opt_parser()
+    pyren3.opt_parser()
 
     mod_utils.chk_dir_tree()
-    mod_db_manager.find_dbs()
+    find_dbs()
 
-    if len(mod_globals.opt_log) == 0:
-        mod_globals.opt_log = "commander_log.txt"
+    if len(config.OPT_LOG) == 0:
+        config.OPT_LOG = "commander_log.txt"
 
     print("Opening ELM")
-    elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
+    elm = ELM(config.OPT_PORT, config.OPT_SPEED, config.OPT_LOG)
 
     print("Loading ECUs list")
-    se = ScanEcus(elm)  # Prepare list of all ecus
+    se = ScanEcus(elm)  # Prepare a list of all ecus
 
-    if not os.path.isfile("savedEcus.p") or mod_globals.opt_scan:
+    if not os.path.isfile("savedEcus.p") or config.OPT_SCAN:
         # choosing model
-        se.chooseModel(mod_globals.opt_car)  # choose model of car for doing full scan
+        se.chooseModel(config.OPT_CAR)  # choose model of a car for doing full scan
 
     # Do this check every time
-    se.scanAllEcus()  # First scan of all ecus
+    se.scan_all_ecus()  # First scan of all ecus
 
     print("Loading language ")
     sys.stdout.flush()
     # loading language data
-    lang = optfile("Location/DiagOnCAN_" + mod_globals.opt_lang + ".bqm", True)
-    mod_globals.language_dict = lang.dict
+    lang = optfile("Location/DiagOnCAN_" + config.OPT_LANG + ".bqm", True)
+    config.LANGUAGE_DICT = lang.dict
     print("Done")
 
     return se.detectedEcus
 
 
-def chooseEcu(ecu_number):
-
+def select_ecu(ecu_number):
     global elm
     global ecu
     global se
     global lang
 
-    choosen_ecu = se.select_ecu(ecu_number)
-    if choosen_ecu == -1:
+    selected_ecu = se.select_ecu(ecu_number)
+    if selected_ecu == -1:
         print("#\n" * 3, "#   Unknown ECU defined!!!\n", "#\n" * 3)
         exit(1)
 
-    ecucashfile = (
-        "./cache/" + choosen_ecu["ModelId"] + "_" + mod_globals.opt_lang + ".p"
-    )
+    ecu_cash_file = "./cache/" + selected_ecu["ModelId"] + "_" + config.OPT_LANG + ".p"
 
-    if os.path.isfile(ecucashfile):  # if cache exists
-        ecu = pickle.load(open(ecucashfile, "rb"))  # load it
+    if os.path.isfile(ecu_cash_file):  # if cache exists
+        ecu = pickle.load(open(ecu_cash_file, "rb"))  # load it
     else:  # else
-        ecu = ECU(choosen_ecu, lang.dict)  # load original data for chosen ECU
+        ecu = ECU(selected_ecu, lang.dict)  # load original data for chosen ECU
         pickle.dump(
-            ecu, open(ecucashfile, "wb")
+            ecu, open(ecu_cash_file, "wb")
         )  # and save data to cache for next time
 
     ecu.init_elm(elm)  # init ELM for chosen ECU
@@ -102,14 +80,14 @@ def chooseEcu(ecu_number):
 
 
 def main():
-    list = prepareECUs()
+    list_ = prepare_ecus()
 
     tot = ""
 
-    for l in list:
+    for l in list_:
         if l["idf"] == "1":  # family 01
             print("### Connecting to Engine ###")
-            chooseEcu(l["ecuname"])
+            select_ecu(l["ecuname"])
             tot += "%-15s : " % "Engine    PR025"
             num, string = ecu.get_pr("PR025")
             print(pyren_encode(string))
@@ -124,16 +102,10 @@ def main():
             print(pyren_encode(string))
             num, string = ecu.get_pr("PR412")
             print(pyren_encode(string))
-            # num, string = ecu.get_pr('PR804')
-            # print pyren_encode(string)
-            # num, string = ecu.get_pr('PR869')
-            # print pyren_encode(string)
-            # num, string = ecu.get_pr('PR870')
-            # print pyren_encode(string)
             print()
         if l["idf"] == "2":  # family 02
             print("### Connecting to ABS ###")
-            chooseEcu(l["ecuname"])
+            select_ecu(l["ecuname"])
             tot += "%-15s : " % "ABS       PR121"
             num, string = ecu.get_pr("PR121")
             print(pyren_encode(string))
@@ -142,7 +114,7 @@ def main():
             print()
         if l["idf"] == "3":  # family 03
             print("### Connecting to TDB ###")
-            chooseEcu(l["ecuname"])
+            select_ecu(l["ecuname"])
             tot += "%-15s : " % "TDB       PR009"
             num, string = ecu.get_pr("PR009")
             print(pyren_encode(string))
@@ -159,60 +131,60 @@ def main():
             tot += str(num)
             tot += "\n"
             print()
-    if mod_globals.os != "android":
-        print(pyren_encode("Listening to CAN. Please wait a bit..."))
-        elm.cmd("at z")
-        elm.cmd("at e1")
-        elm.cmd("at l1")
-        elm.cmd("at h1")
-        elm.cmd("at d1")
-        elm.cmd("at caf0")
-        elm.cmd("at sp 6")
-        elm.cmd("at al")
-        elm.portTimeout = 1
 
-        elm.cmd("at cf 5C5")
-        elm.cmd("at cm 7FF")
-        elm.cmd("at cra 5C5")
-        resp = elm.cmd("atma")
-        elm.cmd("at")
-        for l in resp.split("\n"):
-            if l.upper().startswith("5C5"):
-                kmt = l[9:18].replace(" ", "")
-                tot += "%-10s : " % "Frame 5C5"
-                tot = tot + str(int(kmt, 16))
-                tot += "\n"
-                break
+    print(pyren_encode("Listening to CAN. Please wait a bit..."))
+    elm.cmd("at z")
+    elm.cmd("at e1")
+    elm.cmd("at l1")
+    elm.cmd("at h1")
+    elm.cmd("at d1")
+    elm.cmd("at caf0")
+    elm.cmd("at sp 6")
+    elm.cmd("at al")
+    elm.port_timeout = 1
 
-        elm.cmd("at cf 715")
-        elm.cmd("at cm 7FF")
-        elm.cmd("at cra 715")
-        elm.portTimeout = 5
-        resp = elm.cmd("atma")
-        elm.portTimeout = 1
-        elm.cmd("at")
-        for l in resp.split("\n"):
-            if l.upper().startswith("715"):
-                kmt = l[6:15].replace(" ", "")
-                tot += "%-10s : " % "Frame 715"
-                tot = tot + str(int(kmt, 16))
-                tot += "\n"
-                break
+    elm.cmd("at cf 5C5")
+    elm.cmd("at cm 7FF")
+    elm.cmd("at cra 5C5")
+    response = elm.cmd("atma")
+    elm.cmd("at")
+    for l in response.split("\n"):
+        if l.upper().startswith("5C5"):
+            kmt = l[9:18].replace(" ", "")
+            tot += "%-10s : " % "Frame 5C5"
+            tot = tot + str(int(kmt, 16))
+            tot += "\n"
+            break
 
-        elm.cmd("at cf 5FD")
-        elm.cmd("at cm 7FF")
-        elm.cmd("at cra 5FD")
-        elm.portTimeout = 5
-        resp = elm.cmd("atma")
-        elm.portTimeout = 1
-        elm.cmd("at")
-        for l in resp.split("\n"):
-            if l.upper().startswith("5FD"):
-                kmt = l[6:15].replace(" ", "")
-                tot += "%-10s : " % "Frame 5FD"
-                tot = tot + str(int(kmt, 16))
-                tot += "\n"
-                break
+    elm.cmd("at cf 715")
+    elm.cmd("at cm 7FF")
+    elm.cmd("at cra 715")
+    elm.port_timeout = 5
+    response = elm.cmd("atma")
+    elm.port_timeout = 1
+    elm.cmd("at")
+    for l in response.split("\n"):
+        if l.upper().startswith("715"):
+            kmt = l[6:15].replace(" ", "")
+            tot += "%-10s : " % "Frame 715"
+            tot = tot + str(int(kmt, 16))
+            tot += "\n"
+            break
+
+    elm.cmd("at cf 5FD")
+    elm.cmd("at cm 7FF")
+    elm.cmd("at cra 5FD")
+    elm.port_timeout = 5
+    response = elm.cmd("atma")
+    elm.port_timeout = 1
+    elm.cmd("at")
+    for l in response.split("\n"):
+        if l.upper().startswith("5FD"):
+            kmt = l[6:15].replace(" ", "")
+            tot += "%-10s : " % "Frame 5FD"
+            tot = tot + str(int(kmt, 16))
+            tot += "\n"
+            break
 
     # print tot
     elm.lastMessage = tot

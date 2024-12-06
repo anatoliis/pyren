@@ -13,21 +13,19 @@ import time
 from collections import OrderedDict
 from datetime import datetime
 
-import mod_globals
-
 try:
     import androidhelper as android
 
-    mod_globals.os = "android"
+    mod_globals.OS = "android"
 except:
     try:
         import android
 
-        mod_globals.os = "android"
+        mod_globals.OS = "android"
     except:
         pass
 
-if mod_globals.os != "android":
+if mod_globals.OS != "android":
     import serial  # sudo easy_install pyserial
     from serial.tools import list_ports
 
@@ -353,7 +351,7 @@ class Port:
             upPortName = upPortName.replace(":", "").replace(".", "")
             MAC = ":".join(a + b for a, b in zip(upPortName[::2], upPortName[1::2]))
 
-        if mod_globals.os != "android" and MAC:
+        if mod_globals.OS != "android" and MAC:
             try:
                 self.macaddr = portName
                 self.channel = 1
@@ -366,7 +364,7 @@ class Port:
                 self.hdr.setblocking(True)
             except Exception as e:
                 print(" \n\nERROR: Can't connect to BT adapter\n\n", e)
-                mod_globals.opt_demo = True
+                mod_globals.OPT_DEMO = True
                 sys.exit()
         elif re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}$", portName):
             try:
@@ -380,9 +378,9 @@ class Port:
                 self.hdr.setblocking(True)
             except:
                 print(" \n\nERROR: Can't connect to WiFi ELM\n\n")
-                mod_globals.opt_demo = True
+                mod_globals.OPT_DEMO = True
                 sys.exit()
-        elif mod_globals.os == "android" and (portName == "bt" or MAC is not None):
+        elif mod_globals.OS == "android" and (portName == "bt" or MAC is not None):
             self.portType = 2
             self.droid = android.Android()
             if self.droid:
@@ -429,7 +427,7 @@ class Port:
                 for port, desc, hwid in iterator:
                     print("%-30s \n\tdesc: %s \n\thwid: %s" % (port, desc, hwid))
                 print("")
-                mod_globals.opt_demo = True
+                mod_globals.OPT_DEMO = True
                 exit()
             # print self.hdr.BAUDRATES
             self.check_elm()
@@ -519,7 +517,7 @@ class Port:
             else:
                 inInputBuffer = self.hdr.inWaiting()
                 if inInputBuffer:
-                    if mod_globals.opt_obdlink:
+                    if mod_globals.OPT_OBD_LINK:
                         byte = self.hdr.read(inInputBuffer)
                     else:
                         byte = self.hdr.read(1)
@@ -527,7 +525,7 @@ class Port:
             print()
             print("*" * 40)
             print("*       Connection to ELM was lost")
-            mod_globals.opt_demo = True
+            mod_globals.OPT_DEMO = True
 
         if type(byte) == str:
             byte = byte.encode()
@@ -571,7 +569,7 @@ class Port:
         self.buff = ""
         try:
             while True:
-                if not mod_globals.opt_demo:
+                if not mod_globals.OPT_DEMO:
                     byte = self.read()
                 else:
                     byte = ">"
@@ -615,14 +613,14 @@ class Port:
             tb = pyren_time()  # start time
             self.buff = ""
             while True:
-                if not mod_globals.opt_demo:
+                if not mod_globals.OPT_DEMO:
                     byte = self.read()
                 else:
                     byte = ">"
                 self.buff += byte
                 tc = pyren_time()
                 if ">" in self.buff:
-                    mod_globals.opt_speed = s
+                    mod_globals.OPT_SPEED = s
                     print("\nStart COM speed: ", s)
                     self.hdr.timeout = self.portTimeout
                     return
@@ -633,7 +631,7 @@ class Port:
 
     def soft_boudrate(self, boudrate):
 
-        if mod_globals.opt_demo:
+        if mod_globals.OPT_DEMO:
             return
 
         if self.portType == 1:  # wifi is not supported
@@ -648,7 +646,7 @@ class Port:
 
         print("Changing baud rate to:", boudrate, end=" ")
 
-        if mod_globals.opt_obdlink:
+        if mod_globals.OPT_OBD_LINK:
             self.write("ST SBR " + str(boudrate) + "\r")
         else:
             if boudrate == 38400:
@@ -666,7 +664,7 @@ class Port:
         tb = pyren_time()  # start time
         self.buff = ""
         while True:
-            if not mod_globals.opt_demo:
+            if not mod_globals.OPT_DEMO:
                 byte = self.read()
             else:
                 byte = "OK"
@@ -691,7 +689,7 @@ class Port:
         tb = pyren_time()  # start time
         self.buff = ""
         while True:
-            if not mod_globals.opt_demo:
+            if not mod_globals.OPT_DEMO:
                 byte = self.read()
             else:
                 byte = ">"
@@ -701,12 +699,12 @@ class Port:
             self.buff += byte
             tc = pyren_time()
             if ">" in self.buff:
-                mod_globals.opt_rate = mod_globals.opt_speed
+                mod_globals.OPT_RATE = mod_globals.OPT_SPEED
                 break
             if (tc - tb) > 1:
                 print("ERROR - something went wrong. Let's back.")
                 self.hdr.timeout = self.portTimeout
-                self.hdr.baudrate = mod_globals.opt_speed
+                self.hdr.baudrate = mod_globals.OPT_SPEED
                 self.rwLock = False
                 # disable at_keepalive
                 # self.elm_at_KeepAlive ()
@@ -793,19 +791,19 @@ class ELM:
         # debug
         # print 'Port Open'
 
-        if not mod_globals.opt_demo:
+        if not mod_globals.OPT_DEMO:
             # self.port = serial.Serial(portName, baudrate=speed, timeout=self.portTimeout)
             self.port = Port(portName, speed, self.portTimeout)
 
-        if len(mod_globals.opt_log) > 0:  # and mod_globals.opt_demo==False:
-            self.lf = open("./logs/elm_" + mod_globals.opt_log, "at")
-            self.vf = open("./logs/ecu_" + mod_globals.opt_log, "at")
+        if len(mod_globals.OPT_LOG) > 0:  # and mod_globals.opt_demo==False:
+            self.lf = open("./logs/elm_" + mod_globals.OPT_LOG, "at")
+            self.vf = open("./logs/ecu_" + mod_globals.OPT_LOG, "at")
 
-        if mod_globals.opt_debug and mod_globals.debug_file is None:
-            mod_globals.debug_file = open("./logs/debug.txt", "at")
+        if mod_globals.OPT_DEBUG and mod_globals.DEBUG_FILE is None:
+            mod_globals.DEBUG_FILE = open("./logs/debug.txt", "at")
 
         self.lastCMDtime = 0
-        self.ATCFC0 = mod_globals.opt_cfc0
+        self.ATCFC0 = mod_globals.OPT_CFC0
 
         if self.lf != 0:
             self.lf.write(
@@ -828,7 +826,7 @@ class ELM:
                     420  # STN1110 got STPX last in version v4.2.0
                 )
                 if version_number >= stpx_introduced_in_version_number:
-                    mod_globals.opt_obdlink = True
+                    mod_globals.OPT_OBD_LINK = True
             except:
                 input(
                     "\nCannot determine OBDLink version.\n"
@@ -839,17 +837,17 @@ class ELM:
             # check STN
             elm_rsp = self.cmd("STP 53")
             if "?" not in elm_rsp:
-                mod_globals.opt_stn = True
+                mod_globals.OPT_STN = True
 
         # Max out the UART speed for the fastest polling rate
-        if mod_globals.opt_csv and not mod_globals.opt_demo:
-            if mod_globals.opt_obdlink:
+        if mod_globals.OPT_CSV and not mod_globals.OPT_DEMO:
+            if mod_globals.OPT_OBD_LINK:
                 self.port.soft_boudrate(2000000)
             elif self.port.portType == 0:
                 self.port.soft_boudrate(230400)
 
     def __del__(self):
-        if not mod_globals.opt_demo and not isinstance(self.port, int):
+        if not mod_globals.OPT_DEMO and not isinstance(self.port, int):
             print("*" * 40)
             print("*       RESETTING ELM")
             # if self.port.ka_timer:
@@ -913,7 +911,7 @@ class ELM:
         byte = ""
         try:
             if self.dmf is None:
-                self.dmf = open("./logs/" + mod_globals.opt_log, "rt")
+                self.dmf = open("./logs/" + mod_globals.OPT_LOG, "rt")
             byte = self.dmf.read(1)
         except:
             pass
@@ -938,18 +936,18 @@ class ELM:
         frameBuffLen = 0
         buff = ""
 
-        if not mod_globals.opt_demo:
+        if not mod_globals.OPT_DEMO:
             self.cmd("at h1")
             self.cmd("at d1")
             self.cmd("at s1")
             self.port.write("at ma\r\n")
 
         self.mlf = 0
-        if not mod_globals.opt_demo and len(mod_globals.opt_log) > 0:
-            self.mlf = open("./logs/" + mod_globals.opt_log, "wt")
+        if not mod_globals.OPT_DEMO and len(mod_globals.OPT_LOG) > 0:
+            self.mlf = open("./logs/" + mod_globals.OPT_LOG, "wt")
 
         while self.run_allow_event.isSet():
-            if not mod_globals.opt_demo:
+            if not mod_globals.OPT_DEMO:
                 byte = self.port.read()
             else:
                 byte = self.debugMonitor()
@@ -1017,7 +1015,7 @@ class ELM:
                 self.port.write("\r")
 
     def setMonitorFilter(self, filt, mask):
-        if mod_globals.opt_demo or self.monitorCallBack is None:
+        if mod_globals.OPT_DEMO or self.monitorCallBack is None:
             return
         # if len(filter)!=3 or len(mask)!=3: return
 
@@ -1051,11 +1049,11 @@ class ELM:
         self.monitorThread.start()
 
     def stopMonitor(self):
-        if not mod_globals.opt_demo:
+        if not mod_globals.OPT_DEMO:
             self.port.write("\r\n")
         self.run_allow_event.clear()
         time.sleep(0.2)
-        if mod_globals.opt_demo or self.monitorCallBack is None:
+        if mod_globals.OPT_DEMO or self.monitorCallBack is None:
             return
 
         tmp = self.portTimeout
@@ -1078,7 +1076,7 @@ class ELM:
         frameBuffLen = 0
         buff = ""
 
-        if not mod_globals.opt_demo:
+        if not mod_globals.OPT_DEMO:
             self.port.write("at ma\r\n")
 
         while self.run_allow_event.isSet():
@@ -1154,11 +1152,11 @@ class ELM:
         self.monitorThread.start()
 
     def nr78_stopMonitor(self):
-        if not mod_globals.opt_demo:
+        if not mod_globals.OPT_DEMO:
             self.port.write("\r")
         self.run_allow_event.clear()
         time.sleep(0.2)
-        if mod_globals.opt_demo or self.monitorCallBack is None:
+        if mod_globals.OPT_DEMO or self.monitorCallBack is None:
             return
 
         tmp = self.portTimeout
@@ -1234,7 +1232,7 @@ class ELM:
         return self.waitedFrames
 
     def getFromCache(self, req):
-        if mod_globals.opt_demo and req in list(self.ecudump.keys()):
+        if mod_globals.OPT_DEMO and req in list(self.ecudump.keys()):
             return self.ecudump[req]
 
         if req in list(self.rsp_cache.keys()):
@@ -1243,7 +1241,7 @@ class ELM:
         return ""
 
     def delFromCache(self, req):
-        if not mod_globals.opt_demo and req in list(self.rsp_cache.keys()):
+        if not mod_globals.OPT_DEMO and req in list(self.rsp_cache.keys()):
             del self.rsp_cache[req]
 
     def checkIfCommandUnsupported(self, req, res):
@@ -1251,7 +1249,7 @@ class ELM:
             nr = res.split(":")[1]
             if nr in ["12"]:
                 if (
-                    mod_globals.opt_csv_only
+                    mod_globals.OPT_CSV_ONLY
                 ):  # all unsupported commands must be removed immediately in csv_only mode
                     self.notSupportedCommands[req] = res
                 else:
@@ -1277,7 +1275,7 @@ class ELM:
         returns response without consistency check
         """
 
-        if mod_globals.opt_demo and req in list(self.ecudump.keys()):
+        if mod_globals.OPT_DEMO and req in list(self.ecudump.keys()):
             return self.ecudump[req]
 
         if cache and req in list(self.rsp_cache.keys()):
@@ -1465,7 +1463,7 @@ class ELM:
 
         # deal with exceptions
         # boudrate 38400 not enough to read full information about errors
-        if not mod_globals.opt_obdlink and len(command) == 6 and command[:4] == "1902":
+        if not mod_globals.OPT_OBD_LINK and len(command) == 6 and command[:4] == "1902":
             command = "1902AF"
 
         if command.upper()[:2] in ["AT", "ST"] or self.currentprotocol != "can":
@@ -1474,8 +1472,8 @@ class ELM:
         if self.ATCFC0:
             return self.send_can_cfc0(command)
         else:
-            if mod_globals.opt_obdlink:
-                if mod_globals.opt_caf:
+            if mod_globals.OPT_OBD_LINK:
+                if mod_globals.OPT_CAF:
                     rsp = self.send_can_cfc_caf(command)
                 else:
                     rsp = self.send_can_cfc(command)
@@ -1556,7 +1554,7 @@ class ELM:
             and responses[0][6:8] == "78"
         ):
             responses = responses[1:]
-            mod_globals.opt_n1c = True
+            mod_globals.OPT_N1C = True
 
         if len(responses) == 1:  # single freme response
             if responses[0][:1] == "0":
@@ -1594,7 +1592,7 @@ class ELM:
             noerrors = False
 
         # populate L1 cache
-        if noerrors and command[:2] in AllowedList and not mod_globals.opt_n1c:
+        if noerrors and command[:2] in AllowedList and not mod_globals.OPT_N1C:
             self.l1_cache[command] = str(hex(nframes))[2:].upper()
 
         if len(result) // 2 >= nbytes and noerrors:
@@ -2191,13 +2189,13 @@ class ELM:
             self.lf.flush()
 
         # send command
-        if not mod_globals.opt_demo:
+        if not mod_globals.OPT_DEMO:
             self.port.write(str(command + "\r").encode("utf-8"))  # send command
 
         # receive and parse responce
         while True:
             tc = pyren_time()
-            if mod_globals.opt_demo:
+            if mod_globals.OPT_DEMO:
                 break
             self.buff = self.port.expect(">", self.portTimeout)
             tc = pyren_time()
@@ -2255,7 +2253,7 @@ class ELM:
             self.supportedCommands += 1
 
     def check_adapter(self):
-        if mod_globals.opt_demo:
+        if mod_globals.OPT_DEMO:
             return
         if self.unsupportedCommands == 0:
             return
@@ -2267,7 +2265,7 @@ class ELM:
 
     def init_can(self):
 
-        if not mod_globals.opt_demo:
+        if not mod_globals.OPT_DEMO:
             self.port.reinit()
 
         self.currentprotocol = "can"
@@ -2291,7 +2289,7 @@ class ELM:
         self.check_answer(self.cmd("at l0"))
         self.check_answer(self.cmd("at al"))
 
-        if mod_globals.opt_obdlink and mod_globals.opt_caf and not self.ATCFC0:
+        if mod_globals.OPT_OBD_LINK and mod_globals.OPT_CAF and not self.ATCFC0:
             self.check_answer(self.cmd("AT CAF1"))
             self.check_answer(self.cmd("STCSEGR 1"))
             self.check_answer(self.cmd("STCSEGT 1"))
@@ -2308,7 +2306,7 @@ class ELM:
     def set_can_500(self, addr="XXX"):
         if len(addr) == 3:
             if (
-                mod_globals.opt_can2 and mod_globals.opt_stn
+                mod_globals.OPT_CAN2 and mod_globals.OPT_STN
             ):  # for STN with FORD MS-CAN support and pinout changed by soldering
                 self.cmd("STP 53")
                 self.cmd("STPBR 500000")
@@ -2317,7 +2315,7 @@ class ELM:
                     return
             self.cmd("at sp 6")
         else:
-            if mod_globals.opt_can2 and mod_globals.opt_stn:
+            if mod_globals.OPT_CAN2 and mod_globals.OPT_STN:
                 self.cmd("STP 54")
                 self.cmd("STPBR 500000")
                 tmprsp = self.send_raw("0210C0")
@@ -2327,7 +2325,7 @@ class ELM:
 
     def set_can_250(self, addr="XXX"):
         if len(addr) == 3:
-            if mod_globals.opt_can2 and mod_globals.opt_stn:
+            if mod_globals.OPT_CAN2 and mod_globals.OPT_STN:
                 self.cmd("STP 53")
                 self.cmd("STPBR 250000")
                 tmprsp = self.send_raw("0210C0")
@@ -2335,7 +2333,7 @@ class ELM:
                     return
             self.cmd("at sp 8")
         else:
-            if mod_globals.opt_can2 and mod_globals.opt_stn:
+            if mod_globals.OPT_CAN2 and mod_globals.OPT_STN:
                 self.cmd("STP 54")
                 self.cmd("STPBR 250000")
                 tmprsp = self.send_raw("0210C0")
@@ -2426,14 +2424,14 @@ class ELM:
         self.check_answer(self.cmd("at at 1"))  # reset adaptive timing step 3
         self.check_answer(self.cmd("at cra " + RXa))
 
-        if mod_globals.opt_obdlink and mod_globals.opt_caf:
+        if mod_globals.OPT_OBD_LINK and mod_globals.OPT_CAF:
             self.check_answer(self.cmd("STCFCPA " + TXa + ", " + RXa))
 
         self.check_adapter()
 
     def init_iso(self):
 
-        if not mod_globals.opt_demo:
+        if not mod_globals.OPT_DEMO:
             self.port.reinit()
 
         self.currentprotocol = "iso"
@@ -2501,7 +2499,7 @@ class ELM:
         self.check_answer(self.cmd("at st ff"))  # set timeout to 1 second
         self.check_answer(self.cmd("at at 0"))  # disable adaptive timing
 
-        if "PRNA2000" in ecu.get("protocol", "").upper() or mod_globals.opt_si:
+        if "PRNA2000" in ecu.get("protocol", "").upper() or mod_globals.OPT_SI:
             self.cmd("at sp 4")  # slow init mode 4
             if len(ecu.get("slowInit", "")) > 0:
                 self.cmd("at iia " + ecu["slowInit"])  # address for slow init
@@ -2534,7 +2532,7 @@ class ELM:
             if isLevelAccepted:
                 break
 
-        if self.performanceModeLevel == 3 and mod_globals.opt_obdlink:
+        if self.performanceModeLevel == 3 and mod_globals.OPT_OBD_LINK:
             for level in reversed(
                 list(range(4, 100))
             ):  # 26 - 1 = 25  parameters per page

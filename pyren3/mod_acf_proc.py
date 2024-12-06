@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-
-import mod_globals
+import config
 from mod_mtc import acf_MTC_compare
 from mod_utils import hex_vin_plus_crc, load_dump_to_elm, pyren_encode
 
@@ -66,7 +65,7 @@ def acf_form_commands(m, cu, op):
         )
 
 
-def acf_MTC_generateDefaults(m, mtc):
+def acf_mtc_generate_defaults(m, mtc):
     """m - module definition map"""
     """ mtc - list of options     """
     """ this function generates default values"""
@@ -110,10 +109,10 @@ def acf_MTC_generateDefaults(m, mtc):
     if m["ecuname"] == "":
         m["ecuname"] = m["dst"]
 
-    # dumpn1 = mod_globals.mtcdir+'/dumps/'+str(int(time.time()))+'_'+ddtxml+'.txt'
-    # dumpn2 = mod_globals.mtcdir+'/dumps/'+str(int(time.time()))+'_'+m['ecuname']+'.txt'
-    dumpn1 = mod_globals.mtcdir + "/dumps/000000_" + ddtxml + ".txt"
-    dumpn2 = mod_globals.mtcdir + "/dumps/000000_" + m["ecuname"] + ".txt"
+    # dumpn1 = config.mtcdir+'/dumps/'+str(int(time.time()))+'_'+ddtxml+'.txt'
+    # dumpn2 = config.mtcdir+'/dumps/'+str(int(time.time()))+'_'+m['ecuname']+'.txt'
+    dumpn1 = config.MTC_DIR + "/dumps/000000_" + ddtxml + ".txt"
+    dumpn2 = config.MTC_DIR + "/dumps/000000_" + m["ecuname"] + ".txt"
 
     df1 = open(dumpn1, "wt")
 
@@ -131,13 +130,13 @@ def acf_MTC_generateDefaults(m, mtc):
     # print dumpn2
 
     scriptn = (
-        mod_globals.mtcdir
+        config.MTC_DIR
         + "/scripts/cmd_"
         + m["pin"]
         + "_"
         + m["idf"]
         + "_"
-        + mod_globals.vin[-4:]
+        + config.VIN[-4:]
         + "_"
         + m["sref"]
         + ".cmd"
@@ -147,7 +146,7 @@ def acf_MTC_generateDefaults(m, mtc):
     # print "--------------- Write Commands --------------------"
 
     # write preamble
-    sf.write("# " + mod_globals.vin + "\n\n")
+    sf.write("# " + config.VIN + "\n\n")
     sf.write("$addr = " + m["dst"] + "\n\n")
     sf.write("#idTx = " + m["idTx"] + " idRx = " + m["idRx"] + "\n\n")
     if m["pin"].startswith("can"):
@@ -164,13 +163,13 @@ def acf_MTC_generateDefaults(m, mtc):
 
     # save write commands
     for k, v in sorted(list(m["acf_wc"].items()), key=lambda x_y: x_y[1]):
-        if mod_globals.opt_verbose or mod_globals.opt_verbose2:
+        if config.OPT_VERBOSE or config.opt_verbose2:
             try:
                 sf.write("#" * 60 + "\n")
                 sf.write("# " + k + "\n")
             except:
                 pass
-        if mod_globals.opt_verbose2:
+        if config.opt_verbose2:
             for di in sorted(
                 list(m["mo"].req[k].SentDI.values()),
                 key=lambda x: x.FirstByte * 8 + x.BitOffset,
@@ -186,8 +185,8 @@ def acf_MTC_generateDefaults(m, mtc):
 
     # write trailer
     sf.write("\n# VIN programming !!!check the command!!!\n")
-    sf.write("#2EF190" + hex_vin_plus_crc(mod_globals.vin, False) + "\n")
-    sf.write("#3B81" + hex_vin_plus_crc(mod_globals.vin, True) + "\n")
+    sf.write("#2EF190" + hex_vin_plus_crc(config.VIN, False) + "\n")
+    sf.write("#3B81" + hex_vin_plus_crc(config.VIN, True) + "\n")
     sf.write("\n# reset ecu or disconnect the battary!!!check the command!!!\n")
     sf.write("#1101\n\n")
     sf.write("exit\n")
@@ -206,7 +205,7 @@ def acf_MTC_findDiff(m, mtc, elm):
     ace = m["mo"]
 
     # init elm
-    if mod_globals.opt_demo:  # try to load dump
+    if config.OPT_DEMO:  # try to load dump
         load_dump_to_elm(m["ecuname"], elm)
     else:
         if m["pin"].lower() == "can":
@@ -283,7 +282,7 @@ def acf_MTC_optinInfluence(m, option, allmtc):
     return out
 
 
-def acf_MTC_optionsExplorer(de, option, allmtc):
+def acf_mtc_options_explorer(de, option, allmtc):
     """de - list of all ecus"""
     """ option - option name from MTC list """
     """ this function finds dependent parameters in every module"""

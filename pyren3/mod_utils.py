@@ -6,7 +6,6 @@ import string
 import subprocess
 import sys
 
-import mod_globals
 from mod_elm import ELM
 
 try:
@@ -107,7 +106,7 @@ def Choice(list, question):
         if ch == "q":
             ch = "Q"
         if ch == "cmd":
-            mod_globals.opt_cmd = True
+            mod_globals.OPT_CMD = True
         if ch in d.keys():
             return [d[ch], ch]
 
@@ -168,7 +167,7 @@ def choice_long(list_: list[str], question: str, header: str = ""):
                 break
 
             if char == "cmd":
-                mod_globals.opt_cmd = True
+                mod_globals.OPT_CMD = True
                 print("mod_globals.opt_cmd set to 'True'")
             if char in d.keys():
                 return [d[char], char]
@@ -361,7 +360,7 @@ def get_vin(de, elm, getFirst=False):
     for e in de:
 
         # init elm
-        if mod_globals.opt_demo:  # try to load dump
+        if mod_globals.OPT_DEMO:  # try to load dump
             load_dump_to_elm(e["ecuname"], elm)
         else:
             if e["pin"].lower() == "can":
@@ -422,9 +421,9 @@ def get_vin(de, elm, getFirst=False):
 
 
 def debug(tag: str, s: str) -> None:
-    if mod_globals.opt_debug and mod_globals.debug_file is not None:
-        mod_globals.debug_file.write("### " + tag + "\n")
-        mod_globals.debug_file.write('"' + s + '"\n')
+    if mod_globals.OPT_DEBUG and mod_globals.DEBUG_FILE is not None:
+        mod_globals.DEBUG_FILE.write("### " + tag + "\n")
+        mod_globals.DEBUG_FILE.write('"' + s + '"\n')
 
 
 def is_hex(string_: str) -> bool:
@@ -432,22 +431,22 @@ def is_hex(string_: str) -> bool:
 
 
 def kill_server() -> None:
-    if mod_globals.doc_server_proc is not None:
-        os.kill(mod_globals.doc_server_proc.pid, signal.SIGTERM)
+    if mod_globals.DOC_SERVER_PROC is not None:
+        os.kill(mod_globals.DOC_SERVER_PROC.pid, signal.SIGTERM)
 
 
 def show_doc(addr, id):
-    if mod_globals.vin == "" and not mod_globals.opt_sd:
+    if mod_globals.VIN == "" and not mod_globals.OPT_SD:
         return
 
-    if mod_globals.doc_server_proc is None:
-        mod_globals.doc_server_proc = subprocess.Popen(
+    if mod_globals.DOC_SERVER_PROC is None:
+        mod_globals.DOC_SERVER_PROC = subprocess.Popen(
             ["python3", "-m", "http.server", "59152"]
         )
         atexit.register(kill_server)
 
-    if mod_globals.opt_sd and id != "":
+    if mod_globals.OPT_SD and id != "":
         url = "http://127.0.0.1:59152/doc/" + id[1:] + ".htm"
     else:
-        url = "http://127.0.0.1:59152/doc/" + mod_globals.vin + ".htm" + id
+        url = "http://127.0.0.1:59152/doc/" + mod_globals.VIN + ".htm" + id
     webbrowser.open(url, new=0)

@@ -3,7 +3,7 @@
 import os
 import sys
 
-import mod_globals
+import config
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
@@ -12,24 +12,23 @@ import mod_elm
 ############## change me ################
 
 ecu_functional_address = "7A"
-mod_globals.os = "android"
-mod_globals.opt_port = "bt"  # 'COM4'
+config.OPT_PORT = "bt"  # 'COM4'
 
 #########################################
 
-# mod_globals.opt_demo    = True
-mod_globals.opt_cfc0 = True
-mod_globals.opt_speed = 38400
-mod_globals.opt_log = "10742-rep.txt"
+# config.opt_demo    = True
+config.OPT_CFC0 = True
+config.OPT_SPEED = 38400
+config.OPT_LOG = "10742-rep.txt"
 
 print("Opening ELM")
-elm = mod_elm.ELM(mod_globals.opt_port, mod_globals.opt_speed, True)
+elm = mod_elm.ELM(config.OPT_PORT, config.OPT_SPEED, True)
 
 print("Init    ELM")
 elm.init_can()
 
-TXa = mod_elm.dnat[ecu_functional_address]
-RXa = mod_elm.snat[ecu_functional_address]
+TXa = mod_elm.DNAT[ecu_functional_address]
+RXa = mod_elm.SNAT[ecu_functional_address]
 
 print(elm.cmd("at sh " + TXa))
 print(elm.cmd("at cra " + RXa))

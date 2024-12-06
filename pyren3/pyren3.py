@@ -4,17 +4,14 @@ import os
 import pickle
 import sys
 
-import mod_globals
+import config
 from mod_db_manager import find_dbs
-from mod_ddt_utils import searchddtroot
 from mod_ecu import ECU
 from mod_elm import ELM
 from mod_optfile import optfile
 from mod_scan_ecus import ScanEcus
 from mod_utils import chk_dir_tree, clear_screen, get_vin
 from serial.tools import list_ports
-
-mod_globals.os = os.name
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
@@ -158,14 +155,6 @@ def opt_parser():
     )
 
     parser.add_argument(
-        "--exp",
-        help="switch to Expert mode (allow to use buttons in DDT)",
-        dest="exp",
-        default=False,
-        action="store_true",
-    )
-
-    parser.add_argument(
         "--can2",
         help="CAN network connected to pin 13 and pin 12",
         dest="can2",
@@ -208,43 +197,42 @@ def opt_parser():
         print("")
         exit()
     else:
-        mod_globals.opt_port = options.port
-        mod_globals.opt_ecu_id = options.ecuid
-        mod_globals.opt_speed = int(options.speed)
-        mod_globals.opt_rate = int(options.rate)
-        mod_globals.opt_lang = options.lang
-        mod_globals.opt_car = options.car
-        mod_globals.opt_log = options.logfile
-        mod_globals.opt_demo = options.demo
-        mod_globals.opt_scan = options.scan
-        mod_globals.opt_csv = options.csv
-        mod_globals.opt_csv_only = options.csv_only
-        if mod_globals.opt_csv:
-            mod_globals.opt_csv_human = True
-        if mod_globals.opt_csv_only:
-            mod_globals.opt_csv = True
-        mod_globals.opt_csv_human = options.csv_human
-        if mod_globals.opt_csv_human:
-            mod_globals.opt_csv = True
-        mod_globals.opt_usrkey = options.usr_key
-        mod_globals.opt_verbose = options.verbose
-        mod_globals.opt_si = options.si
-        mod_globals.opt_cfc0 = options.cfc
-        mod_globals.opt_caf = options.caf
-        mod_globals.opt_n1c = options.n1c
-        mod_globals.opt_exp = options.exp
-        mod_globals.opt_dump = options.dump
-        mod_globals.opt_can2 = options.can2
-        mod_globals.opt_performance = options.performance
-        mod_globals.opt_sd = options.sd
-        mod_globals.opt_minordtc = options.minordtc
-        mod_globals.opt_excel = options.excel
-        if mod_globals.opt_excel:
-            mod_globals.opt_csv_sep = ";"
-            mod_globals.opt_csv_dec = ","
+        config.OPT_PORT = options.port
+        config.OPT_ECU_ID = options.ecuid
+        config.OPT_SPEED = int(options.speed)
+        config.OPT_RATE = int(options.rate)
+        config.OPT_LANG = options.lang
+        config.OPT_CAR = options.car
+        config.OPT_LOG = options.logfile
+        config.OPT_DEMO = options.demo
+        config.OPT_SCAN = options.scan
+        config.OPT_CSV = options.csv
+        config.OPT_CSV_ONLY = options.csv_only
+        if config.OPT_CSV:
+            config.OPT_CSV_HUMAN = True
+        if config.OPT_CSV_ONLY:
+            config.OPT_CSV = True
+        config.OPT_CSV_HUMAN = options.csv_human
+        if config.OPT_CSV_HUMAN:
+            config.OPT_CSV = True
+        config.OPT_USRKEY = options.usr_key
+        config.OPT_VERBOSE = options.verbose
+        config.OPT_SI = options.si
+        config.OPT_CFC0 = options.cfc
+        config.OPT_CAF = options.caf
+        config.OPT_N1C = options.n1c
+        config.OPT_DUMP = options.dump
+        config.OPT_CAN2 = options.can2
+        config.OPT_PERFORMANCE = options.performance
+        config.OPT_SD = options.sd
+        config.OPT_MINOR_DTC = options.minordtc
+        config.OPT_EXCEL = options.excel
+        if config.OPT_EXCEL:
+            config.OPT_CSV_SEP = ";"
+            config.OPT_CSV_DEC = ","
         else:
-            mod_globals.opt_csv_sep = ","
-            mod_globals.opt_csv_dec = "."
+            config.OPT_CSV_SEP = ","
+            config.OPT_CSV_DEC = "."
 
 
 def main():
@@ -254,29 +242,29 @@ def main():
     find_dbs()
 
     print("Opening ELM")
-    elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
+    elm = ELM(config.OPT_PORT, config.OPT_SPEED, config.OPT_LOG)
 
     # change serial port baud rate
-    if mod_globals.opt_speed < mod_globals.opt_rate and not mod_globals.opt_demo:
-        elm.port.soft_boudrate(mod_globals.opt_rate)
+    if config.OPT_SPEED < config.OPT_RATE and not config.OPT_DEMO:
+        elm.port.soft_boudrate(config.OPT_RATE)
 
     print("Loading ECUs list")
     se = ScanEcus(elm)  # Prepare list of all ecus
 
     SEFname = "savedEcus.p"
-    if mod_globals.opt_can2:
+    if config.OPT_CAN2:
         SEFname = "savedEcus2.p"
 
-    if mod_globals.opt_demo and len(mod_globals.opt_ecu_id) > 0:
+    if config.OPT_DEMO and len(config.OPT_ECU_ID) > 0:
         # demo mode with predefined ecu list
-        if "tcom" in mod_globals.opt_ecu_id.lower() or len(mod_globals.opt_ecu_id) < 4:
-            tcomid = "".join([i for i in mod_globals.opt_ecu_id if i.isdigit()])
+        if "tcom" in config.OPT_ECU_ID.lower() or len(config.OPT_ECU_ID) < 4:
+            tcomid = "".join([i for i in config.OPT_ECU_ID if i.isdigit()])
             se.load_model_ECUs("Vehicles/TCOM_" + tcomid + ".xml")
-            mod_globals.opt_ecu_id = ",".join(sorted(se.allecus.keys()))
+            config.OPT_ECU_ID = ",".join(sorted(se.allecus.keys()))
         else:
             se.read_Uces_file(all=True)
         se.detectedEcus = []
-        for i in mod_globals.opt_ecu_id.split(","):
+        for i in config.OPT_ECU_ID.split(","):
             if i in list(se.allecus.keys()):
                 se.allecus[i]["ecuname"] = i
                 se.allecus[i]["idf"] = se.allecus[i]["ModelId"][2:4]
@@ -288,37 +276,31 @@ def main():
                 se.allecus[i]["pin"] = "can"
                 se.detectedEcus.append(se.allecus[i])
     else:
-        if not os.path.isfile(SEFname) or mod_globals.opt_scan:
+        if not os.path.isfile(SEFname) or config.OPT_SCAN:
             # choosing model
-            se.chooseModel(
-                mod_globals.opt_car
-            )  # choose model of car for doing full scan
+            se.chooseModel(config.OPT_CAR)  # choose model of car for doing full scan
 
         # Do this check every time
-        se.scanAllEcus()  # First scan of all ecus
+        se.scan_all_ecus()  # First scan of all ecus
 
-    mod_globals.vin = get_vin(se.detectedEcus, elm, getFirst=True)
+    config.VIN = get_vin(se.detectedEcus, elm, getFirst=True)
 
     print("Loading language ")
     sys.stdout.flush()
     # loading language data
-    lang = optfile("Location/DiagOnCAN_" + mod_globals.opt_lang + ".bqm", True)
-    mod_globals.language_dict = lang.dict
+    lang = optfile("Location/DiagOnCAN_" + config.OPT_LANG + ".bqm", True)
+    config.LANGUAGE_DICT = lang.dict
     print("Done")
-
-    searchddtroot()
 
     while True:
         clear_screen()
-        selected_ecu = se.select_ecu(
-            mod_globals.opt_ecu_id
-        )  # choose ECU among detected
-        mod_globals.opt_ecu_id = ""
+        selected_ecu = se.select_ecu(config.OPT_ECU_ID)  # choose ECU among detected
+        config.OPT_ECU_ID = ""
         if selected_ecu == -1:
             continue
 
         ecu_cache_file = os.path.join(
-            "./cache/", selected_ecu["ModelId"] + "_" + mod_globals.opt_lang + ".p"
+            "./cache/", selected_ecu["ModelId"] + "_" + config.OPT_LANG + ".p"
         )
 
         if os.path.isfile(ecu_cache_file):  # if cache exists
@@ -333,10 +315,10 @@ def main():
 
         ecu.init_elm(elm)  # init ELM for chosen ECU
 
-        if mod_globals.opt_demo:
+        if config.OPT_DEMO:
             print("Loading dump")
             ecu.loadDump()
-        elif mod_globals.opt_dump:
+        elif config.OPT_DUMP:
             print("Saving dump")
             ecu.saveDump()
 

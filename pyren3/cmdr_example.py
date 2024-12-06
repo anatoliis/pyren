@@ -9,87 +9,65 @@
 #
 
 import os
+import pickle
 import sys
 import time
 
-import mod_globals
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
-try:
-    import androidhelper as android
-
-    mod_globals.os = "android"
-except:
-    try:
-        import android
-
-        mod_globals.os = "android"
-    except:
-        pass
-
-if mod_globals.os != "android":
-    try:
-        import serial
-        from serial.tools import list_ports
-    except ImportError:
-        sys.exit()
-
-from mod_elm import ELM
-from mod_scan_ecus import ScanEcus
+import config
+import pyren3
 from mod_ecu import ECU
-from mod_optfile import *
-from mod_utils import *
+from mod_elm import ELM
+from mod_optfile import optfile
+from mod_scan_ecus import ScanEcus
+from mod_utils import clear_screen
 
 
-def prepareECU():
+def prepare_ecu():
     """This function loads data for ECU"""
 
     global elm
     global ecu
 
-    pyren.opt_parser()
+    pyren3.opt_parser()
 
-    if len(mod_globals.opt_log) == 0:
-        mod_globals.opt_log = "commander_log.txt"
+    if len(config.OPT_LOG) == 0:
+        config.OPT_LOG = "commander_log.txt"
 
     print("Opening ELM")
-    elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
+    elm = ELM(config.OPT_PORT, config.OPT_SPEED, config.OPT_LOG)
 
     print("Loading ECUs list")
-    se = ScanEcus(elm)  # Prepare list of all ecus
+    se = ScanEcus(elm)  # Prepare a list of all ecus
 
-    if not os.path.isfile("savedEcus.p") or mod_globals.opt_scan:
+    if not os.path.isfile("savedEcus.p") or config.OPT_SCAN:
         # choosing model
-        se.chooseModel(mod_globals.opt_car)  # choose model of car for doing full scan
+        se.chooseModel(config.OPT_CAR)  # choose model of a car for doing full scan
 
     # Do this check every time
-    se.scanAllEcus()  # First scan of all ecus
+    se.scan_all_ecus()  # First scan of all ecus
 
     print("Loading language ")
     sys.stdout.flush()
     # loading language data
-    lang = optfile("Location/DiagOnCAN_" + mod_globals.opt_lang + ".bqm", True)
-    mod_globals.language_dict = lang.dict
+    lang = optfile("Location/DiagOnCAN_" + config.OPT_LANG + ".bqm", True)
+    config.LANGUAGE_DICT = lang.dict
     print("Done")
 
     # clearScreen()
 
-    choosen_ecu = se.select_ecu(mod_globals.opt_ecu_id)  # choose ECU among detected
-    if choosen_ecu == -1:
+    selected_ecu = se.select_ecu(config.OPT_ECU_ID)  # choose ECU among detected
+    if selected_ecu == -1:
         print("#\n" * 3, "#   Unknown ECU defined!!!\n", "#\n" * 3)
         exit(1)
 
-    ecucashfile = (
-        "./cache/" + choosen_ecu["ModelId"] + "_" + mod_globals.opt_lang + ".p"
-    )
+    ecu_cash_file = "./cache/" + selected_ecu["ModelId"] + "_" + config.OPT_LANG + ".p"
 
-    if os.path.isfile(ecucashfile):  # if cache exists
-        ecu = pickle.load(open(ecucashfile, "rb"))  # load it
+    if os.path.isfile(ecu_cash_file):  # if cache exists
+        ecu = pickle.load(open(ecu_cash_file, "rb"))  # load it
     else:  # else
-        ecu = ECU(choosen_ecu, lang.dict)  # load original data for chosen ECU
+        ecu = ECU(selected_ecu, lang.dict)  # load original data for chosen ECU
         pickle.dump(
-            ecu, open(ecucashfile, "wb")
+            ecu, open(ecu_cash_file, "wb")
         )  # and save data to cache for next time
 
     ecu.init_elm(elm)  # init ELM for chosen ECU
@@ -98,8 +76,7 @@ def prepareECU():
 
 
 def main():
-
-    prepareECU()
+    prepare_ecu()
 
     #####
     ##### Example start

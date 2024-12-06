@@ -2,7 +2,6 @@
 
 import string
 import xml.dom.minidom
-from xml.dom.minidom import parse
 
 from mod_ecu_service import *
 
@@ -33,11 +32,11 @@ def get_mnemonicDTC(m, resp):
 
 def get_mnemonic(m, se, elm, raw=False):
 
-    if not m.serviceID and mod_globals.ext_cur_DTC != "000000":
+    if not m.serviceID and mod_globals.EXT_CUR_DTC != "000000":
         for sid in list(se.keys()):
             startReq = se[sid].startReq
             if startReq.startswith("12") and startReq.endswith(
-                mod_globals.ext_cur_DTC[:4]
+                mod_globals.EXT_CUR_DTC[:4]
             ):
                 m.startByte = (
                     se[sid]
@@ -94,7 +93,7 @@ def get_SnapShotMnemonic(m, se, elm, dataids):
 
     resp = executeService(snapshotService, elm, [], "", True)
     if (
-        (mod_globals.opt_demo and not resp)
+        (mod_globals.OPT_DEMO and not resp)
         or not resp.startswith(snapshotService.simpleRsp)
         or len(resp) // 2 == 6
     ):

@@ -30,7 +30,6 @@ import xml.dom.minidom
 
 import mod_db_manager
 import mod_elm as m_elm
-import mod_globals
 from mod_utils import Choice, choice_long, debug, pyren_encode
 
 opt_demo = False
@@ -193,11 +192,11 @@ class ScanEcus:
         """scan all ecus. If savedEcus.p exists then load it and return"""
 
         SEFname = "savedEcus.p"
-        if mod_globals.opt_can2:
+        if mod_globals.OPT_CAN2:
             SEFname = "savedEcus2.p"
 
         # check if savedEcus exists
-        if os.path.isfile(SEFname) and not mod_globals.opt_scan:
+        if os.path.isfile(SEFname) and not mod_globals.OPT_SCAN:
 
             # load it
             self.detectedEcus = pickle.load(open(SEFname, "rb"))
@@ -245,9 +244,9 @@ class ScanEcus:
                     pickle.dump(self.detectedEcus, open(SEFname, "wb"))
             return
         else:
-            mod_globals.opt_scan = True
+            mod_globals.OPT_SCAN = True
 
-        mod_globals.state_scan = True
+        mod_globals.STATE_SCAN = True
 
         self.reqres = []
         self.errres = []
@@ -270,7 +269,7 @@ class ScanEcus:
 
         canH = "6"
         canL = "14"
-        if mod_globals.opt_can2:
+        if mod_globals.OPT_CAN2:
             canH = "13"
             canL = "12"
 
@@ -307,7 +306,7 @@ class ScanEcus:
         self.elm.close_protocol()
 
         # scan KWP ecus
-        if not mod_globals.opt_can2:
+        if not mod_globals.OPT_CAN2:
             self.elm.init_iso()  # actually it executed every time the address is changed
             for ecu, row in sorted(
                 iter(self.allecus.items()),
@@ -347,7 +346,7 @@ class ScanEcus:
             + str(len(self.detectedEcus))
         )
 
-        mod_globals.state_scan = False
+        mod_globals.STATE_SCAN = False
 
         # sort list of detected ECUs
         self.detectedEcus = sorted(self.detectedEcus, key=lambda k: int(k["idf"]))
@@ -358,7 +357,7 @@ class ScanEcus:
     def reScanErrors(self):
         """scan only detectedEcus for re-check errors"""
 
-        mod_globals.opt_scan = True
+        mod_globals.OPT_SCAN = True
 
         self.reqres = []
         self.errres = []
@@ -378,7 +377,7 @@ class ScanEcus:
         # scan CAN ecus
         canH = "6"
         canL = "14"
-        if mod_globals.opt_can2:
+        if mod_globals.OPT_CAN2:
             canH = "13"
             canL = "12"
 
@@ -404,7 +403,7 @@ class ScanEcus:
         self.elm.close_protocol()
 
         # scan KWP ecud
-        if not mod_globals.opt_can2:
+        if not mod_globals.OPT_CAN2:
             self.elm.init_iso()
             for row in sorted(self.detectedEcus, key=lambda k: int(k["idf"])):
                 if row["pin"] == "iso" and row["pin1"] == "7" and row["pin2"] == "15":
@@ -455,27 +454,27 @@ class ScanEcus:
 
         listecu = []
 
-        if mod_globals.os == "android":
-            if mod_globals.opt_scan:
+        if mod_globals.OS == "android":
+            if mod_globals.OPT_SCAN:
                 print(pyren_encode("\n     %-40s %s" % ("Name", "Warn")))
             else:
                 print(pyren_encode("\n     %-40s %s" % ("Name", "Type")))
 
             for row in self.detectedEcus:
-                if families[row["idf"]] in list(mod_globals.language_dict.keys()):
-                    fmlyn = mod_globals.language_dict[families[row["idf"]]]
-                    if mod_globals.opt_scan:
+                if families[row["idf"]] in list(mod_globals.LANGUAGE_DICT.keys()):
+                    fmlyn = mod_globals.LANGUAGE_DICT[families[row["idf"]]]
+                    if mod_globals.OPT_SCAN:
                         line = "%-40s %s" % (fmlyn, row["rerr"])
                     else:
                         line = "%-40s %s" % (fmlyn, row["stdType"])
                 else:
-                    if mod_globals.opt_scan:
+                    if mod_globals.OPT_SCAN:
                         line = "%-40s %s" % (row["doc"].strip(), row["rerr"])
                     else:
                         line = "%-40s %s" % (row["doc"].strip(), row["stdType"])
                 listecu.append(line)
         else:
-            if mod_globals.opt_scan:
+            if mod_globals.OPT_SCAN:
                 print(
                     pyren_encode(
                         "\n     %-7s %-6s %-5s %-40s %s"
@@ -497,10 +496,10 @@ class ScanEcus:
                     m_elm.dnat[row["dst"]] = "000"
                     m_elm.snat[row["dst"]] = "000"
                 if row["idf"] in list(families.keys()) and families[row["idf"]] in list(
-                    mod_globals.language_dict.keys()
+                    mod_globals.LANGUAGE_DICT.keys()
                 ):
-                    fmlyn = mod_globals.language_dict[families[row["idf"]]]
-                    if mod_globals.opt_scan:
+                    fmlyn = mod_globals.LANGUAGE_DICT[families[row["idf"]]]
+                    if mod_globals.OPT_SCAN:
                         line = "%-2s(%3s) %-6s %-5s %-40s %s" % (
                             row["dst"],
                             m_elm.dnat[row["dst"]],
@@ -519,7 +518,7 @@ class ScanEcus:
                             row["stdType"],
                         )
                 else:
-                    if mod_globals.opt_scan:
+                    if mod_globals.OPT_SCAN:
                         line = "%-2s(%3s) %-6s %-5s %-40s %s" % (
                             row["dst"],
                             m_elm.dnat[row["dst"]],

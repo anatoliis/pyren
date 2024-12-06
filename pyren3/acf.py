@@ -1,29 +1,23 @@
 #!/usr/bin/env python3
-
-import mod_utils
-from mod_optfile import *
-from mod_scan_ecus import families as families, findTCOM as findTCOM
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
+import argparse
+import os
 import pickle
 
-mod_globals.os = os.name
-
+import config
+import mod_db_manager
+import mod_utils
+from mod_acf_func import acf_load_modules
+from mod_acf_proc import acf_mtc_generate_defaults
+from mod_elm import ELM
+from mod_mtc import acf_get_mtc
+from mod_optfile import optfile
+from mod_scan_ecus import ScanEcus, families as families, findTCOM as findTCOM
+from mod_utils import get_vin
 from serial.tools import list_ports
 
-from mod_scan_ecus import ScanEcus
-from mod_utils import *
-from mod_mtc import acf_getMTC
-from mod_acf_func import acf_loadModules
-from mod_acf_proc import acf_MTC_generateDefaults
-from mod_acf_proc import acf_MTC_optionsExplorer
 
-
-def optParser():
+def opt_parser():
     """Parsing of command line parameters. User should define at least com port name"""
-
-    import argparse
 
     parser = argparse.ArgumentParser(description="acf - auto configuration tool")
 
@@ -103,15 +97,9 @@ def optParser():
         action="store_true",
     )
 
-    parser.add_argument(
-        "--exp", help="Explore options", dest="exp", default=False, action="store_true"
-    )
-
     parser.add_argument("--vin", help="vin number", dest="vinnum", default="")
 
     parser.add_argument("--ref", help="alternative ref", dest="ref", default="")
-
-    parser.add_argument("--mtc", help="alternative mtc", dest="mtc", default="")
 
     parser.add_argument(
         "-vv",
@@ -132,7 +120,7 @@ def optParser():
 
     options = parser.parse_args()
 
-    if not options.port and mod_globals.os != "android":
+    if not options.port:
         parser.print_help()
         iterator = sorted(list(list_ports.comports()))
         print("")
@@ -142,29 +130,27 @@ def optParser():
         print("")
         exit(2)
     else:
-        mod_globals.opt_port = options.port
-        mod_globals.opt_speed = int(options.speed)
-        mod_globals.opt_rate = int(options.rate)
-        mod_globals.opt_lang = options.lang
-        mod_globals.opt_log = options.logfile
-        mod_globals.opt_demo = options.demo
-        mod_globals.opt_scan = options.scan
-        mod_globals.opt_si = options.si
-        mod_globals.opt_cfc0 = options.cfc
-        mod_globals.opt_n1c = options.n1c
-        mod_globals.opt_can2 = options.can2
-        mod_globals.vin = options.vinnum
-        mod_globals.opt_verbose = options.verbose
-        mod_globals.opt_verbose2 = options.verbose2
-        mod_globals.opt_ref = options.ref
-        mod_globals.opt_mtc = options.mtc
-        mod_globals.opt_exp = options.exp
+        config.OPT_PORT = options.port
+        config.OPT_SPEED = int(options.speed)
+        config.OPT_RATE = int(options.rate)
+        config.OPT_LANG = options.lang
+        config.OPT_LOG = options.logfile
+        config.OPT_DEMO = options.demo
+        config.OPT_SCAN = options.scan
+        config.OPT_SI = options.si
+        config.OPT_CFC0 = options.cfc
+        config.OPT_N1C = options.n1c
+        config.OPT_CAN2 = options.can2
+        config.VIN = options.vinnum
+        config.OPT_VERBOSE = options.verbose
+        config.opt_verbose2 = options.verbose2
+        config.OPT_REF = options.ref
 
 
 def main():
     """Main function"""
 
-    optParser()
+    opt_parser()
 
     mod_utils.chk_dir_tree()
     mod_db_manager.find_dbs()
@@ -175,65 +161,65 @@ def main():
         exit()
 
     print("Loading language ")
-    lang = optfile("Location/DiagOnCAN_" + mod_globals.opt_lang + ".bqm", True)
-    mod_globals.language_dict = lang.dict
+    lang = optfile("Location/DiagOnCAN_" + config.OPT_LANG + ".bqm", True)
+    config.LANGUAGE_DICT = lang.dict
     print("Done")
 
-    if not mod_globals.opt_demo:
+    if not config.OPT_DEMO:
         # load connection attributes from savedEcus.p
         print("Opening ELM")
-        elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
+        elm = ELM(config.OPT_PORT, config.OPT_SPEED, config.OPT_LOG)
 
         # change serial port baud rate
-        if mod_globals.opt_speed < mod_globals.opt_rate and not mod_globals.opt_demo:
-            elm.port.soft_boudrate(mod_globals.opt_rate)
+        if config.OPT_SPEED < config.OPT_RATE and not config.OPT_DEMO:
+            elm.port.soft_boudrate(config.OPT_RATE)
 
         print("Loading ECUs list")
 
         # load savedEcus.p
-        se = ScanEcus(elm)  # Prepare list of all ecus
-        se.scanAllEcus()  # First scan of all ecus
-        de = se.detectedEcus
+        scan_ecus = ScanEcus(elm)  # Prepare a list of all ecus
+        scan_ecus.scan_all_ecus()  # First scan of all ecus
+        detected_ecus = scan_ecus.detectedEcus
 
-        if mod_globals.vin == "":
+        if config.VIN == "":
             print("Reading VINs")
-            VIN = get_vin(de, elm)
-            mod_globals.vin = VIN
+            vin = get_vin(detected_ecus, elm)
+            config.VIN = vin
 
     else:
 
         # load connection attribute from platform_attr
-        pl_id_cache = "./cache/platform_attr.p"
-        if os.path.isfile(pl_id_cache):  # if cache exists
-            pl_id = pickle.load(open(pl_id_cache, "rb"))  # load it
+        platform_id_cache = "./cache/platform_attr.p"
+        if os.path.isfile(platform_id_cache):  # if cache exists
+            platform_id = pickle.load(open(platform_id_cache, "rb"))  # load it
         else:  # else
             findTCOM("", "", "", True)  # make cache
-            pl_id = pickle.load(open(pl_id_cache, "rb"))  # load it
-        # but we do not have platform yet, so load data and then continue
+            platform_id = pickle.load(open(platform_id_cache, "rb"))  # load it
+        # but we do not have a platform yet, so load data and then continue
 
-    VIN = mod_globals.vin
+    vin = config.VIN
 
-    if len(VIN) != 17:
+    if len(vin) != 17:
         print("ERROR!!! Can't find any VIN. Check connection")
         exit()
     else:
-        print("\tVIN     :", VIN)
+        print("\tVIN     :", vin)
 
     # print 'Finding MTC'
-    vindata, mtcdata, refdata, platform = acf_getMTC(VIN)
+    vin_data, mtc_data, ref_data, platform = acf_get_mtc(vin)
 
-    if vindata == "" or mtcdata == "" or refdata == "":
+    if vin_data == "" or mtc_data == "" or ref_data == "":
         print("ERROR!!! Can't find MTC data in database")
         exit()
 
-    # print vindata
+    # print vin_data
     print("\tPlatform:", platform)
-    print("\tvindata:", vindata)
-    print("\tmtcdata:", mtcdata)
-    print("\trefdata:", refdata)
+    print("\tvin_data:", vin_data)
+    print("\tmtc_data:", mtc_data)
+    print("\tref_data:", ref_data)
 
     mtc = (
-        mtcdata.replace(" ", "")
+        mtc_data.replace(" ", "")
         .replace("\n", "")
         .replace("\r", "")
         .replace("\t", "")
@@ -241,16 +227,16 @@ def main():
     )
 
     # now we may continue to prepare connection attributes in demo mode
-    if mod_globals.opt_demo:
-        de = []
-        for bus_brp in pl_id[platform].keys():
+    if config.OPT_DEMO:
+        detected_ecus = []
+        for bus_brp in platform_id[platform].keys():
             brp = ""
             if ":" in bus_brp:
                 bus, brp = bus_brp.split(":")
             else:
                 bus = bus_brp
 
-            for idf in pl_id[platform][bus_brp].keys():
+            for idf in platform_id[platform][bus_brp].keys():
                 ent = {}
                 ent["idf"] = idf
                 ent["ecuname"] = ""
@@ -269,7 +255,7 @@ def main():
                 ent["brp"] = brp
                 ent["vehTypeCode"] = platform
                 ent["startDiagReq"] = ""
-                for a in pl_id[platform][bus_brp][idf]:
+                for a in platform_id[platform][bus_brp][idf]:
                     if ent["pin"] == "iso":
                         ent["dst"] = a.split("#")[0]
                     else:
@@ -279,37 +265,32 @@ def main():
                     else:
                         ent["startDiagReq"] += "#" + starts
 
-                de.append(ent)
+                detected_ecus.append(ent)
 
     print("Loading Modules")
-    module_list = acf_loadModules(de, refdata, platform)
+    module_list = acf_load_modules(detected_ecus, ref_data, platform)
 
     print()
 
-    for m in module_list:
-        if "sref" not in list(m.keys()) or m["sref"] == "":
+    for module_ in module_list:
+        if "sref" not in list(module_.keys()) or module_["sref"] == "":
             continue
-        if families[m["idf"]] in list(mod_globals.language_dict.keys()):
-            m["fam_txt"] = mod_globals.language_dict[families[m["idf"]]]
+        if families[module_["idf"]] in list(config.LANGUAGE_DICT.keys()):
+            module_["fam_txt"] = config.LANGUAGE_DICT[families[module_["idf"]]]
         else:
-            m["fam_txt"] = m["idf"]
-        if "sref" in list(m.keys()):
-            print("\n#########   Family : ", m["idf"], " : ", m["fam_txt"])
-            if "mo" in list(m.keys()) and m["mo"] != "":
-                print("%2s : %s : %s" % (m["idf"], m["sref"], m["mo"].NOM))
+            module_["fam_txt"] = module_["idf"]
+        if "sref" in list(module_.keys()):
+            print("\n#########   Family : ", module_["idf"], " : ", module_["fam_txt"])
+            if "mo" in list(module_.keys()) and module_["mo"] != "":
+                print(
+                    "%2s : %s : %s"
+                    % (module_["idf"], module_["sref"], module_["mo"].NOM)
+                )
 
-                acf_MTC_generateDefaults(m, mtc)
-                # acf_MTC_findDiff( m, mtc, elm )
-
+                acf_mtc_generate_defaults(module_, mtc)
+                # acf_MTC_findDiff( module_, mtc, elm )
             else:
-                print("%2s : %s :   " % (m["idf"], m["sref"]))
-
-    if mod_globals.opt_exp:
-        with open("../MTCSAVE/" + VIN + "/mtcexp.txt", "w") as f:
-            for option in sorted(mtc):
-                res = acf_MTC_optionsExplorer(module_list, option, mtc)
-                for l in res:
-                    f.write(l + "\n")
+                print("%2s : %s :   " % (module_["idf"], module_["sref"]))
 
 
 if __name__ == "__main__":

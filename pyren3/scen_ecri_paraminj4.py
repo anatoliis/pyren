@@ -14,8 +14,8 @@ import xml.dom.minidom
 import xml.etree.cElementTree as et
 from collections import OrderedDict
 
+import config
 import mod_db_manager
-import mod_globals
 from mod_ply import *
 from mod_utils import Choice, clear_screen, is_hex, pyren_encode
 
@@ -42,19 +42,19 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(mod_globals.language_dict.keys()):
+        if value.isdigit() and value in list(config.LANGUAGE_DICT.keys()):
             if encode:
-                value = pyren_encode(mod_globals.language_dict[value])
+                value = pyren_encode(config.LANGUAGE_DICT[value])
             else:
-                value = mod_globals.language_dict[value]
+                value = config.LANGUAGE_DICT[value]
         return value
 
     def get_message_by_id(id, encode=True):
-        if id.isdigit() and id in list(mod_globals.language_dict.keys()):
+        if id.isdigit() and id in list(config.LANGUAGE_DICT.keys()):
             if encode:
-                value = pyren_encode(mod_globals.language_dict[id])
+                value = pyren_encode(config.LANGUAGE_DICT[id])
             else:
-                value = mod_globals.language_dict[id]
+                value = config.LANGUAGE_DICT[id]
         return value
 
     #
@@ -122,7 +122,7 @@ def run(elm, ecu, command, data):
             fileRoot.insert(1, el)
 
         tree = et.ElementTree(fileRoot)
-        tree.write(mod_globals.dumps_dir + ScmParam["FileName"])
+        tree.write(config.DUMPS_DIR + ScmParam["FileName"])
 
     def loadDump():
         dumpScmParam = {}
@@ -130,7 +130,7 @@ def run(elm, ecu, command, data):
         clear_screen()
 
         try:
-            dumpData = open(mod_globals.dumps_dir + ScmParam["FileName"], "r")
+            dumpData = open(config.DUMPS_DIR + ScmParam["FileName"], "r")
         except:
             print(get_message_by_id("2194"))
             print()
@@ -199,7 +199,7 @@ def run(elm, ecu, command, data):
         clear_screen()
 
         print(inProgressMessage)
-        if not mod_globals.opt_demo:
+        if not config.OPT_DEMO:
             makeDump()
 
         responses = ""

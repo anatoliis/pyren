@@ -4,8 +4,8 @@ import os
 import shutil
 import zipfile
 
+import config
 import csv
-import mod_globals
 from mod_utils import Choice
 
 
@@ -28,7 +28,7 @@ def acf_saveMTCtoFile(folder, vindata, mtcdata, refdata, platform):
     f.close()
 
     SEFname = "savedEcus.p"
-    if mod_globals.opt_can2:
+    if config.OPT_CAN2:
         SEFname = "savedEcus2.p"
 
     if os.path.exists("./" + SEFname):
@@ -160,7 +160,7 @@ def acf_getMTC(VIN, preferFile=False):
 
     # check and prepare folder for loading or saving data
     mtc_dir = "../MTCSAVE/" + VIN
-    mod_globals.mtcdir = mtc_dir
+    config.MTC_DIR = mtc_dir
     if not os.path.exists(mtc_dir):
         os.makedirs(mtc_dir)
     if not os.path.exists(mtc_dir + "/dumps"):

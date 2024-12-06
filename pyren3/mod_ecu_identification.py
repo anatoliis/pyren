@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 import xml.dom.minidom
-from xml.dom.minidom import parse
 
-import mod_globals
 from mod_ecu_mnemonic import *
 
 
@@ -20,7 +18,7 @@ def get_identification(id, mn, se, elm, calc, raw=False):
     if id.type == "CSTRING" and type(id.value) is str:
         id.value = id.value  # .decode('ascii', 'ignore')
     ######
-    if mod_globals.os == "android":
+    if config.OS == "android":
         return "%-6s %-40s %-20s" % (id.codeMR, id.label, id.value), id.helps, id.value
     else:
         return "%-6s %-50s %-20s" % (id.codeMR, id.label, id.value), id.helps, id.value

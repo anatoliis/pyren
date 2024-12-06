@@ -5,7 +5,6 @@ import struct
 import sys
 
 import mod_db_manager
-import mod_globals
 
 try:
     import pickle as pickle
@@ -26,12 +25,12 @@ class optfile:
         self.dict = {}
 
         # check in cache folder
-        cachename = mod_globals.cache_dir + os.path.basename(filename)[:-4] + ".p"
+        cachename = mod_globals.CACHE_DIR + os.path.basename(filename)[:-4] + ".p"
         if os.path.isfile(cachename):
             self.dict = pickle.load(open(cachename, "rb"))
             return
 
-        if mod_globals.clip_arc != "" and mod_db_manager.file_in_clip(
+        if mod_globals.CLIP_ARC != "" and mod_db_manager.file_in_clip(
             filename[:-4] + ".p"
         ):
             mod_db_manager.extract_from_clip_to_cache(filename[:-4] + ".p")

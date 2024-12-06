@@ -22,12 +22,10 @@ class CsvOption(str, enum.Enum):
 
 
 class Command(str, enum.Enum):
-    MON = "mon"
     CHECK = "check"
     DEMO = "demo"
     SCAN = "scan"
     PYREN = "pyren"
-    DDT = "ddt"
     TERM = "term"
     PIDS = "pids"
 
@@ -96,9 +94,9 @@ def get_args_for_command_and_settings(settings: Settings, cmd: Command) -> list:
         args.append("--log=" + settings.log_name)
     if settings.speed != "38400":
         args.append("-r" + settings.speed)
-    if settings.lang != "" and cmd != "term" and cmd != "ddt":
+    if settings.lang != "" and cmd is not Command.TERM:
         args.append("-L" + settings.lang)
-    if settings.cfc and cmd is not Command.MON:
+    if settings.cfc:
         args.append("--cfc")
     if settings.n1c:
         args.append("--n1c")
@@ -106,7 +104,7 @@ def get_args_for_command_and_settings(settings: Settings, cmd: Command) -> list:
         args.append("--si")
     if settings.csv:
         args.append("--" + settings.csv_option)
-    if settings.dump and cmd not in (Command.MON, Command.TERM):
+    if settings.dump and cmd is not Command.TERM:
         args.append("--dump")
     if settings.can2 and cmd is not Command.TERM:
         args.append("--can2")
@@ -114,8 +112,6 @@ def get_args_for_command_and_settings(settings: Settings, cmd: Command) -> list:
         args = args + settings.options.split()
     if cmd is Command.TERM:
         args.append("--dialog")
-    if cmd is Command.DDT:
-        args.append("--demo")
 
     return args
 
@@ -128,10 +124,6 @@ def run(settings: Settings, cmd: Command) -> None:
         cmdr = __import__("pyren3")
     elif cmd is Command.CHECK:
         cmdr = __import__("cmdr_chkelm")
-    elif cmd is Command.MON:
-        cmdr = __import__("bus_monitor")
-    elif cmd is Command.DDT:
-        cmdr = __import__("mod_ddt")
     elif cmd is Command.TERM:
         cmdr = __import__("mod_term")
     elif cmd is Command.PIDS:

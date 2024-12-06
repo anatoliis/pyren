@@ -37,7 +37,6 @@ else:
             )
         )
 
-
 protocol_handler_packages = [
     "serial.urlhandler",
 ]

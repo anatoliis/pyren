@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-
 import os
 import pickle
 import time
 import zipfile
 
-import mod_globals
+import config
 
 errone = {}
 acfFile = ""
@@ -34,14 +33,14 @@ class ACE:
 
 def get_alternative_refs(platform):
     # finds more frequent use of ref1 from --ref otion in REF.DAT
-    if mod_globals.opt_ref == "":
+    if config.OPT_REF == "":
         return {}
 
     start_time = time.time()
 
     res = {}
     alt = {}
-    for aref in mod_globals.opt_ref.split(";"):
+    for aref in config.OPT_REF.split(";"):
         aref = aref.strip()
         if (len(aref) == 23 or len(aref) == 24) and " " in aref:
             # ref pair defined compleatle
@@ -134,7 +133,7 @@ def acf_find_in_sirev(ref2, platform):
     return ref2.decode("utf-8")
 
 
-def acf_loadModules(de, refdata, platform):
+def acf_load_modules(de, refdata, platform):
     """load modules from CONFIG database"""
 
     global acfFile
@@ -158,7 +157,7 @@ def acf_loadModules(de, refdata, platform):
 
     module_list = []
 
-    # first check mod_globals.opt_ref for alternatives
+    # first check config.opt_ref for alternatives
     alt = get_alternative_refs(platform)
 
     for r in refdata.split(";"):

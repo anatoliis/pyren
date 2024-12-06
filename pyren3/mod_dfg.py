@@ -2,8 +2,8 @@
 
 import xml.dom.minidom
 
+import config
 import mod_db_manager
-import mod_globals
 from mod_utils import ChoiceFromDict, choice_long, clear_screen, pyren_encode
 
 
@@ -195,11 +195,9 @@ class class_dfg:
             print(header)
             menu = {}
             for dk in list(self.domain.keys()):
-                if self.domain[dk]["codetext"] in list(
-                    mod_globals.language_dict.keys()
-                ):
+                if self.domain[dk]["codetext"] in list(config.LANGUAGE_DICT.keys()):
                     menu[dk] = pyren_encode(
-                        mod_globals.language_dict[self.domain[dk]["codetext"]]
+                        config.LANGUAGE_DICT[self.domain[dk]["codetext"]]
                     )
                 else:
                     menu[dk] = pyren_encode(self.domain[dk]["defaultText"])
@@ -210,7 +208,7 @@ class class_dfg:
                 return
             dk = choice[0]
 
-            path = path + mod_globals.language_dict[self.domain[dk]["codetext"]]
+            path = path + config.LANGUAGE_DICT[self.domain[dk]["codetext"]]
             while True:
                 clear_screen()
                 header = self.tcom + " : " + self.defaultText + "\n"
@@ -219,10 +217,10 @@ class class_dfg:
                 menu = {}
                 for fk in list(self.domain[dk]["function"].keys()):
                     if self.domain[dk]["function"][fk]["codetext"] in list(
-                        mod_globals.language_dict.keys()
+                        config.LANGUAGE_DICT.keys()
                     ):
                         menu[fk] = pyren_encode(
-                            mod_globals.language_dict[
+                            config.LANGUAGE_DICT[
                                 self.domain[dk]["function"][fk]["codetext"]
                             ]
                         )
@@ -240,9 +238,7 @@ class class_dfg:
                 path = (
                     path
                     + "/"
-                    + mod_globals.language_dict[
-                        self.domain[dk]["function"][fk]["codetext"]
-                    ]
+                    + config.LANGUAGE_DICT[self.domain[dk]["function"][fk]["codetext"]]
                 )
                 while True:
                     clear_screen()
@@ -258,9 +254,9 @@ class class_dfg:
                     for ek in list(self.domain[dk]["function"][fk]["feature"].keys()):
                         if self.domain[dk]["function"][fk]["feature"][ek][
                             "codetext"
-                        ] in list(mod_globals.language_dict.keys()):
+                        ] in list(config.LANGUAGE_DICT.keys()):
                             menu[ek] = pyren_encode(
-                                mod_globals.language_dict[
+                                mod_globals.LANGUAGE_DICT[
                                     self.domain[dk]["function"][fk]["feature"][ek][
                                         "codetext"
                                     ]

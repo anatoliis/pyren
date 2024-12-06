@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # This is a module that gathers a list of serial ports on POSIXy systems.
-# For some specific implementations, see also list_ports_linux, list_ports_osx
+# For some specific implementations, see also list_ports_linux
 #
 # This file is part of pySerial. https://github.com/pyserial/pyserial
 # (C) 2011-2015 Chris Liechti <cliechti@gmx.net>
@@ -28,27 +28,6 @@ plat = sys.platform.lower()
 
 if plat[:5] == "linux":  # Linux (confirmed)  # noqa
     from serial.tools.list_ports_linux import comports
-
-elif plat[:6] == "darwin":  # OS X (confirmed)
-    from serial.tools.list_ports_osx import comports
-
-elif plat == "cygwin":  # cygwin/win32
-    # cygwin accepts /dev/com* in many contexts
-    # (such as 'open' call, explicit 'ls'), but 'glob.glob'
-    # and bare 'ls' do not; so use /dev/ttyS* instead
-    def comports(include_links=False):
-        devices = glob.glob("/dev/ttyS*")
-        if include_links:
-            devices.extend(list_ports_common.list_links(devices))
-        return [list_ports_common.ListPortInfo(d) for d in devices]
-
-elif plat[:7] == "openbsd":  # OpenBSD
-
-    def comports(include_links=False):
-        devices = glob.glob("/dev/cua*")
-        if include_links:
-            devices.extend(list_ports_common.list_links(devices))
-        return [list_ports_common.ListPortInfo(d) for d in devices]
 
 elif plat[:3] == "bsd" or plat[:7] == "freebsd":
 

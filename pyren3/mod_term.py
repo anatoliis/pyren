@@ -7,7 +7,6 @@ import sys
 import time
 
 import mod_elm
-import mod_globals
 import mod_utils
 
 try:
@@ -28,9 +27,9 @@ debug_mode = False
 
 key_pressed = ""
 
-mod_globals.os = os.name
+mod_globals.OS = os.name
 
-if mod_globals.os == "nt":
+if mod_globals.OS == "nt":
     import pip
 
     try:
@@ -55,16 +54,16 @@ else:
     try:
         import androidhelper as android
 
-        mod_globals.os = "android"
+        mod_globals.OS = "android"
     except:
         try:
             import android
 
-            mod_globals.os = "android"
+            mod_globals.OS = "android"
         except:
             pass
 
-if mod_globals.os != "android":
+if mod_globals.OS != "android":
     try:
         import serial
         from serial.tools import list_ports
@@ -283,7 +282,7 @@ def optParser():
 
     options = parser.parse_args()
 
-    if not options.port and mod_globals.os != "android":
+    if not options.port and mod_globals.OS != "android":
         parser.print_help()
         iterator = sorted(list(list_ports.comports()))
         print("")
@@ -293,17 +292,17 @@ def optParser():
         print("")
         exit(2)
     else:
-        mod_globals.opt_port = options.port
-        mod_globals.opt_rate = int(options.rate)
-        mod_globals.opt_speed = int(options.rate)
+        mod_globals.OPT_PORT = options.port
+        mod_globals.OPT_RATE = int(options.rate)
+        mod_globals.OPT_SPEED = int(options.rate)
         auto_macro = options.macro
-        mod_globals.opt_log = options.logfile
-        mod_globals.opt_demo = options.demo
-        mod_globals.opt_si = options.si
-        mod_globals.opt_cfc0 = options.cfc
-        mod_globals.opt_caf = options.caf
-        mod_globals.opt_n1c = options.n1c
-        mod_globals.opt_minordtc = options.minordtc
+        mod_globals.OPT_LOG = options.logfile
+        mod_globals.OPT_DEMO = options.demo
+        mod_globals.OPT_SI = options.si
+        mod_globals.OPT_CFC0 = options.cfc
+        mod_globals.OPT_CAF = options.caf
+        mod_globals.OPT_N1C = options.n1c
+        mod_globals.OPT_MINOR_DTC = options.minordtc
         auto_dia = options.dia
         debug_mode = options.dbg
 
@@ -430,16 +429,16 @@ class FileChooser:
         try:
             import androidhelper as android
 
-            mod_globals.os = "android"
+            mod_globals.OS = "android"
         except:
             try:
                 import android
 
-                mod_globals.os = "android"
+                mod_globals.OS = "android"
             except:
                 pass
 
-        if mod_globals.os != "android":
+        if mod_globals.OS != "android":
             try:
                 # Python2
                 import tkinter as tk
@@ -902,12 +901,12 @@ def main():
     optParser()
 
     print("Opening ELM")
-    elm = mod_elm.ELM(mod_globals.opt_port, mod_globals.opt_speed, True)
+    elm = mod_elm.ELM(mod_globals.OPT_PORT, mod_globals.OPT_SPEED, True)
 
     # change serial port baud rate
-    if not mod_globals.opt_demo and elm.port and elm.port.portType == 0:
-        if mod_globals.opt_speed < mod_globals.opt_rate:
-            elm.port.soft_boudrate(mod_globals.opt_rate)
+    if not mod_globals.OPT_DEMO and elm.port and elm.port.portType == 0:
+        if mod_globals.OPT_SPEED < mod_globals.OPT_RATE:
+            elm.port.soft_boudrate(mod_globals.OPT_RATE)
 
     elm.currentaddress = "7A"
     elm.currentprotocol = "can"
@@ -925,7 +924,7 @@ def main():
             f.close()
 
     if debug_mode:
-        mod_globals.opt_demo = True
+        mod_globals.OPT_DEMO = True
         elm.loadDump("./dumps/term_test.txt")
         fname = "./macro/test/test.cmd"
         if len(fname) > 0:
