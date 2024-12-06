@@ -1,26 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# qpy:2
-# qpy:kivy
-
-##################################
-#                                #
-#                                #
-#    Version: 3.1 (2-Jan-2023)   #
-#    Author: Shr-Lnm             #
-#                                #
-#                                #
-##################################
-
-__author__ = "Shr-Lnm"
-__copyright__ = "Copyright 2018-2022"
-__credits__ = []
-# __license__ = "GNU"  # Unknown licence!
-__version__ = "3.1.0"  # python3 maybe ?
-__maintainer__ = "Shr-Lnm"
-__email__ = "mshkn@inbox.ru"
-__status__ = "Beta"
-
 import os
 import shutil
 from os import listdir
