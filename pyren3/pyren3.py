@@ -238,13 +238,6 @@ def opt_parser():
         mod_globals.opt_performance = options.performance
         mod_globals.opt_sd = options.sd
         mod_globals.opt_minordtc = options.minordtc
-        if options.dev == "" or len(options.dev) != 4 or options.dev[0:2] != "10":
-            mod_globals.opt_dev = False
-            mod_globals.opt_devses = "1086"
-        else:
-            print("Development MODE")
-            mod_globals.opt_dev = True
-            mod_globals.opt_devses = options.dev
         mod_globals.opt_excel = options.excel
         if mod_globals.opt_excel:
             mod_globals.opt_csv_sep = ";"

@@ -160,14 +160,6 @@ def optParser():
         mod_globals.opt_mtc = options.mtc
         mod_globals.opt_exp = options.exp
 
-        if options.dev == "" or len(options.dev) != 4 or options.dev[0:2] != "10":
-            mod_globals.opt_dev = False
-            mod_globals.opt_devses = "1086"
-        else:
-            print("Development MODE")
-            mod_globals.opt_dev = True
-            mod_globals.opt_devses = options.dev
-
 
 def main():
     """Main function"""

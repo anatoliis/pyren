@@ -1343,20 +1343,6 @@ class ELM:
         # save current session
         saveSession = self.startSession
 
-        # If dev mode then temporary switch to Development Session
-        if mod_globals.opt_dev and command[0:2] in DevList:
-
-            devmode = True
-
-            # open Development session
-            self.start_session(mod_globals.opt_devses)
-            self.lastCMDtime = pyren_time()
-
-            # log switching event
-            if self.lf != 0:
-                self.lf.write("#[" + log_tmstr() + "]" + "Switch to dev mode\n")
-                self.lf.flush()
-
         # If we are on CAN and there was more than keepAlive seconds of silence
         # then send startSession command again
         if (tb - self.lastCMDtime) > self.keepAlive and len(self.startSession) > 0:
