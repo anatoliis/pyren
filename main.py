@@ -98,7 +98,7 @@ def get_args_for_command_and_settings(settings: Settings, cmd: Command) -> list:
         args.append("-r" + settings.speed)
     if settings.lang != "" and cmd != "term" and cmd != "ddt":
         args.append("-L" + settings.lang)
-    if settings.cfc:
+    if settings.cfc and cmd is not Command.MON:
         args.append("--cfc")
     if settings.n1c:
         args.append("--n1c")
@@ -106,7 +106,7 @@ def get_args_for_command_and_settings(settings: Settings, cmd: Command) -> list:
         args.append("--si")
     if settings.csv:
         args.append("--" + settings.csv_option)
-    if settings.dump and cmd is not Command.TERM:
+    if settings.dump and cmd not in (Command.MON, Command.TERM):
         args.append("--dump")
     if settings.can2 and cmd is not Command.TERM:
         args.append("--can2")

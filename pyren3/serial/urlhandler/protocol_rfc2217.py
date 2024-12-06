@@ -8,5 +8,4 @@
 # SPDX-License-Identifier:    BSD-3-Clause
 
 
-
 from serial.rfc2217 import Serial  # noqa

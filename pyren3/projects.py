@@ -1,4 +1,4 @@
-projects = '''
+projects = """
 x84;Megane II;v84.04.xml;v84.05.xml;v84_05_ru.xml
 x84Ph2;Megane II Phase 2;canv84.12.xml;can_v84_10.xml
 x95;Megane III;canv_v95.05_20100223T085813.xml;canv_v9501.xml;canv_v9502.xml;canv_v9503.xml
@@ -44,5 +44,4 @@ xFF;xFF;15-40_V33r2_CAN_V_MESSAGE_LIST_OFFICIAL_12_06_2015_20151120T172620.xml;M
 xZG;xZG;15_40__CAN_V_M5H_v6.0_20141029T163311.xml;MM_2014_CAN_M_v3.8_MESSAGE_LIST_05_12_2014_20151120T173733.xml
 xZH;xZH;15_40__CAN_V_M5H_v6.0_20141029T163311.xml
 xZJ;xZJ;15_40__CAN_V_M5H_v6.0_20141029T163311.xml
-'''
-
+"""
