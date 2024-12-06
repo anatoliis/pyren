@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 import mod_globals
-from pyren3.mod_elm import ELM
+from mod_elm import ELM
 
 try:
     import webbrowser
