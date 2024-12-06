@@ -1,0 +1,16 @@
+{
+  "path": "./pyren3",
+  "port": "192.168.0.10:35000",
+  "lang": "RU",
+  "speed": "38400",
+  "log": true,
+  "logName": "log.txt",
+  "cfc": true,
+  "n1c": false,
+  "si": false,
+  "csv": false,
+  "csvOption": "csv",
+  "dump": true,
+  "can2": false,
+  "options": ""
+}
