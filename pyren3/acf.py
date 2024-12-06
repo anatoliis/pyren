@@ -175,7 +175,7 @@ def main():
     optParser()
 
     mod_utils.chk_dir_tree()
-    mod_db_manager.find_DBs()
+    mod_db_manager.find_dbs()
 
     """Check directories"""
     if not os.path.exists("../BVMEXTRACTION"):

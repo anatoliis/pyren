@@ -1562,7 +1562,7 @@ def main():
     """Main function"""
 
     mod_utils.chk_dir_tree()
-    mod_db_manager.find_DBs()
+    mod_db_manager.find_dbs()
 
     lau = DDTLauncher()
 

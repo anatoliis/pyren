@@ -19,7 +19,7 @@ if __name__ == "__main__":
     if os.path.exists("pyrendata.zip"):
         os.remove("pyrendata.zip")
 
-    mod_db_manager.find_DBs()
+    mod_db_manager.find_dbs()
 
     inputpath = sys.argv[1]
     ecudir = os.path.join(inputpath, "EcuRenault")

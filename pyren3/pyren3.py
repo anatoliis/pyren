@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-
 import argparse
+import os
+import pickle
+import sys
 
-import mod_ddt_utils
-import mod_utils
+import mod_globals
+from mod_db_manager import find_dbs
+from mod_ddt_utils import searchddtroot
 from mod_ecu import ECU
 from mod_elm import ELM
-from mod_optfile import *
+from mod_optfile import optfile
 from mod_scan_ecus import ScanEcus
+from mod_utils import chk_dir_tree, clear_screen, get_vin
 from serial.tools import list_ports
 
 mod_globals.os = os.name
@@ -253,8 +257,8 @@ def opt_parser():
 def main():
     opt_parser()
 
-    mod_utils.chk_dir_tree()
-    mod_db_manager.find_DBs()
+    chk_dir_tree()
+    find_dbs()
 
     print("Opening ELM")
     elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
@@ -300,7 +304,7 @@ def main():
         # Do this check every time
         se.scanAllEcus()  # First scan of all ecus
 
-    mod_globals.vin = mod_utils.get_vin(se.detectedEcus, elm, getFirst=True)
+    mod_globals.vin = get_vin(se.detectedEcus, elm, getFirst=True)
 
     print("Loading language ")
     sys.stdout.flush()
@@ -309,10 +313,10 @@ def main():
     mod_globals.language_dict = lang.dict
     print("Done")
 
-    mod_ddt_utils.searchddtroot()
+    searchddtroot()
 
     while True:
-        mod_utils.clear_screen()
+        clear_screen()
         selected_ecu = se.select_ecu(
             mod_globals.opt_ecu_id
         )  # choose ECU among detected

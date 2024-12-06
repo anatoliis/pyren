@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import glob
 import os
 import re
@@ -12,8 +11,7 @@ db_dir_list = [".", ".."]
 android_dir_list = ["/mnt/sdcard/pyren"]
 
 
-def find_DBs():
-
+def find_dbs():
     global db_dir_list
     global android_dir_list
 
@@ -289,4 +287,4 @@ def extract_from_ddt_to_cache(filename):
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    find_DBs()
+    find_dbs()

@@ -1499,7 +1499,7 @@ def generateSavedEcus(eculist, fileName):
 
 if __name__ == "__main__":
 
-    mod_db_manager.find_DBs()
+    mod_db_manager.find_dbs()
 
     # findTCOM( '', '', '', pl_id=True)
 

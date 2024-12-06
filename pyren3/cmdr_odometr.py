@@ -44,7 +44,7 @@ def prepareECUs():
     pyren.opt_parser()
 
     mod_utils.chk_dir_tree()
-    mod_db_manager.find_DBs()
+    mod_db_manager.find_dbs()
 
     if len(mod_globals.opt_log) == 0:
         mod_globals.opt_log = "commander_log.txt"

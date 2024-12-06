@@ -17,7 +17,6 @@ import mod_globals
 import mod_optfile
 import mod_ply
 import mod_utils
-from mod_ddt import DDT
 from mod_ecu_dataids import ecu_dataids, pyren_encode
 from mod_elm import AllowedList, dnat, pyren_time, snat
 
@@ -638,7 +637,7 @@ class ECU:
 
         page = 0
 
-        displayedDataIds = []  # Current screen dataIds list for csv_only mode
+        displayed_data_ids = []  # Current screen dataIds list for csv_only mode
         responseHistory = OrderedDict()
         requests = OrderedDict()  # list of requests to send in csv_only mode
 
@@ -672,7 +671,7 @@ class ECU:
             self.elm.clear_cache()
             if not (mod_globals.opt_csv_only and requests):
                 for dr in datarefs:
-                    datastr = dr.name
+                    data_string = dr.name
                     help = dr.type
                     if dr.type == "State":
                         if (
@@ -681,7 +680,7 @@ class ECU:
                             and dr
                             in self.Defaults[mod_globals.ext_cur_DTC[:4]].memDatarefs
                         ):
-                            datastr, help, csvd = mod_ecu_state.get_state(
+                            data_string, help, csvd = mod_ecu_state.get_state(
                                 self.States[dr.name],
                                 self.Mnemonics,
                                 self.Services,
@@ -690,7 +689,7 @@ class ECU:
                                 self.DataIds,
                             )
                         else:
-                            datastr, help, csvd = mod_ecu_state.get_state(
+                            data_string, help, csvd = mod_ecu_state.get_state(
                                 self.States[dr.name],
                                 self.Mnemonics,
                                 self.Services,
@@ -704,7 +703,7 @@ class ECU:
                             and dr
                             in self.Defaults[mod_globals.ext_cur_DTC[:4]].memDatarefs
                         ):
-                            datastr, help, csvd = mod_ecu_parameter.get_parameter(
+                            data_string, help, csvd = mod_ecu_parameter.get_parameter(
                                 self.Parameters[dr.name],
                                 self.Mnemonics,
                                 self.Services,
@@ -713,7 +712,7 @@ class ECU:
                                 self.DataIds,
                             )
                         else:
-                            datastr, help, csvd = mod_ecu_parameter.get_parameter(
+                            data_string, help, csvd = mod_ecu_parameter.get_parameter(
                                 self.Parameters[dr.name],
                                 self.Mnemonics,
                                 self.Services,
@@ -721,17 +720,21 @@ class ECU:
                                 self.calc,
                             )
                     if dr.type == "Identification":
-                        datastr, help, csvd = mod_ecu_identification.get_identification(
-                            self.Identifications[dr.name],
-                            self.Mnemonics,
-                            self.Services,
-                            self.elm,
-                            self.calc,
+                        data_string, help, csvd = (
+                            mod_ecu_identification.get_identification(
+                                self.Identifications[dr.name],
+                                self.Mnemonics,
+                                self.Services,
+                                self.elm,
+                                self.calc,
+                            )
                         )
                     if dr.type == "Command":
-                        datastr = dr.name + " [Command] " + self.Commands[dr.name].label
+                        data_string = (
+                            dr.name + " [Command] " + self.Commands[dr.name].label
+                        )
                     if dr.type == "Text":
-                        datastr = dr.name
+                        data_string = dr.name
                         help = ""
                     if (
                         mod_globals.opt_csv_human
@@ -741,7 +744,7 @@ class ECU:
                         csvline += ";" + pyren_encode(csvd)
 
                     if not (mod_globals.opt_csv and mod_globals.opt_csv_only):
-                        strlst.append(datastr)
+                        strlst.append(data_string)
                         if mod_globals.opt_verbose and len(help) > 0:
                             tmp_str = ""
                             for s in help:
@@ -833,7 +836,7 @@ class ECU:
                 if (
                     self.elm.currentScreenDataIds
                 ):  # DataIds list is generated only at first data read pass in csv_only mode
-                    displayedDataIds = (
+                    displayed_data_ids = (
                         self.elm.currentScreenDataIds
                     )  # We save it for file generating function
 
@@ -858,7 +861,7 @@ class ECU:
                                 return
                             self.create_file(
                                 responseHistory,
-                                displayedDataIds,
+                                displayed_data_ids,
                                 csvline,
                                 csvf,
                                 datarefs,
@@ -892,7 +895,7 @@ class ECU:
                             csvf.close()
                             return
                         self.create_file(
-                            responseHistory, displayedDataIds, csvline, csvf, datarefs
+                            responseHistory, displayed_data_ids, csvline, csvf, datarefs
                         )
                     if "DTC" in path:
                         mod_globals.ext_cur_DTC = "000000"
@@ -1478,6 +1481,8 @@ class ECU:
 
             if choice[0][:3] == "DDT":
                 langmap = self.getLanguageMap()
+                from mod_ddt import DDT
+
                 ddt = DDT(self.elm, self.ecudata, langmap)
                 del ddt
                 # gc.collect ()
@@ -1791,7 +1796,7 @@ def main():
     ecuid = sys.argv[1]
     lanid = sys.argv[2]
 
-    mod_db_manager.find_DBs()
+    mod_db_manager.find_dbs()
 
     if len(ecuid) == 5:
         ecuid, fastinit, slowinit, protocol, candst, startDiagReq = find_real_ecuid(
