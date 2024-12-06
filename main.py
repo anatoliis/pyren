@@ -1,21 +1,15 @@
 #!/usr/bin/env python3
 import os
+import pickle
 import re
 import shutil
 import sys
 from os import listdir
 from os.path import isdir, isfile
 
-try:
-    import pickle as pickle
-except:
-    import pickle
-
-csvOptions = ["csv", "csv_human", "csv_only"]
-
-osname = os.name
-
-currenPath = os.path.dirname(os.path.abspath(__file__))
+CSV_OPTIONS = ["csv", "csv_human", "csv_only"]
+OS_NAME = os.name
+CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 for f in listdir("."):
     if (
@@ -23,10 +17,10 @@ for f in listdir("."):
         and f.lower().startswith("pyren3")
         and isdir("./" + f + "/serial")
     ):
-        sys.path.append(os.path.join(currenPath, f))
-        sys.path.append(os.path.join(currenPath, f, "serial"))
+        sys.path.append(os.path.join(CURRENT_PATH, f))
+        sys.path.append(os.path.join(CURRENT_PATH, f, "serial"))
 
-if osname == "nt":
+if OS_NAME == "nt":
     import pip
 
     try:
@@ -36,18 +30,18 @@ if osname == "nt":
 try:
     import androidhelper as android
 
-    osname = "android"
+    OS_NAME = "android"
 except:
     try:
         import android
 
-        osname = "android"
+        OS_NAME = "android"
     except:
         pass
 
 jnius_mode = False
 
-if osname == "android":
+if OS_NAME == "android":
     try:
         from jnius import autoclass
 
@@ -137,7 +131,7 @@ def update_from_gitlab():
     return 0
 
 
-def getPathList():
+def get_path_list():
     return [
         "./" + f
         for f in listdir(".")
@@ -147,10 +141,7 @@ def getPathList():
     ]
 
 
-def getLangList():
-    # if not os.path.exists('./Location'):
-    #    return []
-    # return [f[10:-4] for f in listdir('./Location') if f.lower().startswith('diagoncan_')]
+def get_lang_list():
     return [
         "AL",
         "CNT",
@@ -178,7 +169,7 @@ def getLangList():
     ]
 
 
-def getPortList():
+def get_port_list():
     ret = []
     if os.name != "android":
         if jnius_mode:
@@ -208,13 +199,13 @@ def getPortList():
     return ret
 
 
-class settings:
+class Settings:
     path = ""
     port = ""
     lang = "RU"
     speed = "38400"
-    logName = "log.txt"
-    csvOption = "csv"
+    log_name = "log.txt"
+    csv_option = "csv"
     log = True
     cfc = True
     n1c = False
@@ -234,22 +225,22 @@ class settings:
         if not os.path.isfile("./settings3.p"):
             self.save()
 
-        f = open("./settings3.p", "rb")
-        tmp_dict = pickle.load(f)
-        f.close()
+        file_ = open("./settings3.p", "rb")
+        tmp_dict = pickle.load(file_)
+        file_.close()
         self.__dict__.update(tmp_dict)
 
     def save(self):
-        f = open("./settings3.p", "wb")
-        pickle.dump(self.__dict__, f)
-        f.close()
+        file_ = open("./settings3.p", "wb")
+        pickle.dump(self.__dict__, file_)
+        file_.close()
 
 
 def run(s, cmd):
-    fullpath = os.path.dirname(os.path.realpath(sys.argv[0])) + s.path[1:]
+    full_path = os.path.dirname(os.path.realpath(sys.argv[0])) + s.path[1:]
     os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
-    sys.path.insert(0, fullpath)
+    sys.path.insert(0, full_path)
 
     if cmd == "pyren" or cmd == "scan" or cmd == "demo":
         cmdr = __import__("pyren3")
@@ -277,7 +268,7 @@ def run(s, cmd):
     if cmd == "scan" and cmd != "term":
         sys.argv.append("--scan")
     if s.log:
-        sys.argv.append("--log=" + s.logName)
+        sys.argv.append("--log=" + s.log_name)
     if s.speed != "38400":
         sys.argv.append("-r" + s.speed)
     if s.lang != "" and cmd != "term" and cmd != "ddt":
@@ -289,7 +280,7 @@ def run(s, cmd):
     if s.si:
         sys.argv.append("--si")
     if s.csv:
-        sys.argv.append("--" + s.csvOption)
+        sys.argv.append("--" + s.csv_option)
     if s.dump and cmd != "term":
         sys.argv.append("--dump")
     if s.can2 and cmd != "term":
@@ -306,74 +297,71 @@ def run(s, cmd):
     sys.exit()
 
 
-if osname != "android":
+if OS_NAME != "android":
     try:
         import serial
         from serial.tools import list_ports
     except ImportError:
-        print("\n\n\n\tPleas install additional modules")
+        print("\n\n\n\tPlease install additional modules")
         print("\t\t>sudo easy_install pyserial")
         sys.exit()
+
+    import tkinter as tk
+    import tkinter.font
+    import tkinter.messagebox
+    import tkinter.filedialog
+
     try:
         # Python2
-        import tkinter as tk
         import tkinter.ttk
-        import tkinter.font
-        import tkinter.messagebox
-        import tkinter.filedialog
         import tkinter.simpledialog
     except ImportError:
         # Python3
-        import tkinter as tk
         import tkinter.ttk as ttk
-        import tkinter.font
-        import tkinter.messagebox
-        import tkinter.filedialog
 
-    class desktopGUI(tk.Frame):
+    class DesktopGUI(tk.Frame):
+        settings = None
 
-        save = None
-
-        def guiDestroy(self):
+        def gui_destroy(self):
             self.root.eval("::ttk::CancelRepeat")
             self.root.destroy()
 
-        def cmd_Mon(self):
-            self.saveSettings()
-            self.guiDestroy()
-            run(self.save, "mon")
+        def cmd_mon(self):
+            self.save_settings()
+            self.gui_destroy()
+            run(self.settings, "mon")
 
-        def cmd_Check(self):
-            self.saveSettings()
-            self.guiDestroy()
-            run(self.save, "check")
+        def cmd_check(self):
+            self.save_settings()
+            self.gui_destroy()
+            run(self.settings, "check")
 
-        def cmd_Demo(self):
-            self.saveSettings()
-            self.guiDestroy()
-            run(self.save, "demo")
+        def cmd_demo(self):
+            self.save_settings()
+            self.gui_destroy()
+            run(self.settings, "demo")
 
-        def cmd_Scan(self):
-            self.saveSettings()
-            self.guiDestroy()
-            run(self.save, "scan")
+        def cmd_scan(self):
+            self.save_settings()
+            self.gui_destroy()
+            run(self.settings, "scan")
 
-        def cmd_Start(self):
-            self.saveSettings()
-            self.guiDestroy()
-            run(self.save, "pyren")
+        def cmd_start(self):
+            self.save_settings()
+            self.gui_destroy()
+            run(self.settings, "pyren")
 
-        def cmd_DDT(self):
-            self.saveSettings()
-            self.guiDestroy()
-            run(self.save, "ddt")
+        def cmd_ddt(self):
+            self.save_settings()
+            self.gui_destroy()
+            run(self.settings, "ddt")
 
-        def cmd_Term(self):
-            self.saveSettings()
-            self.guiDestroy()
-            run(self.save, "term")
+        def cmd_term(self):
+            self.save_settings()
+            self.gui_destroy()
+            run(self.settings, "term")
 
-        def cmd_Update(self):
+        def cmd_update(self):
             res = update_from_gitlab()
             if res == 0:
                 tkinter.messagebox.showinfo("Information", "Done")
@@ -382,41 +370,40 @@ if osname != "android":
             elif res == 2:
                 tkinter.messagebox.showerror("Error", "UnZip error")
 
-        def saveSettings(self):
-            self.save.path = self.var_path.get()
-            self.save.port = self.var_port.get().split(";")[0]
-            self.save.lang = self.var_lang.get()
-            self.save.speed = self.var_speed.get()
-            self.save.log = self.var_log.get()
-            self.save.logName = self.var_logName.get()
-            self.save.cfc = self.var_cfc.get()
-            self.save.n1c = self.var_n1c.get()
-            self.save.si = self.var_si.get()
-            self.save.csv = self.var_csv.get()
-            self.save.csvOption = self.var_csvOption.get()
-            self.save.dump = self.var_dump.get()
-            self.save.can2 = self.var_can2.get()
-            self.save.options = self.var_otherOptions.get()
-            self.save.save()
+        def save_settings(self):
+            self.settings.path = self.var_path.get()
+            self.settings.port = self.var_port.get().split(";")[0]
+            self.settings.lang = self.var_lang.get()
+            self.settings.speed = self.var_speed.get()
+            self.settings.log = self.var_log.get()
+            self.settings.log_name = self.var_log_name.get()
+            self.settings.cfc = self.var_cfc.get()
+            self.settings.n1c = self.var_n1c.get()
+            self.settings.si = self.var_si.get()
+            self.settings.csv = self.var_csv.get()
+            self.settings.csv_option = self.var_csv_option.get()
+            self.settings.dump = self.var_dump.get()
+            self.settings.can2 = self.var_can2.get()
+            self.settings.options = self.var_other_options.get()
+            self.settings.save()
 
-        def loadSettings(self):
+        def load_settings(self):
+            self.var_si.set(self.settings.si)
+            self.var_cfc.set(self.settings.cfc)
+            self.var_n1c.set(self.settings.n1c)
+            self.var_csv.set(self.settings.csv)
+            self.var_csv_option.set(self.settings.csv_option)
+            self.var_can2.set(self.settings.can2)
+            self.var_dump.set(self.settings.dump)
+            self.var_lang.set(self.settings.lang)
+            self.var_path.set(self.settings.path)
+            self.var_port.set(self.settings.port)
+            self.var_speed.set(self.settings.speed)
+            self.var_other_options.set(self.settings.options)
+            self.var_log.set(self.settings.log)
+            self.var_log_name.set(self.settings.log_name)
 
-            self.var_si.set(self.save.si)
-            self.var_cfc.set(self.save.cfc)
-            self.var_n1c.set(self.save.n1c)
-            self.var_csv.set(self.save.csv)
-            self.var_csvOption.set(self.save.csvOption)
-            self.var_can2.set(self.save.can2)
-            self.var_dump.set(self.save.dump)
-            self.var_lang.set(self.save.lang)
-            self.var_path.set(self.save.path)
-            self.var_port.set(self.save.port)
-            self.var_speed.set(self.save.speed)
-            self.var_otherOptions.set(self.save.options)
-            self.var_log.set(self.save.log)
-            self.var_logName.set(self.save.logName)
-
-            self.var_speedList = [
+            self.var_speed_list = [
                 "38400",
                 "115200",
                 "230400",
@@ -424,13 +411,13 @@ if osname != "android":
                 "1000000",
                 "2000000",
             ]
-            self.var_langList = getLangList()
-            self.var_pathList = getPathList()
-            self.var_portList = getPortList()
-            self.var_csvOptions = csvOptions
+            self.var_langList = get_lang_list()
+            self.var_path_list = get_path_list()
+            self.var_port_list = get_port_list()
+            self.var_csv_options = CSV_OPTIONS
 
             if len(self.var_path.get()) == 0:
-                self.var_path.set(self.var_pathList[0])
+                self.var_path.set(self.var_path_list[0])
 
             if len(self.var_lang.get()) == 0:
                 ll = self.var_langList
@@ -442,13 +429,13 @@ if osname != "android":
                     self.var_lang.set(ll[0])
 
             if len(self.var_port.get()) == 0:
-                for p in self.var_portList:
+                for p in self.var_port_list:
                     self.var_port.set(p)
                     if "OBD" in p:
                         break
 
         def __init__(self):
-            self.save = settings()
+            self.settings = Settings()
             self.root = tk.Tk()
             self.root.option_add("*Dialog.msg.font", r"Courier\ New 10")
             self.root.geometry("500x500")
@@ -464,20 +451,20 @@ if osname != "android":
             self.var_si = tk.BooleanVar()
 
             self.var_langList = []
-            self.var_pathList = []
-            self.var_portList = []
-            self.var_speedList = []
+            self.var_path_list = []
+            self.var_port_list = []
+            self.var_speed_list = []
 
             self.var_lang = tk.StringVar()
             self.var_path = tk.StringVar()
             self.var_port = tk.StringVar()
             self.var_speed = tk.StringVar()
-            self.var_csvOption = tk.StringVar()
+            self.var_csv_option = tk.StringVar()
 
-            self.var_logName = tk.StringVar()
-            self.var_otherOptions = tk.StringVar()
+            self.var_log_name = tk.StringVar()
+            self.var_other_options = tk.StringVar()
 
-            self.loadSettings()
+            self.load_settings()
 
             self.root.title("Pyren Launcher")
             self.style = tkinter.ttk.Style()
@@ -647,7 +634,7 @@ if osname != "android":
             self.logName.configure(insertbackground="black")
             self.logName.configure(selectbackground="#c4c4c4")
             self.logName.configure(selectforeground="black")
-            self.logName.configure(textvariable=self.var_logName)
+            self.logName.configure(textvariable=self.var_log_name)
 
             self.cbLog = tk.Checkbutton(self.root)
             self.cbLog.place(relx=0.52, rely=0.325, relheight=0.07, relwidth=0.06)
@@ -762,14 +749,14 @@ if osname != "android":
             self.Options.configure(insertbackground="black")
             self.Options.configure(selectbackground="#c4c4c4")
             self.Options.configure(selectforeground="black")
-            self.Options.configure(textvariable=self.var_otherOptions)
+            self.Options.configure(textvariable=self.var_other_options)
 
             self.btnStart = tk.Button(self.root)
             self.btnStart.place(relx=0.01, rely=0.84, height=22, width=100)
             self.btnStart.configure(activebackground="#d9d9d9")
             self.btnStart.configure(activeforeground="#000000")
             self.btnStart.configure(background="#d9d9d9")
-            self.btnStart.configure(command=self.cmd_Start)
+            self.btnStart.configure(command=self.cmd_start)
             self.btnStart.configure(foreground="#000000")
             self.btnStart.configure(highlightbackground="#d9d9d9")
             self.btnStart.configure(highlightcolor="black")
@@ -781,7 +768,7 @@ if osname != "android":
             self.btnDDT.configure(activebackground="#d9d9d9")
             self.btnDDT.configure(activeforeground="#000000")
             self.btnDDT.configure(background="#d9d9d9")
-            self.btnDDT.configure(command=self.cmd_DDT)
+            self.btnDDT.configure(command=self.cmd_ddt)
             self.btnDDT.configure(foreground="#000000")
             self.btnDDT.configure(highlightbackground="#d9d9d9")
             self.btnDDT.configure(highlightcolor="black")
@@ -793,7 +780,7 @@ if osname != "android":
             self.btnScan.configure(activebackground="#d9d9d9")
             self.btnScan.configure(activeforeground="#000000")
             self.btnScan.configure(background="#d9d9d9")
-            self.btnScan.configure(command=self.cmd_Scan)
+            self.btnScan.configure(command=self.cmd_scan)
             self.btnScan.configure(foreground="#000000")
             self.btnScan.configure(highlightbackground="#d9d9d9")
             self.btnScan.configure(highlightcolor="black")
@@ -805,7 +792,7 @@ if osname != "android":
             self.btnDemo.configure(activebackground="#d9d9d9")
             self.btnDemo.configure(activeforeground="#000000")
             self.btnDemo.configure(background="#d9d9d9")
-            self.btnDemo.configure(command=self.cmd_Demo)
+            self.btnDemo.configure(command=self.cmd_demo)
             self.btnDemo.configure(foreground="#000000")
             self.btnDemo.configure(highlightbackground="#d9d9d9")
             self.btnDemo.configure(highlightcolor="black")
@@ -817,7 +804,7 @@ if osname != "android":
             self.btnCheck.configure(activebackground="#d9d9d9")
             self.btnCheck.configure(activeforeground="#000000")
             self.btnCheck.configure(background="#d9d9d9")
-            self.btnCheck.configure(command=self.cmd_Check)
+            self.btnCheck.configure(command=self.cmd_check)
             self.btnCheck.configure(foreground="#000000")
             self.btnCheck.configure(highlightbackground="#d9d9d9")
             self.btnCheck.configure(highlightcolor="black")
@@ -828,7 +815,7 @@ if osname != "android":
             self.btnMon.configure(activebackground="#d9d9d9")
             self.btnMon.configure(activeforeground="#000000")
             self.btnMon.configure(background="#d9d9d9")
-            self.btnMon.configure(command=self.cmd_Mon)
+            self.btnMon.configure(command=self.cmd_mon)
             self.btnMon.configure(foreground="#000000")
             self.btnMon.configure(highlightbackground="#d9d9d9")
             self.btnMon.configure(highlightcolor="black")
@@ -839,7 +826,7 @@ if osname != "android":
             self.btnMac.configure(activebackground="#d9d9d9")
             self.btnMac.configure(activeforeground="#000000")
             self.btnMac.configure(background="#d9d9d9")
-            self.btnMac.configure(command=self.cmd_Term)
+            self.btnMac.configure(command=self.cmd_term)
             self.btnMac.configure(foreground="#000000")
             self.btnMac.configure(highlightbackground="#d9d9d9")
             self.btnMac.configure(highlightcolor="black")
@@ -850,7 +837,7 @@ if osname != "android":
             self.btnUpg.configure(activebackground="#d9d9d9")
             self.btnUpg.configure(activeforeground="#000000")
             self.btnUpg.configure(background="#d9d9d9")
-            self.btnUpg.configure(command=self.cmd_Update)
+            self.btnUpg.configure(command=self.cmd_update)
             self.btnUpg.configure(foreground="#000000")
             self.btnUpg.configure(highlightbackground="#d9d9d9")
             self.btnUpg.configure(highlightcolor="black")
@@ -859,26 +846,26 @@ if osname != "android":
             self.pathList = tkinter.ttk.Combobox(self.root)
             self.pathList.place(relx=0.04, rely=0.05, relheight=0.06, relwidth=0.41)
             self.pathList.configure(values=["./pyren09a", "./pyren09a"])
-            self.pathList.configure(values=self.var_pathList)
+            self.pathList.configure(values=self.var_path_list)
             self.pathList.configure(textvariable=self.var_path)
             self.pathList.configure(takefocus="")
 
             self.portList = tkinter.ttk.Combobox(self.root)
             self.portList.place(relx=0.52, rely=0.05, relheight=0.06, relwidth=0.43)
-            self.portList.configure(values=self.var_portList)
+            self.portList.configure(values=self.var_port_list)
             self.portList.configure(textvariable=self.var_port)
             self.portList.configure(takefocus="")
 
             self.speedList = tkinter.ttk.Combobox(self.root)
             self.speedList.place(relx=0.54, rely=0.17, relheight=0.06, relwidth=0.41)
-            self.speedList.configure(values=self.var_speedList)
+            self.speedList.configure(values=self.var_speed_list)
             self.speedList.configure(textvariable=self.var_speed)
             self.speedList.configure(takefocus="")
 
             self.csvList = tkinter.ttk.Combobox(self.root)
             self.csvList.place(relx=0.10, rely=0.33, relheight=0.06, relwidth=0.35)
-            self.csvList.configure(values=self.var_csvOptions)
-            self.csvList.configure(textvariable=self.var_csvOption)
+            self.csvList.configure(values=self.var_csv_options)
+            self.csvList.configure(textvariable=self.var_csv_option)
             self.csvList.configure(takefocus="")
 
             self.langList = tkinter.ttk.Combobox(self.root)
@@ -895,7 +882,7 @@ if osname != "android":
             pass
 
     def main():
-        gui = desktopGUI()
+        gui = DesktopGUI()
 
     if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
@@ -912,172 +899,177 @@ if osname != "android":
 
 else:
 
-    class androidGUI:
-
-        save = None
+    class AndroidGUI:
+        settings = None
         pl = []
         ll = []
         csvl = []
 
-        def cmd_Mon(self):
-            self.saveSettings()
+        def cmd_mon(self):
+            self.save_settings()
             self.droid.fullDismiss()
-            run(self.save, "mon")
+            run(self.settings, "mon")
 
-        def cmd_Check(self):
-            self.saveSettings()
+        def cmd_check(self):
+            self.save_settings()
             self.droid.fullDismiss()
-            run(self.save, "check")
+            run(self.settings, "check")
 
-        def cmd_Demo(self):
-            self.saveSettings()
+        def cmd_demo(self):
+            self.save_settings()
             self.droid.fullDismiss()
-            run(self.save, "demo")
+            run(self.settings, "demo")
 
-        def cmd_Scan(self):
-            self.saveSettings()
+        def cmd_scan(self):
+            self.save_settings()
             self.droid.fullDismiss()
-            run(self.save, "scan")
+            run(self.settings, "scan")
 
-        def cmd_Start(self):
-            self.saveSettings()
+        def cmd_start(self):
+            self.save_settings()
             self.droid.fullDismiss()
-            run(self.save, "pyren")
+            run(self.settings, "pyren")
 
-        def cmd_Term(self):
-            self.saveSettings()
+        def cmd_term(self):
+            self.save_settings()
             self.droid.fullDismiss()
-            run(self.save, "term")
+            run(self.settings, "term")
 
         def cmd_PIDs(self):
-            self.saveSettings()
+            self.save_settings()
             self.droid.fullDismiss()
-            run(self.save, "pids")
+            run(self.settings, "pids")
 
-        def cmd_Update(self):
-            res = update_from_gitlab()
-            if res == 0:
+        def cmd_update(self):
+            result = update_from_gitlab()
+            if result == 0:
                 self.droid.makeToast("Done")
-            elif res == 1:
+            elif result == 1:
                 self.droid.makeToast("No connection with gitlab.com")
-            elif res == 2:
+            elif result == 2:
                 self.droid.makeToast("UnZip error")
 
-        def saveSettings(self):
-            self.save.path = self.pl[
+        def save_settings(self):
+            self.settings.path = self.pl[
                 int(
                     self.droid.fullQueryDetail("sp_version").result[
                         "selectedItemPosition"
                     ]
                 )
             ]
-            self.save.lang = self.ll[
+            self.settings.lang = self.ll[
                 int(
                     self.droid.fullQueryDetail("sp_language").result[
                         "selectedItemPosition"
                     ]
                 )
             ]
-            self.save.csvOption = self.csvl[
+            self.settings.csv_option = self.csvl[
                 int(self.droid.fullQueryDetail("sp_csv").result["selectedItemPosition"])
             ]
 
             if self.droid.fullQueryDetail("rb_bt").result["checked"] == "false":
-                self.save.port = "192.168.0.10:35000"
+                self.settings.port = "192.168.0.10:35000"
             else:
-                portName = self.dev_list[
+                port_name = self.dev_list[
                     int(
                         self.droid.fullQueryDetail("in_wifi").result[
                             "selectedItemPosition"
                         ]
                     )
                 ]
-                upPortName = portName.upper().split(";")[0]
-                MAC = ""
+                port_name_upper = port_name.upper().split(";")[0]
+                mac_address = ""
                 if (
                     re.match(
                         r"^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$",
-                        upPortName,
+                        port_name_upper,
                     )
-                    or re.match(r"^[0-9A-F]{4}.[0-9A-F]{4}.[0-9A-F]{4}$", upPortName)
-                    or re.match(r"^[0-9A-F]{12}$", upPortName)
+                    or re.match(
+                        r"^[0-9A-F]{4}.[0-9A-F]{4}.[0-9A-F]{4}$", port_name_upper
+                    )
+                    or re.match(r"^[0-9A-F]{12}$", port_name_upper)
                 ):
-                    upPortName = upPortName.replace(":", "").replace(".", "")
-                    MAC = ":".join(
-                        a + b for a, b in zip(upPortName[::2], upPortName[1::2])
+                    port_name_upper = port_name_upper.replace(":", "").replace(".", "")
+                    mac_address = ":".join(
+                        a + b
+                        for a, b in zip(port_name_upper[::2], port_name_upper[1::2])
                     )
-                self.save.port = MAC + ";" + "BT"
+                self.settings.port = mac_address + ";" + "BT"
 
-            self.save.speed = "38400"
+            self.settings.speed = "38400"
 
-            self.save.logName = self.droid.fullQueryDetail("in_logname").result["text"]
+            self.settings.log_name = self.droid.fullQueryDetail("in_logname").result[
+                "text"
+            ]
 
             if self.droid.fullQueryDetail("cb_log").result["checked"] == "false":
-                self.save.log = False
+                self.settings.log = False
             else:
-                self.save.log = True
+                self.settings.log = True
 
             if self.droid.fullQueryDetail("cb_cfc").result["checked"] == "false":
-                self.save.cfc = False
+                self.settings.cfc = False
             else:
-                self.save.cfc = True
+                self.settings.cfc = True
 
             if self.droid.fullQueryDetail("cb_n1c").result["checked"] == "false":
-                self.save.n1c = False
+                self.settings.n1c = False
             else:
-                self.save.n1c = True
+                self.settings.n1c = True
 
             if self.droid.fullQueryDetail("cb_si").result["checked"] == "false":
-                self.save.si = False
+                self.settings.si = False
             else:
-                self.save.si = True
+                self.settings.si = True
 
             if self.droid.fullQueryDetail("cb_csv").result["checked"] == "false":
-                self.save.csv = False
+                self.settings.csv = False
             else:
-                self.save.csv = True
+                self.settings.csv = True
 
             if self.droid.fullQueryDetail("cb_dump").result["checked"] == "false":
-                self.save.dump = False
+                self.settings.dump = False
             else:
-                self.save.dump = True
+                self.settings.dump = True
 
             if self.droid.fullQueryDetail("cb_can2").result["checked"] == "false":
-                self.save.can2 = False
+                self.settings.can2 = False
             else:
-                self.save.can2 = True
+                self.settings.can2 = True
 
-            self.save.options = self.droid.fullQueryDetail("in_options").result["text"]
+            self.settings.options = self.droid.fullQueryDetail("in_options").result[
+                "text"
+            ]
 
-            self.save.save()
+            self.settings.save()
 
-        def loadSettings(self):
-
-            pl = getPathList()
-            if self.save.path in pl:
-                pl.insert(0, pl.pop(pl.index(self.save.path)))
+        def load_settings(self):
+            pl = get_path_list()
+            if self.settings.path in pl:
+                pl.insert(0, pl.pop(pl.index(self.settings.path)))
             self.droid.fullSetList("sp_version", pl)
             self.pl = pl
 
-            ll = getLangList()
-            if self.save.lang in ll:
-                ll.insert(0, ll.pop(ll.index(self.save.lang)))
+            ll = get_lang_list()
+            if self.settings.lang in ll:
+                ll.insert(0, ll.pop(ll.index(self.settings.lang)))
             self.droid.fullSetList("sp_language", ll)
             self.ll = ll
 
-            csvl = csvOptions
-            if self.save.csvOption in csvl:
-                csvl.insert(0, csvl.pop(csvl.index(self.save.csvOption)))
+            csvl = CSV_OPTIONS
+            if self.settings.csv_option in csvl:
+                csvl.insert(0, csvl.pop(csvl.index(self.settings.csv_option)))
             self.droid.fullSetList("sp_csv", csvl)
             self.csvl = csvl
 
-            if self.save.port == "":
-                self.save.port = "192.168.0.10:35000;WiFi"
-                self.dev_list.append(self.save.port)
-            if self.save.port.upper().endswith("BT"):
+            if self.settings.port == "":
+                self.settings.port = "192.168.0.10:35000;WiFi"
+                self.dev_list.append(self.settings.port)
+            if self.settings.port.upper().endswith("BT"):
                 MAC = ""
-                if ";" in self.save.port:
-                    MAC = self.save.port.split(";")[0]
+                if ";" in self.settings.port:
+                    MAC = self.settings.port.split(";")[0]
                 for d in self.dev_list:
                     if MAC in d:
                         self.dev_list.insert(
@@ -1092,45 +1084,45 @@ else:
                 self.droid.fullSetProperty("rb_wifi", "checked", "true")
                 self.droid.fullSetList("in_wifi", self.dev_list)
 
-            self.droid.fullSetProperty("in_logname", "text", self.save.logName)
-            if self.save.log:
+            self.droid.fullSetProperty("in_logname", "text", self.settings.log_name)
+            if self.settings.log:
                 self.droid.fullSetProperty("cb_log", "checked", "true")
             else:
                 self.droid.fullSetProperty("cb_log", "checked", "false")
 
-            if self.save.cfc:
+            if self.settings.cfc:
                 self.droid.fullSetProperty("cb_cfc", "checked", "true")
             else:
                 self.droid.fullSetProperty("cb_cfc", "checked", "false")
 
-            if self.save.n1c:
+            if self.settings.n1c:
                 self.droid.fullSetProperty("cb_n1c", "checked", "true")
             else:
                 self.droid.fullSetProperty("cb_n1c", "checked", "false")
 
-            if self.save.si:
+            if self.settings.si:
                 self.droid.fullSetProperty("cb_si", "checked", "true")
             else:
                 self.droid.fullSetProperty("cb_si", "checked", "false")
 
-            if self.save.csv:
+            if self.settings.csv:
                 self.droid.fullSetProperty("cb_csv", "checked", "true")
             else:
                 self.droid.fullSetProperty("cb_csv", "checked", "false")
 
-            if self.save.dump:
+            if self.settings.dump:
                 self.droid.fullSetProperty("cb_dump", "checked", "true")
             else:
                 self.droid.fullSetProperty("cb_dump", "checked", "false")
 
-            if self.save.can2:
+            if self.settings.can2:
                 self.droid.fullSetProperty("cb_can2", "checked", "true")
             else:
                 self.droid.fullSetProperty("cb_can2", "checked", "false")
 
-            self.droid.fullSetProperty("in_options", "text", self.save.options)
+            self.droid.fullSetProperty("in_options", "text", self.settings.options)
 
-        lay = """<?xml version="1.0" encoding="utf-8"?>
+        layout = """<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
@@ -1381,27 +1373,27 @@ else:
                 if event["name"] == "click":
                     id = event["data"]["id"]
                     if id == "bt_start":
-                        self.cmd_Start()
+                        self.cmd_start()
                     elif id == "bt_scan":
-                        self.cmd_Scan()
+                        self.cmd_scan()
                     elif id == "bt_demo":
-                        self.cmd_Demo()
+                        self.cmd_demo()
                     elif id == "bt_check":
-                        self.cmd_Check()
+                        self.cmd_check()
                     elif id == "bt_mon":
-                        self.cmd_Mon()
+                        self.cmd_mon()
                     elif id == "bt_term":
-                        self.cmd_Term()
+                        self.cmd_term()
                     elif id == "bt_pids":
                         self.cmd_PIDs()
                     elif id == "bt_update":
-                        self.cmd_Update()
+                        self.cmd_update()
 
         def __init__(self):
-            self.save = settings()
+            self.settings = Settings()
             try:
                 self.droid = android.Android()
-                self.droid.fullShow(self.lay)
+                self.droid.fullShow(self.layout)
                 self.dev_list = ["192.168.0.10:35000;WiFi"]
                 try:
                     tmp = self.droid.bluetoothGetBondedDevices().result
@@ -1409,7 +1401,7 @@ else:
                         self.dev_list.append(tmp[i] + ";" + tmp[i + 1])
                 except:
                     pass
-                self.loadSettings()
+                self.load_settings()
                 self.eventloop()
             finally:
                 self.droid.fullDismiss()
@@ -1418,9 +1410,8 @@ else:
             self.droid.fullDismiss()
 
     def main():
-        gui = androidGUI()
+        gui = AndroidGUI()
 
     if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        # os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
         main()
