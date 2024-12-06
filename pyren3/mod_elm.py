@@ -382,7 +382,7 @@ class Port:
                 print(" \n\nERROR: Can't connect to WiFi ELM\n\n")
                 mod_globals.opt_demo = True
                 sys.exit()
-        elif mod_globals.os == "android" and (portName == "bt" or MAC != None):
+        elif mod_globals.os == "android" and (portName == "bt" or MAC is not None):
             self.portType = 2
             self.droid = android.Android()
             if self.droid:
@@ -396,7 +396,7 @@ class Port:
                 time.sleep(1)
                 retry = retry + 1
                 try:
-                    if MAC == None:
+                    if MAC is None:
                         self.btcid = self.droid.bluetoothConnect(
                             "00001101-0000-1000-8000-00805F9B34FB"
                         ).result
@@ -408,7 +408,7 @@ class Port:
                     pass
                 print("Try ", retry, ":", self.btcid)
                 if (
-                    self.btcid != None and len(self.btcid) > 10
+                    self.btcid is not None and len(self.btcid) > 10
                 ):  # uuid length greater then 10
                     break
                 if retry > 5:
@@ -801,7 +801,7 @@ class ELM:
             self.lf = open("./logs/elm_" + mod_globals.opt_log, "at")
             self.vf = open("./logs/ecu_" + mod_globals.opt_log, "at")
 
-        if mod_globals.opt_debug and mod_globals.debug_file == None:
+        if mod_globals.opt_debug and mod_globals.debug_file is None:
             mod_globals.debug_file = open("./logs/debug.txt", "at")
 
         self.lastCMDtime = 0

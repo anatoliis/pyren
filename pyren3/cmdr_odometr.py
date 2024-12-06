@@ -27,7 +27,6 @@ if mod_globals.os != "android":
     except ImportError:
         sys.exit()
 
-from mod_elm import ELM
 from mod_scan_ecus import ScanEcus
 from mod_ecu import ECU
 from mod_optfile import *
@@ -44,7 +43,7 @@ def prepareECUs():
 
     pyren.opt_parser()
 
-    mod_utils.chkDirTree()
+    mod_utils.chk_dir_tree()
     mod_db_manager.find_DBs()
 
     if len(mod_globals.opt_log) == 0:

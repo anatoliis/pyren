@@ -31,7 +31,7 @@ import xml.dom.minidom
 import mod_db_manager
 import mod_elm as m_elm
 import mod_globals
-from mod_utils import Choice, DBG, choice_long, pyren_encode
+from mod_utils import Choice, choice_long, debug, pyren_encode
 
 opt_demo = False
 
@@ -1155,7 +1155,7 @@ class ScanEcus:
             rrsp, rerr = self.request_iso(row)
 
             # debug
-            DBG("rrsp", rrsp)
+            debug("rrsp", rrsp)
 
             if not rrsp:
                 rrsp = ""
@@ -1199,7 +1199,7 @@ class ScanEcus:
                 )  # populate cache for not to ask again
 
         # debug
-        DBG("reqres", str(self.reqres))
+        debug("reqres", str(self.reqres))
 
         compres = False
         if "ERROR" not in rrsp:
@@ -1207,7 +1207,7 @@ class ScanEcus:
             compres = self.compare_ecu(row["ids"], rrsp, row["ids"][0])
 
         # debug
-        DBG("compres", str(str(compres) + " " + row["ecuname"]))
+        debug("compres", str(str(compres) + " " + row["ecuname"]))
 
         if not rerr:
             rerr = ""

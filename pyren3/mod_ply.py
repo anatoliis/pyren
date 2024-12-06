@@ -413,7 +413,7 @@ class Calc(Parser):
             p[0] = self.names[p[1]]
         except LookupError:
             print("PLY:Parser:Undefined name '%s'" % p[1])
-            if re.match("^[a-fA-F0-9]*$", p[1]) != None:
+            if re.match("^[a-fA-F0-9]*$", p[1]) is not None:
                 p[0] = p[1]
             else:
                 p[0] = 0

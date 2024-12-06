@@ -12,7 +12,6 @@ mod_globals.os = os.name
 
 from serial.tools import list_ports
 
-from mod_elm import ELM
 from mod_scan_ecus import ScanEcus
 from mod_utils import *
 from mod_mtc import acf_getMTC
@@ -175,7 +174,7 @@ def main():
 
     optParser()
 
-    mod_utils.chkDirTree()
+    mod_utils.chk_dir_tree()
     mod_db_manager.find_DBs()
 
     """Check directories"""
@@ -206,7 +205,7 @@ def main():
 
         if mod_globals.vin == "":
             print("Reading VINs")
-            VIN = getVIN(de, elm)
+            VIN = get_vin(de, elm)
             mod_globals.vin = VIN
 
     else:

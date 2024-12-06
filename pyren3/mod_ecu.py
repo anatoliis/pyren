@@ -837,7 +837,7 @@ class ECU:
                         self.elm.currentScreenDataIds
                     )  # We save it for file generating function
 
-            if kb.kbhit():
+            if kb.keyboard_hit():
                 c = kb.get_character()
                 if len(c) != 1:
                     continue

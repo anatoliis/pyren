@@ -16,7 +16,13 @@ import time
 
 import serial
 from serial import win32
-from serial.serialutil import (PortNotOpenError, SerialBase, SerialException, SerialTimeoutException, to_bytes)
+from serial.serialutil import (
+    PortNotOpenError,
+    SerialBase,
+    SerialException,
+    SerialTimeoutException,
+    to_bytes,
+)
 
 
 class Serial(SerialBase):

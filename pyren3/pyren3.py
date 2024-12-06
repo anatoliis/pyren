@@ -253,7 +253,7 @@ def opt_parser():
 def main():
     opt_parser()
 
-    mod_utils.chkDirTree()
+    mod_utils.chk_dir_tree()
     mod_db_manager.find_DBs()
 
     print("Opening ELM")
@@ -300,7 +300,7 @@ def main():
         # Do this check every time
         se.scanAllEcus()  # First scan of all ecus
 
-    mod_globals.vin = mod_utils.getVIN(se.detectedEcus, elm, getFirst=True)
+    mod_globals.vin = mod_utils.get_vin(se.detectedEcus, elm, getFirst=True)
 
     print("Loading language ")
     sys.stdout.flush()

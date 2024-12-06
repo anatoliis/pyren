@@ -110,7 +110,6 @@ if mod_globals.os != "android":
         print("\t\t>sudo easy_install pyserial")
         sys.exit()
 
-from mod_elm import ELM
 from mod_scan_ecus import ScanEcus
 from mod_utils import *
 from mod_mtc import acf_getMTC
@@ -840,7 +839,7 @@ def main():
 
     optParser()
 
-    mod_utils.chkDirTree()
+    mod_utils.chk_dir_tree()
     mod_db_manager.find_DBs()
 
     if allvin != "":
@@ -912,7 +911,7 @@ def main():
         de = se.detectedEcus
 
         print("Reading VINs")
-        VIN = getVIN(de, elm)
+        VIN = get_vin(de, elm)
 
     elif vin_opt == "" and os.path.exists("savedVIN.txt"):
 

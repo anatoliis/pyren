@@ -1,17 +1,4 @@
 #!/usr/bin/env python3
-
-"""
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as 
-published by the Free Software Foundation, either version 3 of the 
-License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-"""
-
 import atexit
 import os
 import signal
@@ -20,27 +7,21 @@ import subprocess
 import sys
 
 import mod_globals
+from pyren3.mod_elm import ELM
 
 try:
     import webbrowser
-except:
+except ImportError:
     pass
 
 # Snippet from http://home.wlu.edu/~levys/software/kbhit.py
 
-# Windows
-if os.name == "nt":
-    import msvcrt
+import termios
 
-# Posix (Linux, OS X)
-else:
-    import termios
-
-    from select import select
+from select import select
 
 
 class KBHit:
-
     def __init__(self):
         self.set_get_character_term()
 
@@ -56,34 +37,28 @@ class KBHit:
         self.new_term[3] = self.new_term[3] & ~termios.ICANON & ~termios.ECHO
 
         termios.tcsetattr(self.file_desriptor, termios.TCSANOW, self.new_term)
-        # termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.new_term)
 
         # Support normal-terminal reset at exit
         atexit.register(self.set_normal_term)
 
     def set_normal_term(self):
         """Resets to normal terminal.  On Windows this is a no-op."""
-
         termios.tcsetattr(self.file_desriptor, termios.TCSANOW, self.old_term)
 
-    def get_character(self):
+    @staticmethod
+    def get_character():
         """Returns a keyboard character after kbhit() has been called.
         Should not be called in the same program as getarrow().
         """
-
-        s = ""
-
         s = sys.stdin.read(1)
 
         if len(s) == 0 or ord(s) == 0 or ord(s) == 0xE0:
-            if os.name == "nt":
-                s = msvcrt.getch().decode("utf-8", "ignore")
-            else:
-                s = sys.stdin.read(1)
+            s = sys.stdin.read(1)
 
         return s
 
-    def get_arrow(self):
+    @staticmethod
+    def get_arrow():
         """Returns an arrow-key code after kbhit() has been called. Codes are
         0 : up
         1 : right
@@ -96,13 +71,15 @@ class KBHit:
 
         return vals.index(ord(c.decode("utf-8")))
 
-    def kbhit(self):
+    @staticmethod
+    def keyboard_hit():
         """Returns True if keyboard character was hit, False otherwise."""
         try:
-            dr, dw, de = select([sys.stdin], [], [], 0)
-        except:
-            pass
-        return dr != []
+            dr, _, _ = select([sys.stdin], [], [], 0)
+        except Exception:
+            return False
+        else:
+            return bool(dr)
 
 
 def Choice(list, question):
@@ -135,81 +112,75 @@ def Choice(list, question):
             return [d[ch], ch]
 
 
-def choice_long(list, question, header=""):
+def choice_long(list_: list[str], question: str, header: str = ""):
     """Util for make choice from long list"""
     d = {}
-    c = 1
-    exitNumber = 0
+    char = 1
     page = 0
     page_size = 20
 
-    for s in list:
+    for s in list_:
         if s.lower() == "<up>" or s.lower() == "<exit>":
-            exitNumber = c
             d["Q"] = s
         else:
-            d[str(c)] = s
-        c = c + 1
+            d[str(char)] = s
+        char = char + 1
 
     while True:
         clear_screen()
-        # os.system('cls' if os.name == 'nt' else 'clear')      # clear screen
-        # print chr(27)+"[2J"+chr(27)+"[;H",                    # clear ANSI screen (thanks colorama for windows)
 
         if len(header):
             print(pyren_encode(header))
 
-        c = page * page_size
-        for s in list[page * page_size : (page + 1) * page_size]:
-            c = c + 1
+        char = page * page_size
+        for s in list_[page * page_size : (page + 1) * page_size]:
+            char = char + 1
             if s.lower() == "<up>" or s.lower() == "<exit>":
                 print("%-2s - %s" % ("Q", pyren_encode(s)))
             else:
-                print("%-2s - %s" % (c, pyren_encode(s)))
+                print("%-2s - %s" % (char, pyren_encode(s)))
 
-        if len(list) > page_size:
+        if len(list_) > page_size:
             if page > 0:
                 print("%-2s - %s" % ("P", "<prev page>"))
-            if (page + 1) * page_size < len(list):
+            if (page + 1) * page_size < len(list_):
                 print("%-2s - %s" % ("N", "<next page>"))
 
         while True:
             try:
-                ch = input(question)
+                char = input(question)
             except (KeyboardInterrupt, SystemExit):
-                print()
-                print()
+                print("\n\n")
                 sys.exit()
 
-            if ch == "q":
-                ch = "Q"
-            if ch == "p":
-                ch = "P"
-            if ch == "n":
-                ch = "N"
+            if char == "q":
+                char = "Q"
+            if char == "p":
+                char = "P"
+            if char == "n":
+                char = "N"
 
-            if ch == "N" and (page + 1) * page_size < len(list):
+            if char == "N" and (page + 1) * page_size < len(list_):
                 page = page + 1
                 break
-            if ch == "P" and page > 0:
+            if char == "P" and page > 0:
                 page = page - 1
                 break
 
-            if ch == "cmd":
+            if char == "cmd":
                 mod_globals.opt_cmd = True
-            if ch in d.keys():
-                return [d[ch], ch]
+                print("mod_globals.opt_cmd set to 'True'")
+            if char in d.keys():
+                return [d[char], char]
 
 
 def ChoiceFromDict(dict, question, showId=True):
     """Util for make choice from dictionary"""
     d = {}
     c = 1
-    exitNumber = 0
     for k in sorted(dict.keys()):
         s = dict[k]
         if k.lower() == "<up>" or k.lower() == "<exit>":
-            exitNumber = c
             print("%s - %s" % ("Q", pyren_encode(s)))
             d["Q"] = k
         else:
@@ -222,38 +193,26 @@ def ChoiceFromDict(dict, question, showId=True):
 
     while True:
         try:
-            ch = input(question)
+            char = input(question)
         except (KeyboardInterrupt, SystemExit):
-            print()
-            print()
+            print("\n\n")
             sys.exit()
-        if ch == "q":
-            ch = "Q"
-        if ch in list(d.keys()):
-            return [d[ch], ch]
+        if char == "q":
+            char = "Q"
+        if char in list(d.keys()):
+            return [d[char], char]
 
 
 def pyren_encode(inp):
     return inp
-    # if mod_globals.os == 'android':
-    #  return inp.encode('utf-8', errors='replace')
-    # else:
-    #  return inp.encode(sys.stdout.encoding, errors='replace')
 
 
 def pyren_decode(inp):
     return inp
-    # if mod_globals.os == 'android':
-    #  return inp.decode('utf-8', errors='replace')
-    # else:
-    #  return inp.decode(sys.stdout.encoding, errors='replace')
 
 
 def pyren_decode_i(inp):
-    if mod_globals.os == "android":
-        return inp.decode("utf-8", errors="ignore")
-    else:
-        return inp.decode(sys.stdout.encoding, errors="ignore")
+    return inp.decode(sys.stdout.encoding, errors="ignore")
 
 
 def clear_screen():
@@ -267,60 +226,59 @@ def up_screen():
     sys.stdout.write(chr(27) + "[;H")
 
 
-def hex_VIN_plus_CRC(VIN, plusCRC=True):
+def hex_vin_plus_crc(vin, plus_crc: bool = True):
     '''The VIN must be composed of 17 alphanumeric characters apart from "I" and "O"'''
 
     # VIN    ='VF1LM1B0H11111111'
-    VIN = VIN.upper()
-    hexVIN = ""
-    CRC = 0xFFFF
+    vin = vin.upper()
+    hex_vin = ""
+    crc = 0xFFFF
 
-    for c in VIN:  # for every byte in VIN
-        b = ord(c)  # get ASCII
-        hexVIN = hexVIN + hex(b)[2:].upper()
+    for char in vin:  # for every byte in VIN
+        b = ord(char)  # get ASCII
+        hex_vin = hex_vin + hex(b)[2:].upper()
         for i in range(8):  # for every bit
-            if (CRC ^ b) & 0x1:
-                CRC = CRC >> 1
-                CRC = CRC ^ 0x8408
+            if (crc ^ b) & 0x1:
+                crc = crc >> 1
+                crc = crc ^ 0x8408
                 b = b >> 1
             else:
-                CRC = CRC >> 1
+                crc = crc >> 1
                 b = b >> 1
 
     # invert
-    CRC = CRC ^ 0xFFFF
+    crc = crc ^ 0xFFFF
 
     # swap bytes
-    b1 = (CRC >> 8) & 0xFF
-    b2 = CRC & 0xFF
-    CRC = ((b2 << 8) | b1) & 0xFFFF
+    b1 = (crc >> 8) & 0xFF
+    b2 = crc & 0xFF
+    crc = ((b2 << 8) | b1) & 0xFFFF
 
-    sCRC = hex(CRC)[2:].upper()
-    sCRC = "0" * (4 - len(sCRC)) + sCRC
+    s_crc = hex(crc)[2:].upper()
+    s_crc = "0" * (4 - len(s_crc)) + s_crc
 
     # result
-    if plusCRC:
-        return hexVIN + sCRC
+    if plus_crc:
+        return hex_vin + s_crc
     else:
-        return hexVIN
+        return hex_vin
 
 
 # Test
 if __name__ == "__main__":
-
     kb = KBHit()
 
     print("Hit any key, or ESC to exit")
 
     while True:
-
-        if kb.kbhit():
+        if kb.keyboard_hit():
             c = kb.get_character()
             if ord(c) == 27:  # ESC
                 break
             print(c)
 
     kb.set_normal_term()
+
 
 # Convert ASCII to HEX
 
@@ -346,25 +304,24 @@ def StringToIntToHex(DEC):
     return hDEC[2:].zfill(2).upper()
 
 
-def loadDumpToELM(ecuname, elm):
-    ecudump = {}
-    dumpname = ""
+def load_dump_to_elm(ecu_name: str, elm: ELM):
+    ecu_dump = {}
 
-    flist = []
+    files_list = []
     for root, dirs, files in os.walk("./dumps"):
-        for f in files:
-            if (ecuname + ".txt") in f:
-                flist.append(f)
+        for file_ in files:
+            if (ecu_name + ".txt") in file_:
+                files_list.append(file_)
 
-    if len(flist) == 0:
+    if len(files_list) == 0:
         return
-    flist.sort()
-    dumpname = os.path.join("./dumps/", flist[-1])
+    files_list.sort()
+    dump_name = os.path.join("./dumps/", files_list[-1])
 
     # debug
-    print("Loading:", dumpname)
+    print("Loading:", dump_name)
 
-    df = open(dumpname, "rt")
+    df = open(dump_name, "rt")
     lines = df.readlines()
     df.close()
 
@@ -372,12 +329,12 @@ def loadDumpToELM(ecuname, elm):
         l = l.strip().replace("\n", "")
         if ":" in l:
             req, rsp = l.split(":")
-            ecudump[req] = rsp
+            ecu_dump[req] = rsp
 
-    elm.setDump(ecudump)
+    elm.setDump(ecu_dump)
 
 
-def chkDirTree():
+def chk_dir_tree():
     """Check direcories"""
     if not os.path.exists("./cache"):
         os.makedirs("./cache")
@@ -395,7 +352,7 @@ def chkDirTree():
         os.makedirs("../MTCSAVE")
 
 
-def getVIN(de, elm, getFirst=False):
+def get_vin(de, elm, getFirst=False):
     """getting VINs from every ECU"""
     """    de  - list of detected ECUs  """
     """    elm - reference to ELM class """
@@ -405,7 +362,7 @@ def getVIN(de, elm, getFirst=False):
 
         # init elm
         if mod_globals.opt_demo:  # try to load dump
-            loadDumpToELM(e["ecuname"], elm)
+            load_dump_to_elm(e["ecuname"], elm)
         else:
             if e["pin"].lower() == "can":
                 elm.init_can()
@@ -464,20 +421,18 @@ def getVIN(de, elm, getFirst=False):
     return choice[0]
 
 
-def DBG(tag, s):
-    if mod_globals.opt_debug and mod_globals.debug_file != None:
+def debug(tag: str, s: str) -> None:
+    if mod_globals.opt_debug and mod_globals.debug_file is not None:
         mod_globals.debug_file.write("### " + tag + "\n")
         mod_globals.debug_file.write('"' + s + '"\n')
 
 
-def isHex(s):
-    return all(c in string.hexdigits for c in s)
+def is_hex(string_: str) -> bool:
+    return all(char in string.hexdigits for char in string_)
 
 
-def kill_server():
-    if mod_globals.doc_server_proc is None:
-        pass
-    else:
+def kill_server() -> None:
+    if mod_globals.doc_server_proc is not None:
         os.kill(mod_globals.doc_server_proc.pid, signal.SIGTERM)
 
 
@@ -485,7 +440,7 @@ def show_doc(addr, id):
     if mod_globals.vin == "" and not mod_globals.opt_sd:
         return
 
-    if mod_globals.doc_server_proc == None:
+    if mod_globals.doc_server_proc is None:
         mod_globals.doc_server_proc = subprocess.Popen(
             ["python3", "-m", "http.server", "59152"]
         )

@@ -12,6 +12,7 @@ def trim(st):
     res = "".join(char for char in st if char in printable)
     return res.strip()
 
+
 import mod_ddt_utils
 import mod_db_manager
 from mod_ddt_request import *
@@ -177,9 +178,9 @@ class DDTECU:
         return ""
 
     def setELM(self, elm):
-        if self.elm != None:
+        if self.elm is not None:
             del self.elm
-        if elm != None:
+        if elm is not None:
             self.elm = elm
 
     def setLangMap(self, langmap):
@@ -473,7 +474,7 @@ class DDTECU:
         self.elmAccess.release()
 
         # log this request to ddt log
-        if self.screen != None and (not cache or req not in self.sentRequests):
+        if self.screen is not None and (not cache or req not in self.sentRequests):
             tmstr = datetime.now().strftime("%H:%M:%S.%f")[:-3]
             self.screen.addToLog(tmstr + ">" + req + "  Rcvd:" + rsp)
 
@@ -565,7 +566,7 @@ class DDTECU:
                 return mod_globals.none_val
 
         # find appropriate request r
-        if request == None:
+        if request is None:
             if data in list(self.req4data.keys()) and self.req4data[data] in list(
                 self.requests.keys()
             ):
@@ -597,7 +598,7 @@ class DDTECU:
             return mod_globals.none_val
 
         # if response not defined as an argument
-        if responce == None:
+        if responce is None:
             # send new request or get response from cache
             resp = self.elmRequest(r.SentBytes)
         else:
@@ -701,14 +702,14 @@ class DDTECU:
                 wr = r
                 break
 
-        if rr == None:
+        if rr is None:
             return "Didn't find command for DataRead"
 
-        if wr == None:
+        if wr is None:
             result += "Didn't find command for DataWrite\n\n"
 
         rdi = rr.ReceivedDI[parName]
-        if wr != None:
+        if wr is not None:
             sdi = wr.SentDI[parName]
 
             if rr.MinBytes != len(wr.SentBytes) // 2:
@@ -803,7 +804,7 @@ class DDTECU:
 
         for f in ["exit_if", "exit_if_not"]:
             result += f + func_params
-        if wr != None:
+        if wr is not None:
             result += "set_bits" + func_params
             result += "xor_bits" + func_params_xor
 

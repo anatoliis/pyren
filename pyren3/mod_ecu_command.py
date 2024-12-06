@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 import string
-import sys
 import xml.dom.minidom
-from xml.dom.minidom import parse
 
 from mod_ecu_identification import get_identification
 from mod_ecu_parameter import get_parameter
@@ -11,7 +9,13 @@ from mod_ecu_scenario import playScenario
 from mod_ecu_screen import *
 from mod_ecu_service import *
 from mod_ecu_state import get_state
-from mod_utils import ASCIITOHEX, ChoiceFromDict, StringToIntToHex, clear_screen, hex_VIN_plus_CRC
+from mod_utils import (
+    ASCIITOHEX,
+    ChoiceFromDict,
+    StringToIntToHex,
+    clear_screen,
+    hex_vin_plus_crc,
+)
 
 
 def runCommand(command, ecu, elm, param="", cmdt="HEX"):
@@ -92,7 +96,7 @@ def runCommand(command, ecu, elm, param="", cmdt="HEX"):
                     continue
                 chosenParameter = ch
             if cmdt == "VIN" and len(ch) == 17 and ("I" not in ch) and ("O" not in ch):
-                chosenParameter = hex_VIN_plus_CRC(ch)
+                chosenParameter = hex_vin_plus_crc(ch)
             if cmdt == "DEC" and all(c in string.digits for c in ch):
                 chosenParameter = StringToIntToHex(ch)
                 # if parsize > 0 and len(chosenParameter) > parsize * 2:
@@ -405,7 +409,7 @@ def executeCommand(command, ecu, elm, path):
                     and ("I" not in ch)
                     and ("O" not in ch)
                 ):
-                    chosenParameter = hex_VIN_plus_CRC(ch)
+                    chosenParameter = hex_vin_plus_crc(ch)
                     break
                 if cmdt == "DEC" and all(c in string.digits for c in ch):
                     chosenParameter = StringToIntToHex(ch)

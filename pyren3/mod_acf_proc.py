@@ -2,7 +2,7 @@
 
 import mod_globals
 from mod_mtc import acf_MTC_compare
-from mod_utils import hex_VIN_plus_CRC, loadDumpToELM, pyren_encode
+from mod_utils import hex_vin_plus_crc, load_dump_to_elm, pyren_encode
 
 
 def acf_pack_command(write, req, dat, cmd, tram, mask):
@@ -186,8 +186,8 @@ def acf_MTC_generateDefaults(m, mtc):
 
     # write trailer
     sf.write("\n# VIN programming !!!check the command!!!\n")
-    sf.write("#2EF190" + hex_VIN_plus_CRC(mod_globals.vin, False) + "\n")
-    sf.write("#3B81" + hex_VIN_plus_CRC(mod_globals.vin, True) + "\n")
+    sf.write("#2EF190" + hex_vin_plus_crc(mod_globals.vin, False) + "\n")
+    sf.write("#3B81" + hex_vin_plus_crc(mod_globals.vin, True) + "\n")
     sf.write("\n# reset ecu or disconnect the battary!!!check the command!!!\n")
     sf.write("#1101\n\n")
     sf.write("exit\n")
@@ -207,7 +207,7 @@ def acf_MTC_findDiff(m, mtc, elm):
 
     # init elm
     if mod_globals.opt_demo:  # try to load dump
-        loadDumpToELM(m["ecuname"], elm)
+        load_dump_to_elm(m["ecuname"], elm)
     else:
         if m["pin"].lower() == "can":
             elm.init_can()

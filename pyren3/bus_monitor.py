@@ -180,7 +180,7 @@ class DDT_MON:
 
         global show_loc
 
-        if show_loc == None or show_loc.isSet():
+        if show_loc is None or show_loc.isSet():
             self.sendAllow.clear()
             return
 
@@ -452,7 +452,7 @@ def main():
 
     optParser()
 
-    mod_utils.chkDirTree()
+    mod_utils.chk_dir_tree()
     mod_db_manager.find_DBs()
 
     if len(candef) == 0:
@@ -482,7 +482,7 @@ def main():
 
     while 1:
         c = ""
-        if kb.kbhit():
+        if kb.keyboard_hit():
             c = kb.get_character()
             if c == "q" or c == "Q" or c == "\x71" or c == "\x51":
                 print()

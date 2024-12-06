@@ -74,7 +74,6 @@ if mod_globals.os != "android":
         print("\t\t>sudo easy_install pyserial")
         sys.exit()
 
-from mod_elm import ELM
 from mod_optfile import *
 from mod_utils import *
 
@@ -596,7 +595,7 @@ class DDTLauncher:
     def enableELM(self):
 
         # print self.elm
-        if self.elm != None:
+        if self.elm is not None:
             try:
                 self.elm.port.hdr.close()
                 del self.elm
@@ -759,7 +758,7 @@ class DDTLauncher:
         except:
             return
 
-        if self.elm == None or self.elm.port == 0:
+        if self.elm is None or self.elm.port == 0:
             tkinter.messagebox.showinfo(
                 "ERROR", "ELM is not connected. You may work only offline."
             )
@@ -844,7 +843,7 @@ class DDTLauncher:
         except:
             return
 
-        if self.elm == None or self.elm.port == 0:
+        if self.elm is None or self.elm.port == 0:
             tkinter.messagebox.showinfo(
                 "ERROR", "ELM is not connected. You may work only offline."
             )
@@ -863,7 +862,7 @@ class DDTLauncher:
 
         self.currentEcu = self.carecus.index(ce)
 
-        if ce == None:
+        if ce is None:
             return
 
         # ce = self.getSelectedECU()
@@ -911,7 +910,7 @@ class DDTLauncher:
 
     def ConnectBtnClick(self):
         ecu = self.getSelectedECU()
-        if ecu == None or ecu["xml"] == "":
+        if ecu is None or ecu["xml"] == "":
             tkinter.messagebox.showinfo(
                 "INFO", "Selected ECU is undefined. Please scan it first."
             )
@@ -1123,7 +1122,7 @@ class DDTLauncher:
     def DemoBtnClick(self):
 
         ecu = self.getSelectedECU()
-        if ecu == None or ecu["xml"] == "":
+        if ecu is None or ecu["xml"] == "":
             tkinter.messagebox.showinfo(
                 "INFO", "Selected ECU is undefined. Please scan it first."
             )
@@ -1272,7 +1271,7 @@ class DDTLauncher:
 
         self.currentEcu = self.carecus.index(ecu)
 
-        if ecu == None:
+        if ecu is None:
             return
 
         self.ecudlg = tk.Toplevel()
@@ -1466,7 +1465,7 @@ class DDTLauncher:
         return
 
     def ecuSaveBtnClick(self):
-        if self.currentEcu == None:
+        if self.currentEcu is None:
             return
         self.carecus[self.currentEcu]["type"] = self.dv_type.get()
         self.carecus[self.currentEcu]["name"] = self.dv_name.get()
@@ -1504,7 +1503,7 @@ class DDTLauncher:
 
     def getDumpListByXml(self, xmlname=None):
 
-        if xmlname == None:
+        if xmlname is None:
             self.v_dumpList = []
             xml = self.dv_xml.get()[:-4]
             for root, dirs, files in os.walk("./dumps"):
@@ -1562,7 +1561,7 @@ class DDTLauncher:
 def main():
     """Main function"""
 
-    mod_utils.chkDirTree()
+    mod_utils.chk_dir_tree()
     mod_db_manager.find_DBs()
 
     lau = DDTLauncher()

@@ -17,7 +17,7 @@ from collections import OrderedDict
 import mod_db_manager
 import mod_globals
 from mod_ply import *
-from mod_utils import Choice, clear_screen, isHex, pyren_encode
+from mod_utils import Choice, clear_screen, is_hex, pyren_encode
 
 
 def run(elm, ecu, command, data):
@@ -103,7 +103,7 @@ def run(elm, ecu, command, data):
         idsDump = OrderedDict()
         for name, value in ScmSet["CommandIdentifications"].items():
             idValue = ecu.get_id(ScmSet["Identifications"][value], True)
-            if isHex(idValue):
+            if is_hex(idValue):
                 idsDump[ScmSet["Commands"][name]] = idValue
         return idsDump
 
@@ -207,7 +207,7 @@ def run(elm, ecu, command, data):
         clear_screen()
 
         for name, value in ScmSet["CommandParameters"].items():
-            if isHex(value):
+            if is_hex(value):
                 responses += ecu.run_cmd(ScmSet["Commands"][name], value)
             else:
                 result = re.search(r"[^a-zA-Z\d\s:]", value)
@@ -218,7 +218,7 @@ def run(elm, ecu, command, data):
 
                     for param in parameters:
                         paramValue = ecu.get_id(ScmSet["Identifications"][param], True)
-                        if not isHex(paramValue):
+                        if not is_hex(paramValue):
                             comp = ""
                             break
                         comp = comp.replace(
@@ -242,7 +242,7 @@ def run(elm, ecu, command, data):
 
                 else:
                     idValue = ecu.get_id(ScmSet["Identifications"][value], True)
-                    if isHex(idValue):
+                    if is_hex(idValue):
                         responses += ecu.run_cmd(ScmSet["Commands"][name], idValue)
 
         print("*" * 80)

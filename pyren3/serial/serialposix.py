@@ -36,7 +36,14 @@ import sys
 import termios
 
 import serial
-from serial.serialutil import (PortNotOpenError, SerialBase, SerialException, SerialTimeoutException, Timeout, to_bytes)
+from serial.serialutil import (
+    PortNotOpenError,
+    SerialBase,
+    SerialException,
+    SerialTimeoutException,
+    Timeout,
+    to_bytes,
+)
 
 
 class PlatformSpecificBase(object):

@@ -14,7 +14,7 @@ import xml.dom.minidom
 
 import mod_db_manager
 import mod_globals
-from mod_utils import clear_screen, hex_VIN_plus_CRC, pyren_encode
+from mod_utils import clear_screen, hex_vin_plus_crc, pyren_encode
 
 
 def run(elm, ecu, command, data):
@@ -112,7 +112,7 @@ def run(elm, ecu, command, data):
 
     cmd = ecu.get_ref_cmd(get_message("ConfigurationName"))
 
-    vin_crc = hex_VIN_plus_CRC(ch)
+    vin_crc = hex_vin_plus_crc(ch)
 
     print()
     ch = input("Are you ready to change the VIN? <yes/no>:")

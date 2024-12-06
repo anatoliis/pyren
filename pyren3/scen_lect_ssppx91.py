@@ -407,7 +407,7 @@ def run(elm, ecu, command, data):
                     return
             if len(readCodes) == 4:
                 break
-            if kb.kbhit():
+            if kb.keyboard_hit():
                 return
 
         print(finishedInfo)

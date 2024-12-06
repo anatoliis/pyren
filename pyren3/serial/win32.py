@@ -10,7 +10,17 @@
 # pylint: disable=invalid-name,too-few-public-methods,protected-access,too-many-instance-attributes
 
 
-from ctypes import (POINTER, Structure, Union, WinDLL, c_char, c_int64, c_ulong, c_void_p, sizeof)
+from ctypes import (
+    POINTER,
+    Structure,
+    Union,
+    WinDLL,
+    c_char,
+    c_int64,
+    c_ulong,
+    c_void_p,
+    sizeof,
+)
 from ctypes.wintypes import BOOL, BYTE, DWORD, HANDLE, LPCWSTR, WORD
 
 _stdcall_libraries = {}

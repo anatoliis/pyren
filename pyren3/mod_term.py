@@ -403,7 +403,7 @@ class FileChooser:
                 self.folder = sf
                 self.newFolderSelected()
             event = self.droid.eventWait(50).result
-            if event == None:
+            if event is None:
                 continue
             if event["name"] == "click":
                 id = event["data"]["id"]
@@ -738,7 +738,7 @@ def wait_kb(ttw):
     kb = mod_utils.KBHit()
 
     while mod_elm.pyren_time() < (st + ttw):
-        if kb.kbhit():
+        if kb.keyboard_hit():
             key_pressed = kb.get_character()
         time.sleep(0.1)
 
@@ -893,7 +893,7 @@ def main():
     global macro
     global var
 
-    mod_utils.chkDirTree()
+    mod_utils.chk_dir_tree()
 
     init_macro()
     init_var()

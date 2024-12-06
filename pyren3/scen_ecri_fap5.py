@@ -154,7 +154,7 @@ def run(elm, ecu, command, data):
         print()
         print("Strat the engine and press ENTER to continue")
         print("Q to exit or A to continue anyway")
-        if kb.kbhit():
+        if kb.keyboard_hit():
             c = kb.get_character()
             if len(c) != 1:
                 continue
@@ -264,7 +264,7 @@ def run(elm, ecu, command, data):
         if pfe:
             break
         print("Press Q to emergency exit")
-        if kb.kbhit():
+        if kb.keyboard_hit():
             c = kb.get_character()
             if len(c) != 1:
                 continue
