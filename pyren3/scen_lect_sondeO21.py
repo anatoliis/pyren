@@ -195,7 +195,7 @@ def run(elm, ecu, command, data):
             break
         print("Press Q to emergency exit")
         if kb.kbhit():
-            c = kb.getch()
+            c = kb.get_character()
             if len(c) != 1:
                 continue
             if c == "q" or c == "Q":

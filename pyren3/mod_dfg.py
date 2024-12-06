@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
 import xml.dom.minidom
-from xml.dom.minidom import parse
 
 import mod_db_manager
 import mod_globals
-from mod_utils import ChoiceFromDict, ChoiceLong, clear_screen, pyren_encode
+from mod_utils import ChoiceFromDict, choice_long, clear_screen, pyren_encode
 
 
 class class_dfg:
@@ -78,7 +77,7 @@ class class_dfg:
             for row in vhcls:
                 models.append(row[2] + " " + row[0])
 
-            ch = ChoiceLong(models, "Choose model :")
+            ch = choice_long(models, "Choose model :")
 
             model = ch[0]
             self.dfgFile = vhcls[int(ch[1]) - 1][1]

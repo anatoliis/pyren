@@ -8,7 +8,6 @@ from mod_ecu import ECU
 from mod_elm import ELM
 from mod_optfile import *
 from mod_scan_ecus import ScanEcus
-from mod_utils import *
 from serial.tools import list_ports
 
 mod_globals.os = os.name
@@ -16,7 +15,7 @@ mod_globals.os = os.name
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 
-def optParser():
+def opt_parser():
     """Parsing of command line parameters. User should define at least com port name"""
 
     parser = argparse.ArgumentParser(
@@ -155,13 +154,6 @@ def optParser():
     )
 
     parser.add_argument(
-        "--dev",
-        help="switch to Development Session for commands from DevList, you should define alternative command for opening the session, like a 1086",
-        dest="dev",
-        default="",
-    )
-
-    parser.add_argument(
         "--exp",
         help="switch to Expert mode (allow to use buttons in DDT)",
         dest="exp",
@@ -259,8 +251,7 @@ def optParser():
 
 
 def main():
-    """Main function"""
-    optParser()
+    opt_parser()
 
     mod_utils.chkDirTree()
     mod_db_manager.find_DBs()
@@ -309,7 +300,7 @@ def main():
         # Do this check every time
         se.scanAllEcus()  # First scan of all ecus
 
-    mod_globals.vin = getVIN(se.detectedEcus, elm, getFirst=True)
+    mod_globals.vin = mod_utils.getVIN(se.detectedEcus, elm, getFirst=True)
 
     print("Loading language ")
     sys.stdout.flush()
@@ -320,8 +311,8 @@ def main():
 
     mod_ddt_utils.searchddtroot()
 
-    while 1:
-        clear_screen()
+    while True:
+        mod_utils.clear_screen()
         selected_ecu = se.select_ecu(
             mod_globals.opt_ecu_id
         )  # choose ECU among detected
@@ -329,8 +320,8 @@ def main():
         if selected_ecu == -1:
             continue
 
-        ecu_cache_file = (
-            "./cache/" + selected_ecu["ModelId"] + "_" + mod_globals.opt_lang + ".p"
+        ecu_cache_file = os.path.join(
+            "./cache/", selected_ecu["ModelId"] + "_" + mod_globals.opt_lang + ".p"
         )
 
         if os.path.isfile(ecu_cache_file):  # if cache exists
@@ -343,7 +334,7 @@ def main():
             with open(ecu_cache_file, "wb") as f:
                 pickle.dump(ecu, f)
 
-        ecu.initELM(elm)  # init ELM for chosen ECU
+        ecu.init_elm(elm)  # init ELM for chosen ECU
 
         if mod_globals.opt_demo:
             print("Loading dump")

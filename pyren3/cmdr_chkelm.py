@@ -148,7 +148,7 @@ from mod_elm import ELM
 
 def main():
 
-    pyren3.optParser()
+    pyren3.opt_parser()
 
     good = 0
     total = 0

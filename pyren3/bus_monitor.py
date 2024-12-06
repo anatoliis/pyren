@@ -23,7 +23,7 @@ from mod_elm import ELM
 
 from mod_ddt_ecu import DDTECU
 from mod_utils import clear_screen
-from mod_utils import ChoiceLong
+from mod_utils import choice_long
 from mod_utils import KBHit
 from mod_utils import pyren_encode
 
@@ -425,7 +425,7 @@ def chooseXml():
         menu.append("%-6s : %s" % (p_params[0], p_params[1]))
 
     menu.append("<Exit>")
-    choice = ChoiceLong(menu, "Choose :", "")
+    choice = choice_long(menu, "Choose :", "")
     if choice[0] == "<Exit>":
         return
 
@@ -438,7 +438,7 @@ def chooseXml():
     for x in p[2:]:
         menu.append(x)
 
-    choice = ChoiceLong(menu, "Choose :", choice[0])
+    choice = choice_long(menu, "Choose :", choice[0])
 
     return choice[0]
 
@@ -483,7 +483,7 @@ def main():
     while 1:
         c = ""
         if kb.kbhit():
-            c = kb.getch()
+            c = kb.get_character()
             if c == "q" or c == "Q" or c == "\x71" or c == "\x51":
                 print()
                 mon.elm.stopMonitor()

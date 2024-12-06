@@ -739,7 +739,7 @@ def wait_kb(ttw):
 
     while mod_elm.pyren_time() < (st + ttw):
         if kb.kbhit():
-            key_pressed = kb.getch()
+            key_pressed = kb.get_character()
         time.sleep(0.1)
 
     kb.set_normal_term()

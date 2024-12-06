@@ -31,7 +31,7 @@ import xml.dom.minidom
 import mod_db_manager
 import mod_elm as m_elm
 import mod_globals
-from mod_utils import Choice, ChoiceLong, DBG, pyren_encode
+from mod_utils import Choice, DBG, choice_long, pyren_encode
 
 opt_demo = False
 
@@ -874,7 +874,7 @@ class ScanEcus:
             self.models.append(row[2] + " " + row[0])
 
         if num == 0 or num > len(self.models):
-            ch = ChoiceLong(self.models, "Choose model :")
+            ch = choice_long(self.models, "Choose model :")
         else:
             ch = [self.models[num - 1], num]
 

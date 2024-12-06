@@ -42,51 +42,38 @@ else:
 class KBHit:
 
     def __init__(self):
-        self.set_getch_term()
+        self.set_get_character_term()
 
-    def set_getch_term(self):
+    def set_get_character_term(self):
         """Creates a KBHit object that you can call to do various keyboard things."""
 
-        if os.name == "nt":
-            pass
+        # Save the terminal settings
+        self.file_desriptor = sys.stdin.fileno()
+        self.new_term = termios.tcgetattr(self.file_desriptor)
+        self.old_term = termios.tcgetattr(self.file_desriptor)
 
-        else:
+        # New terminal setting unbuffered
+        self.new_term[3] = self.new_term[3] & ~termios.ICANON & ~termios.ECHO
 
-            # Save the terminal settings
-            self.fd = sys.stdin.fileno()
-            self.new_term = termios.tcgetattr(self.fd)
-            self.old_term = termios.tcgetattr(self.fd)
+        termios.tcsetattr(self.file_desriptor, termios.TCSANOW, self.new_term)
+        # termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.new_term)
 
-            # New terminal setting unbuffered
-            self.new_term[3] = self.new_term[3] & ~termios.ICANON & ~termios.ECHO
-
-            termios.tcsetattr(self.fd, termios.TCSANOW, self.new_term)
-            # termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.new_term)
-
-            # Support normal-terminal reset at exit
-            atexit.register(self.set_normal_term)
+        # Support normal-terminal reset at exit
+        atexit.register(self.set_normal_term)
 
     def set_normal_term(self):
         """Resets to normal terminal.  On Windows this is a no-op."""
 
-        if os.name == "nt":
-            pass
+        termios.tcsetattr(self.file_desriptor, termios.TCSANOW, self.old_term)
 
-        else:
-            termios.tcsetattr(self.fd, termios.TCSANOW, self.old_term)
-            # termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.old_term)
-
-    def getch(self):
+    def get_character(self):
         """Returns a keyboard character after kbhit() has been called.
         Should not be called in the same program as getarrow().
         """
 
         s = ""
 
-        if os.name == "nt":
-            s = msvcrt.getch().decode("utf-8", "ignore")
-        else:
-            s = sys.stdin.read(1)
+        s = sys.stdin.read(1)
 
         if len(s) == 0 or ord(s) == 0 or ord(s) == 0xE0:
             if os.name == "nt":
@@ -96,7 +83,7 @@ class KBHit:
 
         return s
 
-    def getarrow(self):
+    def get_arrow(self):
         """Returns an arrow-key code after kbhit() has been called. Codes are
         0 : up
         1 : right
@@ -104,29 +91,18 @@ class KBHit:
         3 : left
         Should not be called in the same program as getch().
         """
-
-        if os.name == "nt":
-            msvcrt.getch()  # skip 0xE0
-            c = msvcrt.getch()
-            vals = [72, 77, 80, 75]
-
-        else:
-            c = sys.stdin.read(3)[2]
-            vals = [65, 67, 66, 68]
+        c = sys.stdin.read(3)[2]
+        vals = [65, 67, 66, 68]
 
         return vals.index(ord(c.decode("utf-8")))
 
     def kbhit(self):
         """Returns True if keyboard character was hit, False otherwise."""
-        if os.name == "nt":
-            return msvcrt.kbhit()
-
-        else:
-            try:
-                dr, dw, de = select([sys.stdin], [], [], 0)
-            except:
-                pass
-            return dr != []
+        try:
+            dr, dw, de = select([sys.stdin], [], [], 0)
+        except:
+            pass
+        return dr != []
 
 
 def Choice(list, question):
@@ -159,7 +135,7 @@ def Choice(list, question):
             return [d[ch], ch]
 
 
-def ChoiceLong(list, question, header=""):
+def choice_long(list, question, header=""):
     """Util for make choice from long list"""
     d = {}
     c = 1
@@ -175,8 +151,7 @@ def ChoiceLong(list, question, header=""):
             d[str(c)] = s
         c = c + 1
 
-    while 1:
-
+    while True:
         clear_screen()
         # os.system('cls' if os.name == 'nt' else 'clear')      # clear screen
         # print chr(27)+"[2J"+chr(27)+"[;H",                    # clear ANSI screen (thanks colorama for windows)
@@ -288,7 +263,7 @@ def clear_screen():
     sys.stdout.write(chr(27) + "[2J" + chr(27) + "[;H")
 
 
-def upScreen():
+def up_screen():
     sys.stdout.write(chr(27) + "[;H")
 
 
@@ -340,7 +315,7 @@ if __name__ == "__main__":
     while True:
 
         if kb.kbhit():
-            c = kb.getch()
+            c = kb.get_character()
             if ord(c) == 27:  # ESC
                 break
             print(c)

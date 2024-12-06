@@ -42,7 +42,7 @@ def prepareECUs():
     global se
     global lang
 
-    pyren.optParser()
+    pyren.opt_parser()
 
     mod_utils.chkDirTree()
     mod_db_manager.find_DBs()
@@ -97,7 +97,7 @@ def chooseEcu(ecu_number):
             ecu, open(ecucashfile, "wb")
         )  # and save data to cache for next time
 
-    ecu.initELM(elm)  # init ELM for chosen ECU
+    ecu.init_elm(elm)  # init ELM for chosen ECU
 
     # ecu.show_screens()                                      # show ECU screens
 

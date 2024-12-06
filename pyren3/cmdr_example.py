@@ -48,7 +48,7 @@ def prepareECU():
     global elm
     global ecu
 
-    pyren.optParser()
+    pyren.opt_parser()
 
     if len(mod_globals.opt_log) == 0:
         mod_globals.opt_log = "commander_log.txt"
@@ -92,7 +92,7 @@ def prepareECU():
             ecu, open(ecucashfile, "wb")
         )  # and save data to cache for next time
 
-    ecu.initELM(elm)  # init ELM for chosen ECU
+    ecu.init_elm(elm)  # init ELM for chosen ECU
 
     # ecu.show_screens()                                      # show ECU screens
 

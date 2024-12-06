@@ -1,36 +1,27 @@
 #!/usr/bin/env python3
-
-from mod_ecu_command import *
-from mod_ecu_dataids import *
-from mod_ecu_default import *
-from mod_ecu_identification import *
-from mod_ecu_parameter import *
-from mod_ecu_state import *
-from mod_elm import AllowedList, dnat, pyren_time, snat
-from mod_optfile import *
-from mod_ply import *
-from mod_utils import *
-
-if mod_globals.os != "android":
-    from mod_ddt import DDT
-
-import mod_globals
-import mod_db_manager
-
-from xml.dom.minidom import parse
-from datetime import datetime
-from collections import OrderedDict
-from mod_utils import show_doc
-import xml.dom.minidom
-
-import sys
 import os
-import time
 import re
+import sys
+import time
+import xml.dom.minidom
+from collections import OrderedDict
+from datetime import datetime
+
+import mod_db_manager
+import mod_ecu_command
+import mod_ecu_default
+import mod_ecu_identification
+import mod_ecu_parameter
+import mod_ecu_state
+import mod_globals
+import mod_optfile
+import mod_ply
+import mod_utils
+from mod_ddt import DDT
+from mod_ecu_dataids import ecu_dataids, pyren_encode
+from mod_elm import AllowedList, dnat, pyren_time, snat
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
-# sys.setdefaultencoding('utf-8')
 
 F2A = {
     "01": "7A",
@@ -126,12 +117,14 @@ F2A = {
 }
 
 ecudump = {}  # {'request':'response'}
-favouriteScreen = ecu_own_screen("FAV")
+favourite_screen = mod_ecu_default.ecu_own_screen("FAV")
 
 
 class ECU:
     """Contains data for one specific ECU
     implement menu for ecu"""
+
+    calc: mod_ply.Calc = None
 
     path = "EcuRenault/Sessions/"
 
@@ -152,7 +145,7 @@ class ECU:
 
     ecudata = {}
 
-    minimumrefreshrate = 0.100
+    min_refresh_rate = 0.100
 
     def __init__(self, cecu, tran):
 
@@ -184,26 +177,40 @@ class ECU:
 
         print("Loading screens ")
         self.screens = []
-        sc_class = ecu_screens(self.screens, mdoc, tran)
+        sc_class = mod_ecu_default.ecu_screens(self.screens, mdoc, tran)
 
         print("Loading optimyzer")
         self.defaults = []
-        opt_file = optfile(self.path + self.ecudata["OptimizerId"].strip()[:-3] + "xml")
+        opt_file = mod_optfile.optfile(
+            self.path + self.ecudata["OptimizerId"].strip()[:-3] + "xml"
+        )
 
         print("Loading defaults")
-        df_class = ecu_defaults(self.Defaults, mdoc, opt_file.dict, tran)
+        df_class = mod_ecu_default.ecu_defaults(
+            self.Defaults, mdoc, opt_file.dict, tran
+        )
         print("Loading parameters")
-        pr_class = ecu_parameters(self.Parameters, mdoc, opt_file.dict, tran)
+        pr_class = mod_ecu_parameter.ecu_parameters(
+            self.Parameters, mdoc, opt_file.dict, tran
+        )
         print("Loading states")
-        st_class = ecu_states(self.States, mdoc, opt_file.dict, tran)
+        st_class = mod_ecu_state.ecu_states(self.States, mdoc, opt_file.dict, tran)
         print("Loading identifications")
-        id_class = ecu_identifications(self.Identifications, mdoc, opt_file.dict, tran)
+        id_class = mod_ecu_identification.ecu_identifications(
+            self.Identifications, mdoc, opt_file.dict, tran
+        )
         print("Loading commands")
-        cm_class = ecu_commands(self.Commands, mdoc, opt_file.dict, tran)
+        cm_class = mod_ecu_command.ecu_commands(
+            self.Commands, mdoc, opt_file.dict, tran
+        )
         print("Loading services")
-        sv_class = ecu_services(self.Services, mdoc, opt_file.dict, tran)
+        sv_class = mod_ecu_default.ecu_services(
+            self.Services, mdoc, opt_file.dict, tran
+        )
         print("Loading mnemonics")
-        mm_class = ecu_mnemonics(self.Mnemonics, mdoc, opt_file.dict, tran)
+        mm_class = mod_ecu_default.ecu_mnemonics(
+            self.Mnemonics, mdoc, opt_file.dict, tran
+        )
         print("Loading DTC commands")
         self.getDTCmnemo, self.resetDTCcommand = df_class.getDTCCommands(
             mdoc, opt_file.dict, cecu["stdType"]
@@ -215,13 +222,11 @@ class ECU:
             ddoc = ddom.documentElement
             di_class = ecu_dataids(self.DataIds, ddoc, opt_file.dict, tran)
 
-    def initELM(self, elm):
-
+    def init_elm(self, elm):
         print("Loading PLY ")
-        self.calc = Calc()
+        self.calc = mod_ply.Calc()
 
         print("Init ELM")
-
         self.elm = elm
 
         if self.ecudata["pin"].lower() == "can":
@@ -318,7 +323,7 @@ class ECU:
         if name not in list(self.States.keys()):
             return "none", "unknown state"
         self.elm.clear_cache()
-        datastr, help, csvd = get_state(
+        datastr, help, csvd = mod_ecu_state.get_state(
             self.States[name], self.Mnemonics, self.Services, self.elm, self.calc
         )
         return csvd, datastr
@@ -342,7 +347,7 @@ class ECU:
         if name not in list(self.Parameters.keys()):
             return "none", "unknown parameter"
         self.elm.clear_cache()
-        datastr, help, csvd = get_parameter(
+        datastr, help, csvd = mod_ecu_parameter.get_parameter(
             self.Parameters[name], self.Mnemonics, self.Services, self.elm, self.calc
         )
         return csvd, datastr
@@ -366,7 +371,7 @@ class ECU:
         if name not in list(self.Identifications.keys()):
             return "none", "unknown identification"
         if raw:
-            return get_identification(
+            return mod_ecu_identification.get_identification(
                 self.Identifications[name],
                 self.Mnemonics,
                 self.Services,
@@ -375,7 +380,7 @@ class ECU:
                 raw,
             )
         self.elm.clear_cache()
-        datastr, help, csvd = get_identification(
+        datastr, help, csvd = mod_ecu_identification.get_identification(
             self.Identifications[name],
             self.Mnemonics,
             self.Services,
@@ -435,7 +440,9 @@ class ECU:
         if name not in list(self.Commands.keys()):
             return "none"
         self.elm.clear_cache()
-        resp = runCommand(self.Commands[name], self, self.elm, param, partype)
+        resp = mod_ecu_command.runCommand(
+            self.Commands[name], self, self.elm, param, partype
+        )
         return resp
 
     def get_ref_cmd(self, name):
@@ -450,7 +457,7 @@ class ECU:
 
     def show_commands(self, datarefs, path):
         while True:
-            clear_screen()
+            mod_utils.clear_screen()
             header = (
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
@@ -485,18 +492,17 @@ class ECU:
                 menu.append(datastr)
 
             menu.append("<Up>")
-            choice = ChoiceLong(menu, "Choose :", header)
+            choice = mod_utils.choice_long(menu, "Choose :", header)
             if choice[0] == "<Up>":
                 return
 
             header = header + " -> " + cmds[int(choice[1]) - 1] + " [Command] "
-            executeCommand(
+            mod_ecu_command.executeCommand(
                 self.Commands[cmds[int(choice[1]) - 1]], self, self.elm, header
             )
 
     def show_datarefs(self, datarefs, path):
-
-        clear_screen()
+        mod_utils.clear_screen()
         if os.name == "nt":
             initScreen = chr(27) + "[;H"
         else:
@@ -512,7 +518,7 @@ class ECU:
         for st in self.States:
             if st.startswith("MAS"):
                 mask = True
-                get_state(
+                mod_ecu_state.get_state(
                     self.States[st], self.Mnemonics, self.Services, self.elm, self.calc
                 )
                 if int(self.States[st].value):
@@ -555,7 +561,7 @@ class ECU:
 
         if mod_globals.opt_csv and mod_globals.ext_cur_DTC == "000000":
             # prepare to csv save
-            self.minimumrefreshrate = 0
+            self.min_refresh_rate = 0
             if mod_globals.opt_excel:
                 csvline = "sep=" + mod_globals.opt_csv_sep + "\n"
             csvline = "Time"
@@ -609,7 +615,7 @@ class ECU:
         # debug
         # show_doc(self.ecudata['dst'], IDstr)
 
-        kb = KBHit()
+        kb = mod_utils.KBHit()
 
         tb = pyren_time()  # time of begining
 
@@ -675,7 +681,7 @@ class ECU:
                             and dr
                             in self.Defaults[mod_globals.ext_cur_DTC[:4]].memDatarefs
                         ):
-                            datastr, help, csvd = get_state(
+                            datastr, help, csvd = mod_ecu_state.get_state(
                                 self.States[dr.name],
                                 self.Mnemonics,
                                 self.Services,
@@ -684,7 +690,7 @@ class ECU:
                                 self.DataIds,
                             )
                         else:
-                            datastr, help, csvd = get_state(
+                            datastr, help, csvd = mod_ecu_state.get_state(
                                 self.States[dr.name],
                                 self.Mnemonics,
                                 self.Services,
@@ -698,7 +704,7 @@ class ECU:
                             and dr
                             in self.Defaults[mod_globals.ext_cur_DTC[:4]].memDatarefs
                         ):
-                            datastr, help, csvd = get_parameter(
+                            datastr, help, csvd = mod_ecu_parameter.get_parameter(
                                 self.Parameters[dr.name],
                                 self.Mnemonics,
                                 self.Services,
@@ -707,7 +713,7 @@ class ECU:
                                 self.DataIds,
                             )
                         else:
-                            datastr, help, csvd = get_parameter(
+                            datastr, help, csvd = mod_ecu_parameter.get_parameter(
                                 self.Parameters[dr.name],
                                 self.Mnemonics,
                                 self.Services,
@@ -715,7 +721,7 @@ class ECU:
                                 self.calc,
                             )
                     if dr.type == "Identification":
-                        datastr, help, csvd = get_identification(
+                        datastr, help, csvd = mod_ecu_identification.get_identification(
                             self.Identifications[dr.name],
                             self.Mnemonics,
                             self.Services,
@@ -808,11 +814,11 @@ class ECU:
 
                 # check refresh rate
                 if mod_globals.opt_demo:
-                    self.minimumrefreshrate = 1
+                    self.min_refresh_rate = 1
 
                 tc = pyren_time()
-                if (tc - tb) < self.minimumrefreshrate:
-                    time.sleep(tb + self.minimumrefreshrate - tc)
+                if (tc - tb) < self.min_refresh_rate:
+                    time.sleep(tb + self.min_refresh_rate - tc)
                 tb = tc
 
             if mod_globals.opt_csv_only:
@@ -832,14 +838,14 @@ class ECU:
                     )  # We save it for file generating function
 
             if kb.kbhit():
-                c = kb.getch()
+                c = kb.get_character()
                 if len(c) != 1:
                     continue
                 if path[:3] == "FAV":
                     if ord(c) == 13 or ord(c) == 10:
                         kb.set_normal_term()
                         self.add_favourite()
-                        kb.set_getch_term()
+                        kb.set_get_character_term()
                     else:
                         if mod_globals.opt_csv and (c in mod_globals.opt_usrkey):
                             csvline += ";" + pyren_encode(c)
@@ -850,7 +856,7 @@ class ECU:
                             if mod_globals.opt_csv_human:
                                 csvf.close()
                                 return
-                            self.createFile(
+                            self.create_file(
                                 responseHistory,
                                 displayedDataIds,
                                 csvline,
@@ -862,20 +868,20 @@ class ECU:
                     n = ord(c) - ord("0")
                     if (not mod_globals.opt_csv_only) and n > 0 and n <= (pages + 1):
                         page = n - 1
-                        clear_screen()
+                        mod_utils.clear_screen()
                         continue
                     if c in ["h", "H"]:
-                        show_doc(self.ecudata["dst"], IDstr)
+                        mod_utils.show_doc(self.ecudata["dst"], IDstr)
                         continue
                     if c in ["p", "P"]:
                         if page > 0:
                             page = page - 1
-                        clear_screen()
+                        mod_utils.clear_screen()
                         continue
                     if c in ["n", "N"]:
                         if page < pages:
                             page = page + 1
-                        clear_screen()
+                        mod_utils.clear_screen()
                         continue
                     if mod_globals.opt_csv and (c in mod_globals.opt_usrkey):
                         csvline += ";" + pyren_encode(c)
@@ -885,7 +891,7 @@ class ECU:
                         if mod_globals.opt_csv_human:
                             csvf.close()
                             return
-                        self.createFile(
+                        self.create_file(
                             responseHistory, displayedDataIds, csvline, csvf, datarefs
                         )
                     if "DTC" in path:
@@ -900,7 +906,7 @@ class ECU:
             currentScreenDataIdsLength
         ):  # Create complex requests from all 22 requests
             firstRequest = "22" + self.elm.currentScreenDataIds[0][0].id
-            complexRequest, sentDataIdentifires = prepareComplexRequest(
+            complexRequest, sentDataIdentifires = mod_ecu_default.prepareComplexRequest(
                 firstRequest, self.elm.currentScreenDataIds
             )
             requests[complexRequest] = complexRequest
@@ -910,40 +916,42 @@ class ECU:
 
         return requests
 
-    def createFile(self, responseHistory, displayedDataIds, csvline, csvf, datarefs):
-        clear_screen()
+    def create_file(
+        self, response_history, displayed_data_ids, csv_line, csv_file, datarefs
+    ):
+        mod_utils.clear_screen()
         print("Generating a file. Please wait...")
 
-        if len(responseHistory):
-            startTime = next(iter(responseHistory))
+        if len(response_history):
+            startTime = next(iter(response_history))
 
-        for reqTime, reqCache in responseHistory.items():
+        for reqTime, reqCache in response_history.items():
             for req, rsp in reqCache.items():
                 if req.startswith("22") and len(req) > 6:
-                    for reqDids in displayedDataIds:
+                    for reqDids in displayed_data_ids:
                         if reqDids[0].id == req[2:6]:
-                            parseComplexResponse(
+                            mod_ecu_default.parseComplexResponse(
                                 self.elm, "62", rsp.replace(" ", ""), reqDids
                             )
                 else:
                     self.elm.rsp_cache[req] = rsp
 
-            csvline = csvline + "\n"
-            csvline = csvline.replace(".", mod_globals.opt_csv_dec)
-            csvline = csvline.replace(",", mod_globals.opt_csv_dec)
-            csvline = csvline.replace(";", mod_globals.opt_csv_sep)
-            csvf.write(csvline)
-            csvf.flush()
+            csv_line = csv_line + "\n"
+            csv_line = csv_line.replace(".", mod_globals.opt_csv_dec)
+            csv_line = csv_line.replace(",", mod_globals.opt_csv_dec)
+            csv_line = csv_line.replace(";", mod_globals.opt_csv_sep)
+            csv_file.write(csv_line)
+            csv_file.flush()
             time_diff = reqTime - startTime
             time_sec = str(time_diff // 1000)
             time_ms = str((time_diff) % 1000)
-            csvline = time_sec.zfill(2) + mod_globals.opt_csv_dec + time_ms.zfill(3)
+            csv_line = time_sec.zfill(2) + mod_globals.opt_csv_dec + time_ms.zfill(3)
 
             for dr in datarefs:
                 datastr = dr.name
                 help = dr.type
                 if dr.type == "State":
-                    datastr, help, csvd = get_state(
+                    datastr, help, csvd = mod_ecu_state.get_state(
                         self.States[dr.name],
                         self.Mnemonics,
                         self.Services,
@@ -951,43 +959,44 @@ class ECU:
                         self.calc,
                     )
                 if dr.type == "Parameter":
-                    datastr, help, csvd = get_parameter(
+                    datastr, help, csvd = mod_ecu_parameter.get_parameter(
                         self.Parameters[dr.name],
                         self.Mnemonics,
                         self.Services,
                         self.elm,
                         self.calc,
                     )
-                if csvf != 0 and (dr.type == "State" or dr.type == "Parameter"):
-                    csvline += ";" + csvd
+                if csv_file != 0 and (dr.type == "State" or dr.type == "Parameter"):
+                    csv_line += ";" + csvd
 
-        csvf.close()
+        csv_file.close()
 
     def add_favourite(self):
-        H = 25
-        if len(favouriteScreen.datarefs) < H:
-            userDataStr = input("\nEnter parameter that you want to monitor: ").upper()
-            for userData in userDataStr.split(","):
-                userData = userData.strip()
-                if userData == "CLEAR":
-                    del favouriteScreen.datarefs[:]
-                pr = self.add_elem(userData)
+        h = 25
+        if len(favourite_screen.datarefs) < h:
+            user_data_str = input(
+                "\nEnter parameter that you want to monitor: "
+            ).upper()
+            for user_data in user_data_str.split(","):
+                user_data = user_data.strip()
+                if user_data == "CLEAR":
+                    del favourite_screen.datarefs[:]
+                pr = self.add_elem(user_data)
                 if pr:
-                    for dr in favouriteScreen.datarefs:
+                    for dr in favourite_screen.datarefs:
                         if pr == dr.name:
-                            favouriteScreen.datarefs.remove(dr)
+                            favourite_screen.datarefs.remove(dr)
         else:
             input("\nYou have reached parameters limit. Removing last parameter.")
-            favouriteScreen.datarefs.pop()
-        clear_screen()
+            favourite_screen.datarefs.pop()
+        mod_utils.clear_screen()
 
-    def loadFavList(self):
-
+    def load_fav_list(self):
         fn = "./cache/favlist_" + self.ecudata["ecuname"] + ".txt"
 
         if not os.path.isfile(fn):
-            favlistfile = open(fn, "wb")
-            favlistfile.close()
+            fav_list_file = open(fn, "wb")
+            fav_list_file.close()
 
         fl = open(fn, "r").readlines()
         if len(fl):
@@ -1009,9 +1018,9 @@ class ECU:
         if elem[:2] == "PR":
             for pr in list(self.Parameters.keys()):
                 if self.Parameters[pr].agcdRef == elem:
-                    if not any(pr == dr.name for dr in favouriteScreen.datarefs):
-                        favouriteScreen.datarefs.append(
-                            ecu_screen_dataref("", pr, "Parameter")
+                    if not any(pr == dr.name for dr in favourite_screen.datarefs):
+                        favourite_screen.datarefs.append(
+                            mod_ecu_default.ecu_screen_dataref("", pr, "Parameter")
                         )
                         return False
                     else:
@@ -1019,9 +1028,9 @@ class ECU:
         elif elem[:2] == "ET":
             for st in list(self.States.keys()):
                 if self.States[st].agcdRef == elem:
-                    if not any(st == dr.name for dr in favouriteScreen.datarefs):
-                        favouriteScreen.datarefs.append(
-                            ecu_screen_dataref("", st, "State")
+                    if not any(st == dr.name for dr in favourite_screen.datarefs):
+                        favourite_screen.datarefs.append(
+                            mod_ecu_default.ecu_screen_dataref("", st, "State")
                         )
                         return False
                     else:
@@ -1029,9 +1038,11 @@ class ECU:
         elif elem[:2] == "ID":
             for idk in list(self.Identifications.keys()):
                 if self.Identifications[idk].agcdRef == elem:
-                    if not any(idk == dr.name for dr in favouriteScreen.datarefs):
-                        favouriteScreen.datarefs.append(
-                            ecu_screen_dataref("", idk, "Identification")
+                    if not any(idk == dr.name for dr in favourite_screen.datarefs):
+                        favourite_screen.datarefs.append(
+                            mod_ecu_default.ecu_screen_dataref(
+                                "", idk, "Identification"
+                            )
                         )
                         return False
                     else:
@@ -1041,7 +1052,7 @@ class ECU:
 
     def saveFavList(self):
         fl = open("./cache/favlist_" + self.ecudata["ecuname"] + ".txt", "w")
-        for dr in favouriteScreen.datarefs:
+        for dr in favourite_screen.datarefs:
             if dr.name.startswith("P"):
                 for pr in list(self.Parameters.keys()):
                     if dr.name == pr:
@@ -1058,7 +1069,7 @@ class ECU:
 
     def show_subfunction(self, subfunction, path):
         while 1:
-            clear_screen()
+            mod_utils.clear_screen()
             header = (
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
@@ -1076,7 +1087,7 @@ class ECU:
 
     def show_function(self, function, path):
         while 1:
-            clear_screen()
+            mod_utils.clear_screen()
             header = (
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
@@ -1090,7 +1101,7 @@ class ECU:
                 for sfu in function.subfunctions:
                     menu.append(sfu.text)
                 menu.append("<Up>")
-                choice = Choice(menu, "Choose :")
+                choice = mod_utils.Choice(menu, "Choose :")
                 if choice[0] == "<Up>":
                     return
                 self.show_subfunction(
@@ -1103,7 +1114,7 @@ class ECU:
 
     def show_screen(self, screen):
         while 1:
-            clear_screen()
+            mod_utils.clear_screen()
             header = (
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
@@ -1117,7 +1128,7 @@ class ECU:
                 for fu in screen.functions:
                     menu.append(fu.text)
                 menu.append("<Up>")
-                choice = Choice(menu, "Choose :")
+                choice = mod_utils.Choice(menu, "Choose :")
                 if choice[0] == "<Up>":
                     return
                 self.show_function(screen.functions[int(choice[1]) - 1], screen.name)
@@ -1128,7 +1139,7 @@ class ECU:
     def show_defaults_std_a(self):
         while 1:
             path = "DE (STD_A)"
-            clear_screen()
+            mod_utils.clear_screen()
             header = (
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
@@ -1142,7 +1153,7 @@ class ECU:
 
             self.elm.clear_cache()
 
-            dtcs, defstr, hlpstr = get_default_std_a(
+            dtcs, defstr, hlpstr = mod_ecu_default.get_default_std_a(
                 self.Defaults,
                 self.Mnemonics,
                 self.Services,
@@ -1157,13 +1168,13 @@ class ECU:
 
             menu.append("<Up>")
             menu.append("<Clear>")
-            choice = Choice(menu, "Choose one for detailed view or <Clear>:")
+            choice = mod_utils.Choice(menu, "Choose one for detailed view or <Clear>:")
 
             if choice[0] == "<Up>":
                 return
             if choice[0] == "<Clear>":
                 print("Executing command ", self.resetDTCcommand)
-                executeCommand(
+                mod_ecu_command.executeCommand(
                     self.Commands[self.resetDTCcommand], self, self.elm, header
                 )
                 return
@@ -1179,7 +1190,7 @@ class ECU:
 
             if self.Defaults[dtchex[:4]].datarefs:
                 cur_dtrf = [
-                    ecu_screen_dataref(
+                    mod_ecu_default.ecu_screen_dataref(
                         0, "\n" + mod_globals.language_dict["300"] + "\n", "Text"
                     )
                 ] + self.Defaults[dtchex[:4]].datarefs
@@ -1191,7 +1202,7 @@ class ECU:
                     + "\n"
                 )
                 mem_dtrf = [
-                    ecu_screen_dataref(0, mem_dtrf_txt, "Text")
+                    mod_ecu_default.ecu_screen_dataref(0, mem_dtrf_txt, "Text")
                 ] + self.Defaults[dtchex[:4]].memDatarefs
 
             tmp_dtrf = mem_dtrf + cur_dtrf
@@ -1201,7 +1212,7 @@ class ECU:
     def show_defaults_std_b(self):
         while 1:
             path = "DE (STD_B)"
-            clear_screen()
+            mod_utils.clear_screen()
             header = (
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
@@ -1215,7 +1226,7 @@ class ECU:
 
             self.elm.clear_cache()
 
-            dtcs, defstr, hlpstr = get_default_std_b(
+            dtcs, defstr, hlpstr = mod_ecu_default.get_default_std_b(
                 self.Defaults,
                 self.Mnemonics,
                 self.Services,
@@ -1230,13 +1241,13 @@ class ECU:
 
             menu.append("<Up>")
             menu.append("<Clear>")
-            choice = Choice(menu, "Choose one for detailed view or <Clear>:")
+            choice = mod_utils.Choice(menu, "Choose one for detailed view or <Clear>:")
 
             if choice[0] == "<Up>":
                 return
             if choice[0] == "<Clear>":
                 print("Executing command ", self.resetDTCcommand)
-                executeCommand(
+                mod_ecu_command.executeCommand(
                     self.Commands[self.resetDTCcommand], self, self.elm, header
                 )
                 return
@@ -1253,7 +1264,7 @@ class ECU:
 
             if self.Defaults[dtchex[:4]].datarefs:
                 cur_dtrf = [
-                    ecu_screen_dataref(
+                    mod_ecu_default.ecu_screen_dataref(
                         0, "\n" + mod_globals.language_dict["300"] + "\n", "Text"
                     )
                 ] + self.Defaults[dtchex[:4]].datarefs
@@ -1265,11 +1276,11 @@ class ECU:
                     + "\n"
                 )
                 mem_dtrf = [
-                    ecu_screen_dataref(0, mem_dtrf_txt, "Text")
+                    mod_ecu_default.ecu_screen_dataref(0, mem_dtrf_txt, "Text")
                 ] + self.Defaults[dtchex[:4]].memDatarefs
             if self.ext_de:
                 ext_info_dtrf = [
-                    ecu_screen_dataref(
+                    mod_ecu_default.ecu_screen_dataref(
                         0, "\n" + mod_globals.language_dict["1691"] + "\n", "Text"
                     )
                 ] + self.ext_de
@@ -1282,7 +1293,7 @@ class ECU:
     def show_defaults_failflag(self):
         while 1:
             path = "DE (FAILFLAG)"
-            clear_screen()
+            mod_utils.clear_screen()
             header = (
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
@@ -1296,7 +1307,7 @@ class ECU:
 
             self.elm.clear_cache()
 
-            dtcs, defstr, hlpstr = get_default_failflag(
+            dtcs, defstr, hlpstr = mod_ecu_default.get_default_failflag(
                 self.Defaults, self.Mnemonics, self.Services, self.elm, self.calc
             )
 
@@ -1305,7 +1316,7 @@ class ECU:
 
             menu.append("<Up>")
             menu.append("<Clear>")
-            choice = Choice(menu, "Choose one for detailed view or <Clear>:")
+            choice = mod_utils.Choice(menu, "Choose one for detailed view or <Clear>:")
 
             if choice[0] == "<Up>":
                 return
@@ -1313,7 +1324,7 @@ class ECU:
                 print("Executing command ", self.resetDTCcommand)
                 # header = "ECU : "+self.ecudata['ecuname']+'  '+self.ecudata['doc']+'\n'+ \
                 #     "Screen : "+path
-                executeCommand(
+                mod_ecu_command.executeCommand(
                     self.Commands[self.resetDTCcommand], self, self.elm, header
                 )
                 return
@@ -1326,9 +1337,9 @@ class ECU:
             self.show_datarefs(self.Defaults[dtchex].datarefs, path)
 
     def show_screens(self):
-        self.screens.append(favouriteScreen)
+        self.screens.append(favourite_screen)
         while 1:
-            clear_screen()
+            mod_utils.clear_screen()
             header = (
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
@@ -1380,9 +1391,9 @@ class ECU:
             if self.acf_ready() != "":
                 menu.append("ACI : Auto Config Info")
             menu.append("<Up>")
-            choice = Choice(menu, "Choose :")
+            choice = mod_utils.Choice(menu, "Choose :")
             if choice[0] == "<Up>":
-                favouriteScreen.datarefs = []
+                favourite_screen.datarefs = []
                 return
 
             if choice[0][:2] == "DE":
@@ -1398,15 +1409,17 @@ class ECU:
                 continue
 
             if choice[0][:3] == "ECM":
-                scrn = ecu_screen("ECM")
+                scrn = mod_ecu_default.ecu_screen("ECM")
                 scrn.datarefs = []
                 for cm in sorted(self.Commands):
-                    scrn.datarefs.append(ecu_screen_dataref("", cm, "Command"))
+                    scrn.datarefs.append(
+                        mod_ecu_default.ecu_screen_dataref("", cm, "Command")
+                    )
                 self.show_screen(scrn)
                 continue
 
             if choice[0][:3] == "PRA":
-                scrn = ecu_screen("PRA")
+                scrn = mod_ecu_default.ecu_screen("PRA")
                 scrn.datarefs = []
                 tempDict = {}
                 for pr in self.Parameters:
@@ -1421,13 +1434,15 @@ class ECU:
                             self.Parameters[pr[0]].mnemolist[0]
                         ].serviceID:
                             scrn.datarefs.append(
-                                ecu_screen_dataref("", pr[0], "Parameter")
+                                mod_ecu_default.ecu_screen_dataref(
+                                    "", pr[0], "Parameter"
+                                )
                             )
                 self.show_screen(scrn)
                 continue
 
             if choice[0][:3] == "ETA":
-                scrn = ecu_screen("ETA")
+                scrn = mod_ecu_default.ecu_screen("ETA")
                 scrn.datarefs = []
                 tempDict = {}
                 for st in self.States:
@@ -1445,15 +1460,19 @@ class ECU:
                 for st in sortedStates:
                     if self.States[st[0]].mnemolist:
                         if self.Mnemonics[self.States[st[0]].mnemolist[0]].serviceID:
-                            scrn.datarefs.append(ecu_screen_dataref("", st[0], "State"))
+                            scrn.datarefs.append(
+                                mod_ecu_default.ecu_screen_dataref("", st[0], "State")
+                            )
                 self.show_screen(scrn)
                 continue
 
             if choice[0][:3] == "IDA":
-                scrn = ecu_screen("IDA")
+                scrn = mod_ecu_default.ecu_screen("IDA")
                 scrn.datarefs = []
                 for idk in sorted(self.Identifications):
-                    scrn.datarefs.append(ecu_screen_dataref("", idk, "Identification"))
+                    scrn.datarefs.append(
+                        mod_ecu_default.ecu_screen_dataref("", idk, "Identification")
+                    )
                 self.show_screen(scrn)
                 continue
 
@@ -1466,7 +1485,9 @@ class ECU:
 
             if choice[0][:3] == "ACI":
                 acf_cmd = self.acf_ready()
-                executeCommand(self.Commands[acf_cmd], self, self.elm, header)
+                mod_ecu_command.executeCommand(
+                    self.Commands[acf_cmd], self, self.elm, header
+                )
                 continue
 
             fav_sc = self.screens[int(choice[1]) - 1]
@@ -1474,8 +1495,8 @@ class ECU:
                 for sc in self.screens:
                     if sc.name.startswith("FAV"):
                         fav_sc = sc
-                if not favouriteScreen.datarefs:
-                    if self.loadFavList():
+                if not favourite_screen.datarefs:
+                    if self.load_fav_list():
                         self.show_screen(fav_sc)
                     else:
                         self.add_favourite()
@@ -1788,7 +1809,7 @@ def main():
 
     print("Loading language ")
     sys.stdout.flush()
-    lang = optfile("Location/DiagOnCAN_" + lanid + ".bqm", True)
+    lang = mod_optfile.optfile("Location/DiagOnCAN_" + lanid + ".bqm", True)
     print("Done")
     sys.stdout.flush()
 
@@ -1800,28 +1821,24 @@ def main():
 
     print("Loading optimyzer")
     sys.stdout.flush()
-    # opt_file = optfile(mod_db_manager.get_file_from_clip(sgfile))
-    opt_file = optfile(sgfile)
+    opt_file = mod_optfile.optfile(sgfile)
 
     print("Loading defaults")
-    df_class = ecu_defaults(Defaults, mdoc, opt_file.dict, lang.dict)
+    df_class = mod_ecu_default.ecu_defaults(Defaults, mdoc, opt_file.dict, lang.dict)
     print("Loading parameters")
-    pr_class = ecu_parameters(Parameters, mdoc, opt_file.dict, lang.dict)
+    pr_class = mod_ecu_parameter.ecu_parameters(
+        Parameters, mdoc, opt_file.dict, lang.dict
+    )
     print("Loading states")
-    st_class = ecu_states(States, mdoc, opt_file.dict, lang.dict)
+    st_class = mod_ecu_state.ecu_states(States, mdoc, opt_file.dict, lang.dict)
     print("Loading identifications")
-    id_class = ecu_identifications(Identifications, mdoc, opt_file.dict, lang.dict)
+    id_class = mod_ecu_identification.ecu_identifications(
+        Identifications, mdoc, opt_file.dict, lang.dict
+    )
     print("Loading commands")
-    cm_class = ecu_commands(Commands, mdoc, opt_file.dict, lang.dict)
+    cm_class = mod_ecu_command.ecu_commands(Commands, mdoc, opt_file.dict, lang.dict)
     print("Loading mnemonics")
-    mm_class = ecu_mnemonics(Mnemonics, mdoc, opt_file.dict, lang.dict)
-
-    # for p in Parameters.values():
-    #  print p
-    # for s in States.values():
-    #  print s
-    # for m in Mnemonics.values():
-    #  print m
+    mm_class = mod_ecu_default.ecu_mnemonics(Mnemonics, mdoc, opt_file.dict, lang.dict)
 
     if len(sys.argv) == 3:
         print()
