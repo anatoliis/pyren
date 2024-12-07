@@ -6,6 +6,7 @@ import string
 import subprocess
 import sys
 
+import config
 from mod_elm import ELM
 
 try:
@@ -20,7 +21,7 @@ import termios
 from select import select
 
 
-class KBHit:
+class KeyboardHit:
     def __init__(self):
         self.set_get_character_term()
 
@@ -106,7 +107,7 @@ def Choice(list, question):
         if ch == "q":
             ch = "Q"
         if ch == "cmd":
-            mod_globals.OPT_CMD = True
+            config.OPT_CMD = True
         if ch in d.keys():
             return [d[ch], ch]
 
@@ -167,8 +168,8 @@ def choice_long(list_: list[str], question: str, header: str = ""):
                 break
 
             if char == "cmd":
-                mod_globals.OPT_CMD = True
-                print("mod_globals.opt_cmd set to 'True'")
+                config.OPT_CMD = True
+                print("config.opt_cmd set to 'True'")
             if char in d.keys():
                 return [d[char], char]
 
@@ -265,7 +266,7 @@ def hex_vin_plus_crc(vin, plus_crc: bool = True):
 
 # Test
 if __name__ == "__main__":
-    kb = KBHit()
+    kb = KeyboardHit()
 
     print("Hit any key, or ESC to exit")
 
@@ -330,7 +331,7 @@ def load_dump_to_elm(ecu_name: str, elm: ELM):
             req, rsp = l.split(":")
             ecu_dump[req] = rsp
 
-    elm.setDump(ecu_dump)
+    elm.set_dump(ecu_dump)
 
 
 def chk_dir_tree():
@@ -360,7 +361,7 @@ def get_vin(de, elm, getFirst=False):
     for e in de:
 
         # init elm
-        if mod_globals.OPT_DEMO:  # try to load dump
+        if config.OPT_DEMO:  # try to load dump
             load_dump_to_elm(e["ecuname"], elm)
         else:
             if e["pin"].lower() == "can":
@@ -421,9 +422,9 @@ def get_vin(de, elm, getFirst=False):
 
 
 def debug(tag: str, s: str) -> None:
-    if mod_globals.OPT_DEBUG and mod_globals.DEBUG_FILE is not None:
-        mod_globals.DEBUG_FILE.write("### " + tag + "\n")
-        mod_globals.DEBUG_FILE.write('"' + s + '"\n')
+    if config.OPT_DEBUG and config.DEBUG_FILE is not None:
+        config.DEBUG_FILE.write("### " + tag + "\n")
+        config.DEBUG_FILE.write('"' + s + '"\n')
 
 
 def is_hex(string_: str) -> bool:
@@ -431,22 +432,22 @@ def is_hex(string_: str) -> bool:
 
 
 def kill_server() -> None:
-    if mod_globals.DOC_SERVER_PROC is not None:
-        os.kill(mod_globals.DOC_SERVER_PROC.pid, signal.SIGTERM)
+    if config.DOC_SERVER_PROC is not None:
+        os.kill(config.DOC_SERVER_PROC.pid, signal.SIGTERM)
 
 
 def show_doc(addr, id):
-    if mod_globals.VIN == "" and not mod_globals.OPT_SD:
+    if config.VIN == "" and not config.OPT_SD:
         return
 
-    if mod_globals.DOC_SERVER_PROC is None:
-        mod_globals.DOC_SERVER_PROC = subprocess.Popen(
+    if config.DOC_SERVER_PROC is None:
+        config.DOC_SERVER_PROC = subprocess.Popen(
             ["python3", "-m", "http.server", "59152"]
         )
         atexit.register(kill_server)
 
-    if mod_globals.OPT_SD and id != "":
+    if config.OPT_SD and id != "":
         url = "http://127.0.0.1:59152/doc/" + id[1:] + ".htm"
     else:
-        url = "http://127.0.0.1:59152/doc/" + mod_globals.VIN + ".htm" + id
+        url = "http://127.0.0.1:59152/doc/" + config.VIN + ".htm" + id
     webbrowser.open(url, new=0)

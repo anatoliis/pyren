@@ -15,7 +15,7 @@ import xml.dom.minidom
 
 import config
 import mod_db_manager
-from mod_utils import KBHit, clear_screen, pyren_encode
+from mod_utils import KeyboardHit, clear_screen, pyren_encode
 
 
 # def get_message( value ):
@@ -131,9 +131,9 @@ def run(elm, ecu, command, data):
     #
     State1_ref = ecu.get_ref_st(ScmParam["State1"])  # Engine state
     value7, datastr7 = ecu.get_st(ScmParam["State1"])
-    kb = KBHit()
+    kb = KeyboardHit()
     while pyren_encode(value7) != pyren_encode(
-        mod_globals.LANGUAGE_DICT[ScmParam["TOURNANT"]]
+        config.LANGUAGE_DICT[ScmParam["TOURNANT"]]
     ):
         value7, datastr7 = ecu.get_st(ScmParam["State1"])
         value5, datastr5 = ecu.get_pr(ScmParam["Param6"])
@@ -187,7 +187,7 @@ def run(elm, ecu, command, data):
     begin_time = time.time()
     Phase_state = ecu.get_ref_st(ScmParam["State2"])
     Result_state = ecu.get_ref_st(ScmParam["State3"])
-    kb = KBHit()
+    kb = KeyboardHit()
     pfe = 0
     while 1:
         # get all values before showing them for avoid screen flickering
@@ -241,7 +241,7 @@ def run(elm, ecu, command, data):
         #    Check result
         #
         rescode = pyren_encode(value9)
-        result = pyren_encode(mod_globals.LANGUAGE_DICT[ScmSet[rescode]])
+        result = pyren_encode(config.LANGUAGE_DICT[ScmSet[rescode]])
 
         clear_screen()
         print(pyren_encode(header))

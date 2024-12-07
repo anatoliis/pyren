@@ -9,18 +9,18 @@ URL  -  scm:scen_lect_sondeO21#scen_lect_xxxxxx_xxxxx.xml
 'run' procedure will be executed by pyren script
  
 """
-
 import time
 import xml.dom.minidom
 from copy import deepcopy
 
+import config
 import mod_db_manager
-from mod_utils import KBHit, clear_screen, pyren_encode
+from mod_utils import KeyboardHit, clear_screen, pyren_encode
 
 
 # def get_message( value ):
-#  if value.isdigit() and value in mod_globals.language_dict.keys():
-#    value = pyren_encode( mod_globals.language_dict[value] )
+#  if value.isdigit() and value in config.language_dict.keys():
+#    value = pyren_encode( config.language_dict[value] )
 #  print value
 
 
@@ -48,13 +48,13 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(mod_globals.LANGUAGE_DICT.keys()):
-            value = pyren_encode(mod_globals.LANGUAGE_DICT[value])
+        if value.isdigit() and value in list(config.LANGUAGE_DICT.keys()):
+            value = pyren_encode(config.LANGUAGE_DICT[value])
         return value
 
     def get_message_by_id(id):
-        if id.isdigit() and id in list(mod_globals.LANGUAGE_DICT.keys()):
-            value = pyren_encode(mod_globals.LANGUAGE_DICT[id])
+        if id.isdigit() and id in list(config.LANGUAGE_DICT.keys()):
+            value = pyren_encode(config.LANGUAGE_DICT[id])
         return value
 
     #
@@ -128,9 +128,9 @@ def run(elm, ecu, command, data):
         state_ref = ecu.get_ref_st(etat["Index"])
         value1, datastr1 = ecu.get_st(etat["Index"])
         print((pyren_encode(datastr1)))
-        if pyren_encode(value1) != mod_globals.LANGUAGE_DICT[etat["RefOK"]]:
+        if pyren_encode(value1) != config.LANGUAGE_DICT[etat["RefOK"]]:
             value2, datastr2 = ecu.get_st(etat["Donne1"])
-            print(pyren_encode(mod_globals.LANGUAGE_DICT[etat["TexteSortie"]]))
+            print(pyren_encode(config.LANGUAGE_DICT[etat["TexteSortie"]]))
             print((pyren_encode(datastr2)))
             print("*" * 80)
             ch = input("Press ENTER to exit")
@@ -160,7 +160,7 @@ def run(elm, ecu, command, data):
     begin_time = time.time()
     Phase_state = ecu.get_ref_st(ScmParam["EtatComTer"])
     Result_state = ecu.get_ref_st(ScmParam["EtatResultatTest"])
-    kb = KBHit()
+    kb = KeyboardHit()
     pfe = 0
     while 1:
         # get all values before showing them for avoid screen flickering
@@ -170,8 +170,8 @@ def run(elm, ecu, command, data):
         rescode = pyren_encode(value1)
         result = rescode
         for m in ScmList_Messages:
-            if rescode in pyren_encode(mod_globals.LANGUAGE_DICT[m["Valeur"]]):
-                result = pyren_encode(mod_globals.LANGUAGE_DICT[m["Texte"]])
+            if rescode in pyren_encode(config.LANGUAGE_DICT[m["Valeur"]]):
+                result = pyren_encode(config.LANGUAGE_DICT[m["Texte"]])
 
         current_time = time.time()
         elapsed = int(current_time - begin_time)

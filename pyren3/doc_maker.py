@@ -87,7 +87,7 @@ table_header = False
 dfg_ds = {}
 
 
-def getRef(ff, pref):
+def get_ref(ff, pref):
     notfound = True
     for l in ff:
         if l.startswith(pref):
@@ -168,7 +168,7 @@ def convert_xml(root, h_t, fns, ff, lid):
             et.SubElement(
                 h_t,
                 "a",
-                attrib={"class": "xref", "href": "#" + getRef(ff, e.attrib["sie-id"])},
+                attrib={"class": "xref", "href": "#" + get_ref(ff, e.attrib["sie-id"])},
             ).text = e.attrib["ref"]
 
         elif e.tag == "intxref":
@@ -382,7 +382,7 @@ def convert_xml(root, h_t, fns, ff, lid):
             convert_xml(e, ni, fns, ff, lid)
 
 
-def saveToSeparateFile(nel, dtc):
+def save_to_separate_file(nel, dtc):
 
     t_doc = et.Element("html")
     t_h_h = et.SubElement(t_doc, "head")
@@ -404,13 +404,8 @@ def saveToSeparateFile(nel, dtc):
 
 
 def process_xml(path, l, ff):
-
     tree = et.parse(path + l)
     root = tree.getroot()
-    sieconfigid = root.attrib["sieconfigid"]
-
-    # ma = acf_MTC_compare_doc( sieconfigid, mtc )
-    # if ma:  #document complines to MTC filter
 
     try:
         title = root.find("title").text.strip()
@@ -427,31 +422,30 @@ def process_xml(path, l, ff):
 
     # process document
     fns = lid.split("_")
-    fdo = fns[0][0]
 
     if fns[4] != "000000":
         title = "DTC" + fns[4] + " " + title
 
-    dtcId = ""
+    dtc_id = ""
     if fns[4] != "000000" and fns[5] == "104":
-        dtcId = fns[4]
+        dtc_id = fns[4]
 
-    dtcId_106 = ""
+    dtc_id_106 = ""
     if fns[4] != "000000" and fns[5] == "106":
-        dtcId_106 = fns[4]
+        dtc_id_106 = fns[4]
 
     nel = et.Element("div")
     et.SubElement(nel, "hr", attrib={"id": lid})
 
-    if dtcId != "":
-        et.SubElement(nel, "a", attrib={"href": "#home", "id": dtcId}).text = "Up"
+    if dtc_id != "":
+        et.SubElement(nel, "a", attrib={"href": "#home", "id": dtc_id}).text = "Up"
     else:
         et.SubElement(nel, "a", attrib={"href": "#home"}).text = "Up"
 
     convert_xml(root, nel, fns, ff, lid)
 
-    if dtcId_106 != "" and config.OPT_SD:
-        saveToSeparateFile(nel, dtcId_106)
+    if dtc_id_106 != "" and config.OPT_SD:
+        save_to_separate_file(nel, dtc_id_106)
 
     return nel, lid, title
 
@@ -570,13 +564,13 @@ def f_functions(dfg_dom, ff, of, pref, domname, path):
     return dom_o
 
 
-def generateHTML(path, mtc, vin, dfg, date_madc):
+def generate_html(path, mtc, vin, dfg, date_madc):
 
     global style
 
     try:
         lf = os.listdir(path)
-    except:
+    except Exception:
         print("ERROR: path not found: ", path)
         exit()
 
@@ -820,7 +814,7 @@ def main():
     #      exit()
     #    zipf = zipFileList[0]
 
-    VIN = ""
+    vin = ""
     if vin_opt == "" and (
         not config.OPT_DEMO and (config.OPT_SCAN or not os.path.exists("savedVIN.txt"))
     ):
@@ -832,65 +826,64 @@ def main():
             elm.port.soft_boudrate(config.OPT_RATE)
 
         print("Loading ECUs list")
-        se = ScanEcus(elm)  # Prepare list of all ecus
+        scan_ecus = ScanEcus(elm)  # Prepare a list of all ecus
 
-        SEFname = "savedEcus.p"
+        saved_ecus_file_name = "savedEcus.p"
 
         if config.OPT_DEMO and len(config.OPT_ECU_ID) > 0:
-            # demo mode with predefined ecu list
-            se.read_Uces_file(all=True)
-            se.detectedEcus = []
+            # demo mode with a predefined ecu list
+            scan_ecus.read_uces_file(read_all=True)
+            scan_ecus.detected_ecus = []
             for i in config.OPT_ECU_ID.split(","):
-                if i in list(se.allecus.keys()):
-                    se.allecus[i]["ecuname"] = i
-                    se.allecus[i]["idf"] = se.allecus[i]["ModelId"][2:4]
-                    if se.allecus[i]["idf"][0] == "0":
-                        se.allecus[i]["idf"] = se.allecus[i]["idf"][1]
-                    se.allecus[i]["pin"] = "can"
-                    se.detectedEcus.append(se.allecus[i])
+                if i in list(scan_ecus.all_ecus.keys()):
+                    scan_ecus.all_ecus[i]["ecuname"] = i
+                    scan_ecus.all_ecus[i]["idf"] = scan_ecus.all_ecus[i]["ModelId"][2:4]
+                    if scan_ecus.all_ecus[i]["idf"][0] == "0":
+                        scan_ecus.all_ecus[i]["idf"] = scan_ecus.all_ecus[i]["idf"][1]
+                    scan_ecus.all_ecus[i]["pin"] = "can"
+                    scan_ecus.detected_ecus.append(scan_ecus.all_ecus[i])
         else:
-            if not os.path.isfile(SEFname) or config.OPT_SCAN:
+            if not os.path.isfile(saved_ecus_file_name) or config.OPT_SCAN:
                 # choosing model
-                se.chooseModel(
+                scan_ecus.choose_model(
                     config.OPT_CAR
                 )  # choose model of car for doing full scan
 
             # Do this check every time
-            se.scan_all_ecus()  # First scan of all ecus
+            scan_ecus.scan_all_ecus()  # First scan of all ecus
 
-        de = se.detectedEcus
+        de = scan_ecus.detected_ecus
 
         print("Reading VINs")
-        VIN = get_vin(de, elm)
+        vin = get_vin(de, elm)
 
     elif vin_opt == "" and os.path.exists("savedVIN.txt"):
-
-        with open("savedVIN.txt") as vinfile:
-            vinlines = vinfile.readlines()
-            for l in vinlines:
-                l = l.strip()
-                if "#" in l:
+        with open("savedVIN.txt") as vin_file:
+            vin_lines = vin_file.readlines()
+            for vin_line in vin_lines:
+                vin_line = vin_line.strip()
+                if "#" in vin_line:
                     continue
-                if len(l) == 17:
-                    VIN = l.upper()
+                if len(vin_line) == 17:
+                    vin = vin_line.upper()
                     break
 
     elif vin_opt != "":
-        VIN = vin_opt
+        vin = vin_opt
 
-    if len(VIN) != 17:
+    if len(vin) != 17:
         print("Can't find any valid VIN. Switch to demo")
         config.OPT_DEMO = True
     else:
-        print("\tVIN     :", VIN)
+        print("\tVIN     :", vin)
 
     # find and load MTC
     vindata = ""
     mtcdata = ""
     refdata = ""
     platform = ""
-    if VIN != "":
-        vindata, mtcdata, refdata, platform = acf_get_mtc(VIN, prefer_file=True)
+    if vin != "":
+        vindata, mtcdata, refdata, platform = acf_get_mtc(vin, prefer_file=True)
 
         if vindata == "" or mtcdata == "" or refdata == "":
             print("ERROR!!! Can't find MTC data in database")
@@ -920,28 +913,17 @@ def main():
         dfg.tcom = "147"
         dfg.dfgFile = dfg.dfgFile.replace("DFG_135", "DFG_147")
 
-    dfg.loadDFG()
-
-    # if os.path.isfile(dfg.cacheFile):                   #if cache exists
-    #  dfg = pickle.load( open( dfg.cacheFile, "rb" ) )    #load it
-    # else:                                               #else
-    #  dfg.loadDFG()                                       #load file
-    #  pickle.dump( dfg, open( dfg.cacheFile, "wb" ) )     #and save cache
+    dfg.load_dfg()
 
     dfg_ds = dfg.dataSet
 
-    # dfg.showMenu(zipf)
-    # try:
-    # if dfg.tcom == '135' : dfg.tcom = '147'
-    generateHTML(
+    generate_html(
         "../DocDB_" + config.OPT_LANG + "/DocDb" + dfg.tcom + "/SIE/",
         mtcdata.split(";"),
-        VIN,
+        vin,
         dfg,
         date_madc,
     )
-    # except:
-    #  pass
 
 
 if __name__ == "__main__":

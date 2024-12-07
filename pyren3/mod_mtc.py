@@ -145,12 +145,12 @@ def acf_buildFull(platf):
     print("\n\n File: " + plDIR + "/all_vin.csv is build\n\n")
 
 
-def acf_getMTC(VIN, preferFile=False):
+def acf_get_mtc(vin: str, prefer_file: bool = False):
     """getting MTC data from BVMEXTRACTION"""
 
-    VIN1 = VIN[:3]
-    VIN2 = VIN[3:9]
-    VIN3 = VIN[9:]
+    VIN1 = vin[:3]
+    VIN2 = vin[3:9]
+    VIN3 = vin[9:]
 
     vindata = ""
     mtcdata = ""
@@ -159,7 +159,7 @@ def acf_getMTC(VIN, preferFile=False):
     vindir = ""
 
     # check and prepare folder for loading or saving data
-    mtc_dir = "../MTCSAVE/" + VIN
+    mtc_dir = "../MTCSAVE/" + vin
     config.MTC_DIR = mtc_dir
     if not os.path.exists(mtc_dir):
         os.makedirs(mtc_dir)
@@ -169,7 +169,7 @@ def acf_getMTC(VIN, preferFile=False):
         os.makedirs(mtc_dir + "/scripts")
 
     if os.path.exists(mtc_dir + "/mtcdata.txt"):
-        if preferFile:
+        if prefer_file:
             vindata, mtcdata, refdata, platform = acf_loadMTCfromFile(mtc_dir)
             return vindata, mtcdata, refdata, platform
         print("\n" + "#" * 35)

@@ -21,21 +21,16 @@ def get_state(st, mn, se, elm, calc, dataids={}):
     else:
         st.value = str(tmp_val)
 
-    if mod_globals.OPT_CSV and mod_globals.OPT_CSV_ONLY:
+    if config.OPT_CSV and config.OPT_CSV_ONLY:
         csv_val = str(tmp_val)
     else:
         csv_val = str(st.value)
 
-    if mod_globals.OS == "android":
-        st.value = " " * (8 - len(st.value) // 2) + str(st.value)
-        return "%-6s %-41s %-16s" % (st.codeMR, st.label, st.value), st.helps, csv_val
-    else:
-        st.value = " " * (16 - len(st.value) // 2) + str(st.value)
-        return "%-6s %-50s %-20s" % (st.codeMR, st.label, st.value), st.helps, csv_val
+    st.value = " " * (16 - len(st.value) // 2) + str(st.value)
+    return "%-6s %-50s %-20s" % (st.codeMR, st.label, st.value), st.helps, csv_val
 
 
 class ecu_state:
-
     name = ""
     agcdRef = ""
     codeMR = ""

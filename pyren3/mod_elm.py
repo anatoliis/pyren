@@ -3,7 +3,7 @@
    module contains class for working with ELM327
    version: 010922
 """
-
+import os
 import re
 import socket
 import string
@@ -13,33 +13,21 @@ import time
 from collections import OrderedDict
 from datetime import datetime
 
-try:
-    import androidhelper as android
+import config
+import serial
+from serial.tools import list_ports
 
-    mod_globals.OS = "android"
-except:
-    try:
-        import android
-
-        mod_globals.OS = "android"
-    except:
-        pass
-
-if mod_globals.OS != "android":
-    import serial  # sudo easy_install pyserial
-    from serial.tools import list_ports
-
-# List of commands which may require to open another Developer session (option --dev)
-DevList = ["27", "28", "2E", "30", "31", "32", "34", "35", "36", "37", "3B", "3D"]
+# List of commands which may require opening another Developer session (option --dev)
+DEV_LIST = ["27", "28", "2E", "30", "31", "32", "34", "35", "36", "37", "3B", "3D"]
 
 # List of commands allowed in any mode
-AllowedList = ["12", "19", "1A", "21", "22", "23"]
+ALLOWED_LIST = ["12", "19", "1A", "21", "22", "23"]
 
 # Max frame burst for Flow Control
-MaxBurst = 0x7
+MAX_BURST = 0x7
 
 #  Functional_2_CAN address translation tables for Renault cars
-snat = {
+SNAT = {
     "01": "760",
     "02": "724",
     "04": "762",
@@ -138,7 +126,7 @@ snat = {
     "FF": "7D0",
 }
 
-dnat = {
+DNAT = {
     "01": "740",
     "02": "704",
     "04": "742",
@@ -239,7 +227,7 @@ dnat = {
 
 # Code snippet from https://github.com/rbei-etas/busmaster
 # Negative responses
-negrsp = {
+NEGATIVE_RESPONSES = {
     "10": "NR: General Reject",
     "11": "NR: Service Not Supported",
     "12": "NR: SubFunction Not Supported",
@@ -295,30 +283,29 @@ negrsp = {
 }
 
 
-def log_tmstr():
+def log_timestamp_str():
     return datetime.now().strftime("%x %H:%M:%S.%f")[:21].ljust(21, "0")
 
 
 def pyren_time():
     if (sys.version_info[0] * 100 + sys.version_info[1]) > 306:
         return time.perf_counter_ns() / 1e9
-    else:
-        return time.time()
+    return time.time()
 
 
 # noinspection PyBroadException,PyUnresolvedReferences
 class Port:
     """This is a serial port or a TCP-connection
     if portName looks like a 192.168.0.10:35000
-    then it is wifi and we should open tcp connection
+    then it is Wi-Fi and we should open tcp connection
     else try to open serial port
     """
 
-    portType = 0  # 0-serial 1-tcp/bt 2-androidBlueTooth
-    ipaddr = "192.168.0.10"
-    tcpprt = 35000
-    portName = ""
-    portTimeout = 5  # don't change it here. Change in ELM class
+    port_type = 0  # 0-serial 1-tcp/bt 2-androidBlueTooth
+    ip_addr = "192.168.0.10"
+    tcp_port = 35000
+    port_name = ""
+    port_timeout = 5  # Don't change it here. Change in ELM class
 
     droid = None
     btcid = None
@@ -330,32 +317,34 @@ class Port:
     lastReadTime = 0
     # ka_timer = None
 
-    atKeepAlive = 2  # period of sending AT during inactivity
+    at_keep_alive = 2  # period of sending AT during inactivity
 
-    def __init__(self, portName, speed, portTimeout):
+    def __init__(self, port_name, speed, port_timeout):
 
-        self.portTimeout = portTimeout
+        self.port_timeout = port_timeout
 
-        portName = portName.strip()
+        port_name = port_name.strip()
 
-        MAC = None
-        upPortName = portName.upper()
+        mac = None
+        port_name_upper = port_name.upper()
         if (
             re.match(
                 r"^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$",
-                upPortName,
+                port_name_upper,
             )
-            or re.match(r"^[0-9A-F]{4}.[0-9A-F]{4}.[0-9A-F]{4}$", upPortName)
-            or re.match(r"^[0-9A-F]{12}$", upPortName)
+            or re.match(r"^[0-9A-F]{4}.[0-9A-F]{4}.[0-9A-F]{4}$", port_name_upper)
+            or re.match(r"^[0-9A-F]{12}$", port_name_upper)
         ):
-            upPortName = upPortName.replace(":", "").replace(".", "")
-            MAC = ":".join(a + b for a, b in zip(upPortName[::2], upPortName[1::2]))
+            port_name_upper = port_name_upper.replace(":", "").replace(".", "")
+            mac = ":".join(
+                a + b for a, b in zip(port_name_upper[::2], port_name_upper[1::2])
+            )
 
-        if mod_globals.OS != "android" and MAC:
+        if mac:
             try:
-                self.macaddr = portName
+                self.macaddr = port_name
                 self.channel = 1
-                self.portType = 1
+                self.port_type = 1
                 self.hdr = socket.socket(
                     socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM
                 )
@@ -364,60 +353,28 @@ class Port:
                 self.hdr.setblocking(True)
             except Exception as e:
                 print(" \n\nERROR: Can't connect to BT adapter\n\n", e)
-                mod_globals.OPT_DEMO = True
+                config.OPT_DEMO = True
                 sys.exit()
-        elif re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}$", portName):
+        elif re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}$", port_name):
             try:
-                self.ipaddr, self.tcpprt = portName.split(":")
-                self.tcpprt = int(self.tcpprt)
-                self.portType = 1
+                self.ip_addr, self.tcp_port = port_name.split(":")
+                self.tcp_port = int(self.tcp_port)
+                self.port_type = 1
                 self.hdr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.hdr.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
                 self.hdr.settimeout(3)
-                self.hdr.connect((self.ipaddr, self.tcpprt))
+                self.hdr.connect((self.ip_addr, self.tcp_port))
                 self.hdr.setblocking(True)
             except:
                 print(" \n\nERROR: Can't connect to WiFi ELM\n\n")
-                mod_globals.OPT_DEMO = True
+                config.OPT_DEMO = True
                 sys.exit()
-        elif mod_globals.OS == "android" and (portName == "bt" or MAC is not None):
-            self.portType = 2
-            self.droid = android.Android()
-            if self.droid:
-                print("SL4A loaded")
-            print("BT is enabled:", self.droid.toggleBluetoothState(True).result)
-            print(
-                "BT discovery canceled:", self.droid.bluetoothDiscoveryCancel().result
-            )
-            retry = 0
-            while 1:
-                time.sleep(1)
-                retry = retry + 1
-                try:
-                    if MAC is None:
-                        self.btcid = self.droid.bluetoothConnect(
-                            "00001101-0000-1000-8000-00805F9B34FB"
-                        ).result
-                    else:
-                        self.btcid = self.droid.bluetoothConnect(
-                            uuid="00001101-0000-1000-8000-00805F9B34FB", address=MAC
-                        ).result
-                except:
-                    pass
-                print("Try ", retry, ":", self.btcid)
-                if (
-                    self.btcid is not None and len(self.btcid) > 10
-                ):  # uuid length greater then 10
-                    break
-                if retry > 5:
-                    print(" \n\nERROR: Can't connect to BT adapter")
-                    exit()
         else:
-            self.portName = portName
-            self.portType = 0
+            self.port_name = port_name
+            self.port_type = 0
             try:
                 self.hdr = serial.Serial(
-                    self.portName, baudrate=speed, timeout=portTimeout
+                    self.port_name, baudrate=speed, timeout=port_timeout
                 )
             except:  # serial.SerialException:
                 print("ELM not connected or wrong COM port defined.")
@@ -427,7 +384,7 @@ class Port:
                 for port, desc, hwid in iterator:
                     print("%-30s \n\tdesc: %s \n\thwid: %s" % (port, desc, hwid))
                 print("")
-                mod_globals.OPT_DEMO = True
+                config.OPT_DEMO = True
                 exit()
             # print self.hdr.BAUDRATES
             self.check_elm()
@@ -443,14 +400,14 @@ class Port:
         """
         Need for wifi adapters with short connection timeout
         """
-        if self.portType != 1:
+        if self.port_type != 1:
             return
 
         if not hasattr(self, "macaddr"):
             self.hdr.close()
             self.hdr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.hdr.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-            self.hdr.connect((self.ipaddr, self.tcpprt))
+            self.hdr.connect((self.ip_addr, self.tcp_port))
             self.hdr.setblocking(True)
 
         self.write("AT\r")
@@ -466,9 +423,9 @@ class Port:
             self.kaLock = True
             data = 'AT\r'
             try:
-              if self.portType == 1:
+              if self.port_type == 1:
                 self.hdr.sendall (data)
-              elif self.portType == 2:
+              elif self.port_type == 2:
                 self.droid.bluetoothWrite (data)
               else:
                 self.hdr.write (data)
@@ -476,7 +433,7 @@ class Port:
               tb = pyren_time()  # start time
               tmpBuff = ""
               while True:
-                if not mod_globals.opt_demo:
+                if not config.opt_demo:
                   byte = self.read ()
                 else:
                   byte = '>'
@@ -506,18 +463,18 @@ class Port:
     def read(self):
         byte = ""
         try:
-            if self.portType == 1:
+            if self.port_type == 1:
                 try:
                     byte = self.hdr.recv(1)
                 except:
                     pass
-            elif self.portType == 2:
+            elif self.port_type == 2:
                 if self.droid.bluetoothReadReady(self.btcid).result:
                     byte = self.droid.bluetoothRead(1, self.btcid).result
             else:
                 inInputBuffer = self.hdr.inWaiting()
                 if inInputBuffer:
-                    if mod_globals.OPT_OBD_LINK:
+                    if config.OPT_OBD_LINK:
                         byte = self.hdr.read(inInputBuffer)
                     else:
                         byte = self.hdr.read(1)
@@ -525,7 +482,7 @@ class Port:
             print()
             print("*" * 40)
             print("*       Connection to ELM was lost")
-            mod_globals.OPT_DEMO = True
+            config.OPT_DEMO = True
 
         if type(byte) == str:
             byte = byte.encode()
@@ -546,22 +503,18 @@ class Port:
             data = data.encode()
 
         # try:
-        if self.portType == 1:
+        if self.port_type == 1:
             try:
                 rcv_bytes = self.hdr.sendall(data)
             except:
                 self.reinit()
                 rcv_bytes = self.hdr.sendall(data)
             return rcv_bytes
-        elif self.portType == 2:
+        elif self.port_type == 2:
             # return self.droid.bluetoothWrite(data , self.btcid)
             return self.droid.bluetoothWrite(data.decode("utf-8"), self.btcid)
         else:
             return self.hdr.write(data)
-        # except:
-        #    print('*' * 40)
-        #    print('*       Connection to ELM was lost')
-        #    mod_globals.opt_demo = True
 
     def expect(self, pattern, time_out=1):
 
@@ -569,7 +522,7 @@ class Port:
         self.buff = ""
         try:
             while True:
-                if not mod_globals.OPT_DEMO:
+                if not config.OPT_DEMO:
                     byte = self.read()
                 else:
                     byte = ">"
@@ -613,16 +566,16 @@ class Port:
             tb = pyren_time()  # start time
             self.buff = ""
             while True:
-                if not mod_globals.OPT_DEMO:
+                if not config.OPT_DEMO:
                     byte = self.read()
                 else:
                     byte = ">"
                 self.buff += byte
                 tc = pyren_time()
                 if ">" in self.buff:
-                    mod_globals.OPT_SPEED = s
+                    config.OPT_SPEED = s
                     print("\nStart COM speed: ", s)
-                    self.hdr.timeout = self.portTimeout
+                    self.hdr.timeout = self.port_timeout
                     return
                 if (tc - tb) > 1:
                     break
@@ -631,10 +584,10 @@ class Port:
 
     def soft_boudrate(self, boudrate):
 
-        if mod_globals.OPT_DEMO:
+        if config.OPT_DEMO:
             return
 
-        if self.portType == 1:  # wifi is not supported
+        if self.port_type == 1:  # wifi is not supported
             print("ERROR - wifi/bluetooth do not support changing boud rate")
             return
 
@@ -646,7 +599,7 @@ class Port:
 
         print("Changing baud rate to:", boudrate, end=" ")
 
-        if mod_globals.OPT_OBD_LINK:
+        if config.OPT_OBD_LINK:
             self.write("ST SBR " + str(boudrate) + "\r")
         else:
             if boudrate == 38400:
@@ -664,7 +617,7 @@ class Port:
         tb = pyren_time()  # start time
         self.buff = ""
         while True:
-            if not mod_globals.OPT_DEMO:
+            if not config.OPT_DEMO:
                 byte = self.read()
             else:
                 byte = "OK"
@@ -689,7 +642,7 @@ class Port:
         tb = pyren_time()  # start time
         self.buff = ""
         while True:
-            if not mod_globals.OPT_DEMO:
+            if not config.OPT_DEMO:
                 byte = self.read()
             else:
                 byte = ">"
@@ -699,12 +652,12 @@ class Port:
             self.buff += byte
             tc = pyren_time()
             if ">" in self.buff:
-                mod_globals.OPT_RATE = mod_globals.OPT_SPEED
+                config.OPT_RATE = config.OPT_SPEED
                 break
             if (tc - tb) > 1:
                 print("ERROR - something went wrong. Let's back.")
-                self.hdr.timeout = self.portTimeout
-                self.hdr.baudrate = mod_globals.OPT_SPEED
+                self.hdr.timeout = self.port_timeout
+                self.hdr.baudrate = config.OPT_SPEED
                 self.rwLock = False
                 # disable at_keepalive
                 # self.elm_at_KeepAlive ()
@@ -728,15 +681,15 @@ class ELM:
 
     keepAlive = 4  # send startSession to CAN after silence if startSession defined
     busLoad = 0  # I am sure than it should be zero
-    srvsDelay = 0  # the delay next command requested by service
-    lastCMDtime = 0  # time when last command was sent to bus
-    portTimeout = 5  # timeout of port (com or tcp)
+    srvs_delay = 0  # the delay next command requested by service
+    last_cmd_time = 0  # time when last command was sent to bus
+    port_timeout = 5  # timeout of port (com or tcp)
     elmTimeout = "FF"  # timeout set by ATST
-    performanceModeLevel = 1  # number of dataids, that can be sent in one 22 request
+    performance_mode_level = 1  # number of dataids, that can be sent in one 22 request
 
     # error counters
     error_frame = 0
-    error_bufferfull = 0
+    error_buffer_full = 0
     error_question = 0
     error_nodata = 0
     error_timeout = 0
@@ -744,23 +697,23 @@ class ELM:
     error_can = 0
 
     response_time = 0
-    screenRefreshTime = 0
+    screen_refresh_time = 0
 
     buff = ""
-    currentprotocol = ""
-    currentsubprotocol = ""
-    currentaddress = ""
-    startSession = ""
-    lastinitrsp = ""
+    current_protocol = ""
+    current_sub_protocol = ""
+    current_address = ""
+    start_session_ = ""
+    last_init_response = ""
 
     currentScreenDataIds = []  # dataids displayed on current screen
     rsp_cache = OrderedDict()  # cashes responses for current screen
     l1_cache = {}  # save number of frames in responces
-    tmpNotSupportedCommands = (
+    tmp_not_supported_commands = (
         {}
     )  # temporary list for requests that were positive and became negative for no reason
-    notSupportedCommands = {}  # save them to not slow down polling
-    ecudump = {}  # for demo only. contains responses for all 21xx and 22xxxx requests
+    not_supported_commands = {}  # save them to not slow down polling
+    ecu_dump = {}  # for demo only. contains responses for all 21xx and 22xxxx requests
 
     ATR1 = True
     ATCFC0 = False
@@ -773,14 +726,14 @@ class ELM:
 
     lastMessage = ""
 
-    monitorThread = None
-    monitorCallBack = None
-    monitorSendAllow = None
+    monitor_thread = None
+    monitor_callback = None
+    monitor_send_allow = None
     run_allow_event = None
     dmf = None
 
     waitedFrames = ""
-    endWaitingFrames = True
+    end_waiting_frames = True
     rspLen = 0
     fToWait = 0
 
@@ -791,30 +744,34 @@ class ELM:
         # debug
         # print 'Port Open'
 
-        if not mod_globals.OPT_DEMO:
-            # self.port = serial.Serial(portName, baudrate=speed, timeout=self.portTimeout)
-            self.port = Port(portName, speed, self.portTimeout)
+        if not config.OPT_DEMO:
+            self.port = Port(portName, speed, self.port_timeout)
 
-        if len(mod_globals.OPT_LOG) > 0:  # and mod_globals.opt_demo==False:
-            self.lf = open("./logs/elm_" + mod_globals.OPT_LOG, "at")
-            self.vf = open("./logs/ecu_" + mod_globals.OPT_LOG, "at")
+        if len(config.OPT_LOG) > 0:  # and config.opt_demo==False:
+            self.lf = open("./logs/elm_" + config.OPT_LOG, "at")
+            self.vf = open("./logs/ecu_" + config.OPT_LOG, "at")
 
-        if mod_globals.OPT_DEBUG and mod_globals.DEBUG_FILE is None:
-            mod_globals.DEBUG_FILE = open("./logs/debug.txt", "at")
+        if config.OPT_DEBUG and config.DEBUG_FILE is None:
+            config.DEBUG_FILE = open("./logs/debug.txt", "at")
 
-        self.lastCMDtime = 0
-        self.ATCFC0 = mod_globals.OPT_CFC0
+        self.last_cmd_time = 0
+        self.ATCFC0 = config.OPT_CFC0
 
         if self.lf != 0:
             self.lf.write(
-                "#" * 60 + "\n#[" + log_tmstr() + "] Check ELM type\n" + "#" * 60 + "\n"
+                "#" * 60
+                + "\n#["
+                + log_timestamp_str()
+                + "] Check ELM type\n"
+                + "#" * 60
+                + "\n"
             )
             self.lf.flush()
 
         # check OBDLink
-        elm_rsp = self.cmd("STI")
-        if elm_rsp and "?" not in elm_rsp:
-            firmware_version = elm_rsp.split(" ")[-1]
+        elm_response = self.cmd("STI")
+        if elm_response and "?" not in elm_response:
+            firmware_version = elm_response.split(" ")[-1]
             try:
                 firmware_version = firmware_version.split(".")
                 version_number = int(
@@ -822,48 +779,45 @@ class ELM:
                         [re.sub(r"\D", "", version) for version in firmware_version]
                     )
                 )
-                stpx_introduced_in_version_number = (
-                    420  # STN1110 got STPX last in version v4.2.0
-                )
-                if version_number >= stpx_introduced_in_version_number:
-                    mod_globals.OPT_OBD_LINK = True
-            except:
+            except Exception:
                 input(
                     "\nCannot determine OBDLink version.\n"
                     + "OBDLink performance may be decreased.\n"
                     + "Press any key to continue...\n"
                 )
+            else:
+                stpx_introduced_in_version_number = (
+                    420  # STN1110 got STPX last in version v4.2.0
+                )
+                if version_number >= stpx_introduced_in_version_number:
+                    config.OPT_OBD_LINK = True
 
             # check STN
-            elm_rsp = self.cmd("STP 53")
-            if "?" not in elm_rsp:
-                mod_globals.OPT_STN = True
+            elm_response = self.cmd("STP 53")
+            if "?" not in elm_response:
+                config.OPT_STN = True
 
         # Max out the UART speed for the fastest polling rate
-        if mod_globals.OPT_CSV and not mod_globals.OPT_DEMO:
-            if mod_globals.OPT_OBD_LINK:
+        if config.OPT_CSV and not config.OPT_DEMO:
+            if config.OPT_OBD_LINK:
                 self.port.soft_boudrate(2000000)
-            elif self.port.portType == 0:
+            elif self.port.port_type == 0:
                 self.port.soft_boudrate(230400)
 
     def __del__(self):
-        if not mod_globals.OPT_DEMO and not isinstance(self.port, int):
+        if not config.OPT_DEMO and not isinstance(self.port, int):
             print("*" * 40)
             print("*       RESETTING ELM")
-            # if self.port.ka_timer:
-            #    self.port.ka_timer.cancel ()
             self.port.write("atz\r")
-            self.port.atKeepAlive = 0
+            self.port.at_keep_alive = 0
             if self.run_allow_event:
                 self.run_allow_event.clear()
-            # if self.monitorThread:
-            #     self.monitorThread.clear ()
         print("*" * 40)
         print("* ")
         print("*       ERRORS STATISTIC")
         print("* ")
         print("* error_frame      = ", self.error_frame)
-        print("* error_bufferfull = ", self.error_bufferfull)
+        print("* error_buffer_full = ", self.error_buffer_full)
         print("* error_question   = ", self.error_question)
         print("* error_nodata     = ", self.error_nodata)
         print("* error_timeout    = ", self.error_timeout)
@@ -882,38 +836,38 @@ class ELM:
         # print 'Clearing L2 cache'
         self.rsp_cache = OrderedDict()
 
-        # if not mod_globals.opt_demo:
+        # if not config.opt_demo:
         #  self.rsp_cache = {}
 
-    def setDump(self, ecudump):
+    def set_dump(self, ecu_dump):
         """define ecudum for demo mode"""
-        self.ecudump = ecudump
+        self.ecu_dump = ecu_dump
 
-    def loadDump(self, dumpname):
+    def load_dump(self, dump_name):
 
-        print("Loading dump:", dumpname)
+        print("Loading dump:", dump_name)
 
-        df = open(dumpname, "rt")
+        df = open(dump_name, "rt")
         lines = df.readlines()
         df.close()
 
-        ecudump = {}
+        ecu_dump = {}
 
         for l in lines:
             l = l.strip().replace("\n", "")
             if l.count(":") == 1:
                 req, rsp = l.split(":")
-                ecudump[req] = rsp
+                ecu_dump[req] = rsp
 
-        self.setDump(ecudump)
+        self.set_dump(ecu_dump)
 
-    def debugMonitor(self):
+    def debug_monitor(self):
         byte = ""
         try:
             if self.dmf is None:
-                self.dmf = open("./logs/" + mod_globals.OPT_LOG, "rt")
+                self.dmf = open(os.path.join("./logs/", config.OPT_LOG), "rt")
             byte = self.dmf.read(1)
-        except:
+        except Exception:
             pass
         if not byte:
             self.dmf = None
@@ -925,43 +879,46 @@ class ELM:
         return byte
 
     def monitor(self, callback, send_allow, c_t=0.1, c_f=10):
-        self.monitorCallBack = callback
-        self.monitorSendAllow = send_allow
+        self.monitor_callback = callback
+        self.monitor_send_allow = send_allow
 
         coalescing_time = c_t
         coalescing_frames = c_f
 
         lst = pyren_time()  # last send time
-        frameBuff = ""
-        frameBuffLen = 0
+        frame_buff = ""
+        frame_buff_len = 0
         buff = ""
 
-        if not mod_globals.OPT_DEMO:
+        if not config.OPT_DEMO:
             self.cmd("at h1")
             self.cmd("at d1")
             self.cmd("at s1")
             self.port.write("at ma\r\n")
 
         self.mlf = 0
-        if not mod_globals.OPT_DEMO and len(mod_globals.OPT_LOG) > 0:
-            self.mlf = open("./logs/" + mod_globals.OPT_LOG, "wt")
+        if not config.OPT_DEMO and len(config.OPT_LOG) > 0:
+            self.mlf = open("./logs/" + config.OPT_LOG, "wt")
 
         while self.run_allow_event.isSet():
-            if not mod_globals.OPT_DEMO:
+            if not config.OPT_DEMO:
                 byte = self.port.read()
             else:
-                byte = self.debugMonitor()
+                byte = self.debug_monitor()
 
             ct = pyren_time()  # current time
-            if (ct - lst) > coalescing_time:  # and frameBuffLen>0:
-                if self.monitorSendAllow is None or not self.monitorSendAllow.isSet():
-                    self.monitorSendAllow.set()
+            if (ct - lst) > coalescing_time:  # and frame_buff_len>0:
+                if (
+                    self.monitor_send_allow is None
+                    or not self.monitor_send_allow.isSet()
+                ):
+                    self.monitor_send_allow.set()
                     # print 'time callback'
-                    callback(frameBuff)
+                    callback(frame_buff)
                     # print 'return from callback'
                 lst = ct
-                frameBuff = ""
-                frameBuffLen = 0
+                frame_buff = ""
+                frame_buff_len = 0
 
             if len(byte) == 0:
                 continue
@@ -985,28 +942,28 @@ class ELM:
                 if len(line) < (dlc * 3 + 5):
                     continue
 
-                frameBuff = frameBuff + line + "\n"
-                frameBuffLen = frameBuffLen + 1
+                frame_buff = frame_buff + line + "\n"
+                frame_buff_len = frame_buff_len + 1
 
                 # save log
                 if self.mlf:
                     # self.mlf.write (line + '\n')
 
                     # debug
-                    self.mlf.write(log_tmstr() + " : " + line + "\n")
+                    self.mlf.write(log_timestamp_str() + " : " + line + "\n")
 
-                if frameBuffLen >= coalescing_frames:
+                if frame_buff_len >= coalescing_frames:
                     if (
-                        self.monitorSendAllow is None
-                        or not self.monitorSendAllow.isSet()
+                        self.monitor_send_allow is None
+                        or not self.monitor_send_allow.isSet()
                     ):
-                        self.monitorSendAllow.set()
+                        self.monitor_send_allow.set()
                         # print 'frame callback'
-                        callback(frameBuff)
+                        callback(frame_buff)
                         # print 'return from callback'
                     lst = ct
-                    frameBuff = ""
-                    frameBuffLen = 0
+                    frame_buff = ""
+                    frame_buff_len = 0
 
                 continue
 
@@ -1014,74 +971,74 @@ class ELM:
             if byte == ">":
                 self.port.write("\r")
 
-    def setMonitorFilter(self, filt, mask):
-        if mod_globals.OPT_DEMO or self.monitorCallBack is None:
+    def set_monitor_filter(self, filter_, mask):
+        if config.OPT_DEMO or self.monitor_callback is None:
             return
         # if len(filter)!=3 or len(mask)!=3: return
 
         print()
-        print("Filter : " + filt)
+        print("Filter : " + filter_)
         print("Mask   : " + mask)
         sys.stdout.flush()
 
         # stop monitor
-        self.stopMonitor()
+        self.stop_monitor()
 
-        if len(filt) != 3 or len(mask) != 3 or filt == "000":
+        if len(filter_) != 3 or len(mask) != 3 or filter_ == "000":
             self.cmd("at cf 000")
             self.cmd("at cm 000")
         else:
-            self.cmd("at cf " + filt)
+            self.cmd("at cf " + filter_)
             self.cmd("at cm " + mask)
 
-        self.startMonitor(self.monitorCallBack, self.monitorSendAllow)
+        self.start_monitor(self.monitor_callback, self.monitor_send_allow)
 
-    def startMonitor(self, callback, sendAllow=None, c_t=0.1, c_f=10):
-        if self.currentprotocol != "can":
+    def start_monitor(self, callback, send_allow=None, c_t=0.1, c_f=10):
+        if self.current_protocol != "can":
             print("Monitor mode is possible only on CAN bus")
             return
         self.run_allow_event = threading.Event()
         self.run_allow_event.set()
-        self.monitorThread = threading.Thread(
-            target=self.monitor, args=(callback, sendAllow, c_t, c_f)
+        self.monitor_thread = threading.Thread(
+            target=self.monitor, args=(callback, send_allow, c_t, c_f)
         )
-        self.monitorThread.setDaemon(True)
-        self.monitorThread.start()
+        self.monitor_thread.setDaemon(True)
+        self.monitor_thread.start()
 
-    def stopMonitor(self):
-        if not mod_globals.OPT_DEMO:
+    def stop_monitor(self):
+        if not config.OPT_DEMO:
             self.port.write("\r\n")
         self.run_allow_event.clear()
         time.sleep(0.2)
-        if mod_globals.OPT_DEMO or self.monitorCallBack is None:
+        if config.OPT_DEMO or self.monitor_callback is None:
             return
 
-        tmp = self.portTimeout
-        self.portTimeout = 0.3
+        tmp = self.port_timeout
+        self.port_timeout = 0.3
         self.cmd("at")
         self.cmd("at h0")
         self.cmd("at d0")
         self.cmd("at s0")
-        self.portTimeout = tmp
+        self.port_timeout = tmp
 
     def nr78_monitor(self, callback, send_allow, c_t=0.1, c_f=1):
-        self.monitorCallBack = callback
-        self.monitorSendAllow = send_allow
+        self.monitor_callback = callback
+        self.monitor_send_allow = send_allow
 
         coalescing_time = c_t
         coalescing_frames = c_f
 
         lst = pyren_time()  # last send time
-        frameBuff = ""
-        frameBuffLen = 0
+        frame_buffer = ""
+        frame_buffer_len = 0
         buff = ""
 
-        if not mod_globals.OPT_DEMO:
+        if not config.OPT_DEMO:
             self.port.write("at ma\r\n")
 
         while self.run_allow_event.isSet():
             # there should be no nr78 in demo mode
-            # if not mod_globals.opt_demo:
+            # if not config.opt_demo:
             #    byte = self.port.read()
             # else:
             #    byte = self.debugMonitor()
@@ -1089,21 +1046,23 @@ class ELM:
             byte = self.port.read()
 
             ct = pyren_time()  # current time
-            if (ct - lst) > coalescing_time:  # and frameBuffLen>0:
-                if self.monitorSendAllow is None or not self.monitorSendAllow.isSet():
-                    self.monitorSendAllow.set()
+            if (ct - lst) > coalescing_time:  # and frame_buffer_len>0:
+                if (
+                    self.monitor_send_allow is None
+                    or not self.monitor_send_allow.isSet()
+                ):
+                    self.monitor_send_allow.set()
                     # print 'time callback'
-                    callback(frameBuff)
+                    callback(frame_buffer)
                     # print 'return from callback'
                 lst = ct
-                frameBuff = ""
-                frameBuffLen = 0
+                frame_buffer = ""
+                frame_buffer_len = 0
 
             if len(byte) == 0:
                 continue
 
             if byte == "\r" or byte == "\n":
-
                 line = buff.strip()
                 buff = ""
                 if len(line) < 2:
@@ -1113,25 +1072,25 @@ class ELM:
                 if "stopped" in line.lower():
                     continue
 
-                frameBuff = frameBuff + line + "\n"
-                frameBuffLen = frameBuffLen + 1
+                frame_buffer = frame_buffer + line + "\n"
+                frame_buffer_len = frame_buffer_len + 1
 
                 # save log
                 if self.lf:
-                    self.lf.write("mon: " + log_tmstr() + " : " + line + "\n")
+                    self.lf.write("mon: " + log_timestamp_str() + " : " + line + "\n")
 
-                if frameBuffLen >= coalescing_frames:
+                if frame_buffer_len >= coalescing_frames:
                     if (
-                        self.monitorSendAllow is None
-                        or not self.monitorSendAllow.isSet()
+                        self.monitor_send_allow is None
+                        or not self.monitor_send_allow.isSet()
                     ):
-                        self.monitorSendAllow.set()
+                        self.monitor_send_allow.set()
                         # print 'frame callback'
-                        callback(frameBuff)
+                        callback(frame_buffer)
                         # print 'return from callback'
                     lst = ct
-                    frameBuff = ""
-                    frameBuffLen = 0
+                    frame_buffer = ""
+                    frame_buffer_len = 0
 
                 continue
 
@@ -1139,33 +1098,32 @@ class ELM:
             if byte == ">":
                 self.port.write("\r")
 
-    def nr78_startMonitor(self, callback, sendAllow=None, c_t=0.1, c_f=1):
-        if self.currentprotocol != "can":
+    def nr78_start_monitor(self, callback, send_allow=None, c_t=0.1, c_f=1):
+        if self.current_protocol != "can":
             print("Monitor mode is possible only on CAN bus")
             return
         self.run_allow_event = threading.Event()
         self.run_allow_event.set()
-        self.monitorThread = threading.Thread(
-            target=self.nr78_monitor, args=(callback, sendAllow, c_t, c_f)
+        self.monitor_thread = threading.Thread(
+            target=self.nr78_monitor, args=(callback, send_allow, c_t, c_f)
         )
-        self.monitorThread.setDaemon(True)
-        self.monitorThread.start()
+        self.monitor_thread.setDaemon(True)
+        self.monitor_thread.start()
 
-    def nr78_stopMonitor(self):
-        if not mod_globals.OPT_DEMO:
+    def nr78_stop_monitor(self):
+        if not config.OPT_DEMO:
             self.port.write("\r")
         self.run_allow_event.clear()
         time.sleep(0.2)
-        if mod_globals.OPT_DEMO or self.monitorCallBack is None:
+        if config.OPT_DEMO or self.monitor_callback is None:
             return
 
-        tmp = self.portTimeout
-        self.portTimeout = 0.3
+        tmp = self.port_timeout
+        self.port_timeout = 0.3
         self.send_raw("AT")
-        self.portTimeout = tmp
+        self.port_timeout = tmp
 
-    def waitFramesCallBack(self, frames):
-
+    def wait_frames_call_back(self, frames):
         for l in frames.split("\n"):
             l = l.strip()
             if len(l) == 0:
@@ -1180,89 +1138,89 @@ class ELM:
             self.waitedFrames = self.waitedFrames + l
 
             if l[:1] == "3":  # flow control
-                self.endWaitingFrames = True
+                self.end_waiting_frames = True
 
             elif l[:1] == "0":  # single frame
-                nBytes = int(l[1:2], 16)
-                if nBytes < 8:
+                n_bytes = int(l[1:2], 16)
+                if n_bytes < 8:
                     self.rspLen = 1
-                    self.fToWait = 0  # becouse we've recieved it
+                    self.fToWait = 0  # because we've received it
                 else:
                     print("\n ERROR #1 in waitFramesCallBack")
-                self.endWaitingFrames = True
+                self.end_waiting_frames = True
 
             elif l[:1] == "1":  # first frame
-                nBytes = int(l[1:4], 16)
-                nBytes = nBytes - 6  # becouse we've recieved first frame
-                self.rspLen = nBytes // 7 + bool(nBytes % 7)
+                n_bytes = int(l[1:4], 16)
+                n_bytes = n_bytes - 6  # because we've received the first frame
+                self.rspLen = n_bytes // 7 + bool(n_bytes % 7)
                 # self.fToWait = min(self.rspLen,MaxBurst)
-                self.endWaitingFrames = True  # stop waiting and send FlowControl
+                self.end_waiting_frames = True  # stop waiting and send FlowControl
 
             elif l[:1] == "2":  # consecutive frame
                 self.rspLen = self.rspLen - 1
                 self.fToWait = self.fToWait - 1
                 if self.fToWait == 0:
-                    self.endWaitingFrames = True
+                    self.end_waiting_frames = True
 
-        self.monitorSendAllow.clear()
+        self.monitor_send_allow.clear()
         return
 
     def waitFrames(self, timeout):
 
         self.waitedFrames = ""
-        self.endWaitingFrames = False
-        self.fToWait = min(self.rspLen, MaxBurst)
+        self.end_waiting_frames = False
+        self.fToWait = min(self.rspLen, MAX_BURST)
 
-        sendAllow = threading.Event()
-        sendAllow.clear()
-        self.nr78_startMonitor(self.waitFramesCallBack, sendAllow, 0.1, 1)
+        send_allow = threading.Event()
+        send_allow.clear()
+        self.nr78_start_monitor(self.wait_frames_call_back, send_allow, 0.1, 1)
 
         beg = pyren_time()
 
-        while not self.endWaitingFrames and (pyren_time() - beg < timeout):
+        while not self.end_waiting_frames and (pyren_time() - beg < timeout):
             time.sleep(0.01)
 
         # debug
         # print '>>>> ', self.waitedFrames
-        self.nr78_stopMonitor()
+        self.nr78_stop_monitor()
 
         # debug
         # print '>>>> ', self.waitedFrames
 
         return self.waitedFrames
 
-    def getFromCache(self, req):
-        if mod_globals.OPT_DEMO and req in list(self.ecudump.keys()):
-            return self.ecudump[req]
+    def get_from_cache(self, req):
+        if config.OPT_DEMO and req in list(self.ecu_dump.keys()):
+            return self.ecu_dump[req]
 
         if req in list(self.rsp_cache.keys()):
             return self.rsp_cache[req]
 
         return ""
 
-    def delFromCache(self, req):
-        if not mod_globals.OPT_DEMO and req in list(self.rsp_cache.keys()):
+    def del_from_cache(self, req):
+        if not config.OPT_DEMO and req in list(self.rsp_cache.keys()):
             del self.rsp_cache[req]
 
-    def checkIfCommandUnsupported(self, req, res):
+    def check_if_command_unsupported(self, req, res):
         if "NR" in res:
             nr = res.split(":")[1]
             if nr in ["12"]:
                 if (
-                    mod_globals.OPT_CSV_ONLY
+                    config.OPT_CSV_ONLY
                 ):  # all unsupported commands must be removed immediately in csv_only mode
-                    self.notSupportedCommands[req] = res
+                    self.not_supported_commands[req] = res
                 else:
-                    if req in list(self.tmpNotSupportedCommands.keys()):
-                        del self.tmpNotSupportedCommands[req]
-                        self.notSupportedCommands[req] = res
+                    if req in list(self.tmp_not_supported_commands.keys()):
+                        del self.tmp_not_supported_commands[req]
+                        self.not_supported_commands[req] = res
                     else:
-                        self.tmpNotSupportedCommands[req] = res
+                        self.tmp_not_supported_commands[req] = res
         else:
             if req in list(
-                self.tmpNotSupportedCommands.keys()
-            ):  # if previous response was negative and now it is positive
-                del self.tmpNotSupportedCommands[
+                self.tmp_not_supported_commands.keys()
+            ):  # if the previous response was negative and now it is positive
+                del self.tmp_not_supported_commands[
                     req
                 ]  # remove it from negative commands queue, because of false negative
 
@@ -1270,13 +1228,13 @@ class ELM:
         """Check if request is saved in L2 cache.
         If not then
           - make real request
-          - convert responce to one line
+          - convert response to one line
           - save in L2 cache
         returns response without consistency check
         """
 
-        if mod_globals.OPT_DEMO and req in list(self.ecudump.keys()):
-            return self.ecudump[req]
+        if config.OPT_DEMO and req in list(self.ecu_dump.keys()):
+            return self.ecu_dump[req]
 
         if cache and req in list(self.rsp_cache.keys()):
             return self.rsp_cache[req]
@@ -1284,9 +1242,9 @@ class ELM:
         # send cmd
         rsp = self.cmd(req, int(serviceDelay))
 
-        # parse responce
+        # parse response
         res = ""
-        if self.currentprotocol != "can":
+        if self.current_protocol != "can":
             # Trivially reject first line (echo)
             rsp_split = rsp.split("\n")[1:]
             for s in rsp_split:
@@ -1296,65 +1254,65 @@ class ELM:
             for s in rsp.split("\n"):
                 if ":" in s:
                     res += s[2:].strip() + " "
-                else:  # responce consists only from one frame
+                else:  # response consists only from one frame
                     if s.replace(" ", "").startswith(positive.replace(" ", "")):
                         res += s.strip() + " "
 
         rsp = res
 
         # populate L2 cache
-        if req[:2] in AllowedList:
+        if req[:2] in ALLOWED_LIST:
             self.rsp_cache[req] = rsp
 
         # save log
         if self.vf != 0 and "NR" not in rsp:
-            tmp_addr = self.currentaddress
-            if self.currentaddress in list(dnat.keys()):
-                tmp_addr = dnat[self.currentaddress]
-            self.vf.write(log_tmstr() + ";" + tmp_addr + ";" + req + ";" + rsp + "\n")
+            tmp_addr = self.current_address
+            if self.current_address in list(DNAT.keys()):
+                tmp_addr = DNAT[self.current_address]
+            self.vf.write(
+                log_timestamp_str() + ";" + tmp_addr + ";" + req + ";" + rsp + "\n"
+            )
             self.vf.flush()
 
         return rsp
 
     # noinspection PyUnboundLocalVariable
-    def cmd(self, command, serviceDelay=0):
+    def cmd(self, command, service_delay=0):
 
         command = command.upper()
 
         # check if command not supported
-        if command in list(self.notSupportedCommands.keys()):
-            return self.notSupportedCommands[command]
+        if command in list(self.not_supported_commands.keys()):
+            return self.not_supported_commands[command]
 
         tb = pyren_time()  # start time
 
-        devmode = False
-
-        # Ensure time gap between commands
+        # Ensure timegap between commands
         # dl = self.busLoad + self.srvsDelay - tb + self.lastCMDtime
         if (
-            (tb - self.lastCMDtime) < (self.busLoad + self.srvsDelay)
+            (tb - self.last_cmd_time) < (self.busLoad + self.srvs_delay)
         ) and command.upper()[:2] not in ["AT", "ST"]:
-            time.sleep(self.busLoad + self.srvsDelay - tb + self.lastCMDtime)
+            time.sleep(self.busLoad + self.srvs_delay - tb + self.last_cmd_time)
 
         tb = pyren_time()  # renew start time
 
         # save current session
-        saveSession = self.startSession
+        save_session = self.start_session_
 
         # If we are on CAN and there was more than keepAlive seconds of silence
         # then send startSession command again
-        if (tb - self.lastCMDtime) > self.keepAlive and len(self.startSession) > 0:
+        if (tb - self.last_cmd_time) > self.keepAlive and len(self.start_session_) > 0:
 
             # log KeepAlive event
             if self.lf != 0:
-                self.lf.write("#[" + log_tmstr() + "]" + "KeepAlive\n")
+                self.lf.write("#[" + log_timestamp_str() + "]" + "KeepAlive\n")
                 self.lf.flush()
 
             # send keepalive
-            # if not mod_globals.opt_demo:
+            # if not config.opt_demo:
             #  self.port.reinit() #experimental
-            self.send_cmd(self.startSession)
-            self.lastCMDtime = pyren_time()  # for not to get into infinite loop
+            self.send_cmd(self.start_session_)
+            self.last_cmd_time = pyren_time()  # for not to get into infinite loop
 
         # send command and check for ask to wait
         cmdrsp = ""
@@ -1363,10 +1321,10 @@ class ELM:
             rep_count = rep_count - 1
             no_negative_wait_response = True
 
-            self.lastCMDtime = tc = pyren_time()
+            self.last_cmd_time = tc = pyren_time()
             cmdrsp = self.send_cmd(command)
 
-            self.checkIfCommandUnsupported(
+            self.check_if_command_unsupported(
                 command, cmdrsp
             )  # check if response for this command is NR:12
 
@@ -1379,7 +1337,7 @@ class ELM:
                 if (
                     line.startswith("7F")
                     and len(line) == 8
-                    and line[6:8] in list(negrsp.keys())
+                    and line[6:8] in list(NEGATIVE_RESPONSES.keys())
                 ):
                     nr = line[6:8]
                 if line.startswith("NR"):
@@ -1390,7 +1348,7 @@ class ELM:
                 elif nr in ["78"]:
                     self.send_raw("at at 0")
                     self.send_raw("at st ff")
-                    self.lastCMDtime = tc = pyren_time()
+                    self.last_cmd_time = tc = pyren_time()
                     cmdrsp = self.send_cmd(command)
                     self.send_raw("at at 1")
                     break
@@ -1398,21 +1356,7 @@ class ELM:
             if no_negative_wait_response:
                 break
 
-        # If dev mode then switch back from Development Session
-        if devmode:
-
-            # restore current session
-            self.startSession = saveSession
-            self.start_session(self.startSession)
-            self.lastCMDtime = pyren_time()
-
-            # log switching event
-            if self.lf != 0:
-                self.lf.write("#[" + log_tmstr() + "]" + "Switch back from dev mode\n")
-                self.lf.flush()
-
-                # add srvsDelay to time gap before send next command
-        self.srvsDelay = float(serviceDelay) / 1000.0
+        self.srvs_delay = float(service_delay) / 1000.0
 
         # check for negative response from k-line (CAN NR processed in send_can***)
         for line in cmdrsp.split("\n"):
@@ -1420,10 +1364,10 @@ class ELM:
             if (
                 line.startswith("7F")
                 and len(line) == 8
-                and line[6:8] in list(negrsp.keys())
-                and self.currentprotocol != "can"
+                and line[6:8] in list(NEGATIVE_RESPONSES.keys())
+                and self.current_protocol != "can"
             ):
-                # if not mod_globals.state_scan: print line, negrsp[line[6:8]]
+                # if not config.state_scan: print line, negrsp[line[6:8]]
                 if self.lf != 0:
                     # tm = str (pyren_time())
                     self.lf.write(
@@ -1432,17 +1376,17 @@ class ELM:
                         + "] rsp:"
                         + line
                         + ":"
-                        + negrsp[line[6:8]]
+                        + NEGATIVE_RESPONSES[line[6:8]]
                         + "\n"
                     )
                     self.lf.flush()
                 if self.vf != 0:
-                    tmp_addr = self.currentaddress
-                    if self.currentaddress in list(dnat.keys()):
-                        tmp_addr = dnat[self.currentaddress]
+                    tmp_addr = self.current_address
+                    if self.current_address in list(DNAT.keys()):
+                        tmp_addr = DNAT[self.current_address]
 
                     self.vf.write(
-                        log_tmstr()
+                        log_timestamp_str()
                         + ";"
                         + tmp_addr
                         + ";"
@@ -1450,7 +1394,7 @@ class ELM:
                         + ";"
                         + line
                         + ";"
-                        + negrsp[line[6:8]]
+                        + NEGATIVE_RESPONSES[line[6:8]]
                         + "\n"
                     )
                     self.vf.flush()
@@ -1463,24 +1407,24 @@ class ELM:
 
         # deal with exceptions
         # boudrate 38400 not enough to read full information about errors
-        if not mod_globals.OPT_OBD_LINK and len(command) == 6 and command[:4] == "1902":
+        if not config.OPT_OBD_LINK and len(command) == 6 and command[:4] == "1902":
             command = "1902AF"
 
-        if command.upper()[:2] in ["AT", "ST"] or self.currentprotocol != "can":
+        if command.upper()[:2] in ["AT", "ST"] or self.current_protocol != "can":
             return self.send_raw(command)
 
         if self.ATCFC0:
             return self.send_can_cfc0(command)
         else:
-            if mod_globals.OPT_OBD_LINK:
-                if mod_globals.OPT_CAF:
+            if config.OPT_OBD_LINK:
+                if config.OPT_CAF:
                     rsp = self.send_can_cfc_caf(command)
                 else:
                     rsp = self.send_can_cfc(command)
             else:
                 rsp = self.send_can(command)
             if (
-                self.error_frame > 0 or self.error_bufferfull > 0
+                self.error_frame > 0 or self.error_buffer_full > 0
             ):  # then fallback to cfc0
                 self.ATCFC0 = True
                 self.cmd("at cfc0")
@@ -1554,7 +1498,7 @@ class ELM:
             and responses[0][6:8] == "78"
         ):
             responses = responses[1:]
-            mod_globals.OPT_N1C = True
+            config.OPT_N1C = True
 
         if len(responses) == 1:  # single freme response
             if responses[0][:1] == "0":
@@ -1592,7 +1536,7 @@ class ELM:
             noerrors = False
 
         # populate L1 cache
-        if noerrors and command[:2] in AllowedList and not mod_globals.OPT_N1C:
+        if noerrors and command[:2] in ALLOWED_LIST and not config.OPT_N1C:
             self.l1_cache[command] = str(hex(nframes))[2:].upper()
 
         if len(result) // 2 >= nbytes and noerrors:
@@ -1603,25 +1547,25 @@ class ELM:
             return result
         else:
             # check for negative response (repeat the same as in cmd())
-            if result[:2] == "7F" and result[4:6] in list(negrsp.keys()):
+            if result[:2] == "7F" and result[4:6] in list(NEGATIVE_RESPONSES.keys()):
                 if self.vf != 0:
                     # debug
                     # print result
 
                     self.vf.write(
-                        log_tmstr()
+                        log_timestamp_str()
                         + ";"
-                        + dnat[self.currentaddress]
+                        + DNAT[self.current_address]
                         + ";"
                         + command
                         + ";"
                         + result
                         + ";"
-                        + negrsp[result[4:6]]
+                        + NEGATIVE_RESPONSES[result[4:6]]
                         + "\n"
                     )
                     self.vf.flush()
-                return "NR:" + result[4:6] + ":" + negrsp[result[4:6]]
+                return "NR:" + result[4:6] + ":" + NEGATIVE_RESPONSES[result[4:6]]
             else:
                 return "WRONG RESPONSE"
 
@@ -1676,22 +1620,22 @@ class ELM:
             # check for negative response (repeat the same as in cmd())
             # debug
             # print "Size error: ", result
-            if result[:2] == "7F" and result[4:6] in list(negrsp.keys()):
+            if result[:2] == "7F" and result[4:6] in list(NEGATIVE_RESPONSES.keys()):
                 if self.vf != 0:
                     self.vf.write(
-                        log_tmstr()
+                        log_timestamp_str()
                         + ";"
-                        + dnat[self.currentaddress]
+                        + DNAT[self.current_address]
                         + ";"
                         + command
                         + ";"
                         + result
                         + ";"
-                        + negrsp[result[4:6]]
+                        + NEGATIVE_RESPONSES[result[4:6]]
                         + "\n"
                     )
                     self.vf.flush()
-                return "NR:" + result[4:6] + ":" + negrsp[result[4:6]]
+                return "NR:" + result[4:6] + ":" + NEGATIVE_RESPONSES[result[4:6]]
             else:
                 return "WRONG RESPONSE"
 
@@ -1808,7 +1752,7 @@ class ELM:
 
                 # Ensure time gap between frames according to FlowControl
                 tc = pyren_time()  # current time
-                self.screenRefreshTime += ST / 1000.0
+                self.screen_refresh_time += ST / 1000.0
                 if (tc - tb) * 1000.0 < ST:
                     target_time = pyren_time() + (ST / 1000.0 - (tc - tb))
                     while pyren_time() < target_time:
@@ -1895,7 +1839,7 @@ class ELM:
             noerrors = False
 
         # populate L1 cache
-        if noerrors and init_command[:2] in AllowedList:
+        if noerrors and init_command[:2] in ALLOWED_LIST:
             self.l1_cache[init_command] = str(nFrames)
 
         if noerrors and len(result) // 2 >= nBytes:
@@ -1908,22 +1852,22 @@ class ELM:
             # check for negative response (repeat the same as in cmd())
             # debug
             # print "Size error: ", result
-            if result[:2] == "7F" and result[4:6] in list(negrsp.keys()):
+            if result[:2] == "7F" and result[4:6] in list(NEGATIVE_RESPONSES.keys()):
                 if self.vf != 0:
                     self.vf.write(
-                        log_tmstr()
+                        log_timestamp_str()
                         + ";"
-                        + dnat[self.currentaddress]
+                        + DNAT[self.current_address]
                         + ";"
                         + command
                         + ";"
                         + result
                         + ";"
-                        + negrsp[result[4:6]]
+                        + NEGATIVE_RESPONSES[result[4:6]]
                         + "\n"
                     )
                     self.vf.flush()
-                return "NR:" + result[4:6] + ":" + negrsp[result[4:6]]
+                return "NR:" + result[4:6] + ":" + NEGATIVE_RESPONSES[result[4:6]]
             else:
                 return "WRONG RESPONSE"
 
@@ -2109,7 +2053,7 @@ class ELM:
             # while len (result) / 2 < nBytes:
             while cFrame < nFrames:
                 # now we should send ff
-                sBS = hex(min({nFrames - cFrame, MaxBurst}))[2:]
+                sBS = hex(min({nFrames - cFrame, MAX_BURST}))[2:]
                 frsp = self.send_raw("300" + sBS + "00" + sBS)
 
                 # analyse response
@@ -2158,22 +2102,22 @@ class ELM:
             # check for negative response (repeat the same as in cmd())
             # debug
             # print "Size error: ", result
-            if result[:2] == "7F" and result[4:6] in list(negrsp.keys()):
+            if result[:2] == "7F" and result[4:6] in list(NEGATIVE_RESPONSES.keys()):
                 if self.vf != 0:
                     self.vf.write(
-                        log_tmstr()
+                        log_timestamp_str()
                         + ";"
-                        + dnat[self.currentaddress]
+                        + DNAT[self.current_address]
                         + ";"
                         + command
                         + ";"
                         + result
                         + ";"
-                        + negrsp[result[4:6]]
+                        + NEGATIVE_RESPONSES[result[4:6]]
                         + "\n"
                     )
                     self.vf.flush()
-                return "NR:" + result[4:6] + ":" + negrsp[result[4:6]]
+                return "NR:" + result[4:6] + ":" + NEGATIVE_RESPONSES[result[4:6]]
             else:
                 return "WRONG RESPONSE"
 
@@ -2185,21 +2129,21 @@ class ELM:
 
         # save command to log
         if self.lf != 0:
-            self.lf.write(">[" + log_tmstr() + "]" + command + "\n")
+            self.lf.write(">[" + log_timestamp_str() + "]" + command + "\n")
             self.lf.flush()
 
         # send command
-        if not mod_globals.OPT_DEMO:
+        if not config.OPT_DEMO:
             self.port.write(str(command + "\r").encode("utf-8"))  # send command
 
         # receive and parse responce
         while True:
             tc = pyren_time()
-            if mod_globals.OPT_DEMO:
+            if config.OPT_DEMO:
                 break
-            self.buff = self.port.expect(">", self.portTimeout)
+            self.buff = self.port.expect(">", self.port_timeout)
             tc = pyren_time()
-            if (tc - tb) > self.portTimeout and "TIMEOUT" not in self.buff:
+            if (tc - tb) > self.port_timeout and "TIMEOUT" not in self.buff:
                 self.buff += "TIMEOUT"
             if "TIMEOUT" in self.buff:
                 self.error_timeout += 1
@@ -2208,7 +2152,13 @@ class ELM:
                 break
             elif self.lf != 0:
                 self.lf.write(
-                    "<[" + log_tmstr() + "]" + self.buff + "(shifted)" + command + "\n"
+                    "<["
+                    + log_timestamp_str()
+                    + "]"
+                    + self.buff
+                    + "(shifted)"
+                    + command
+                    + "\n"
                 )
                 self.lf.flush()
 
@@ -2216,7 +2166,7 @@ class ELM:
         if "?" in self.buff:
             self.error_question += 1
         if "BUFFER FULL" in self.buff:
-            self.error_bufferfull += 1
+            self.error_buffer_full += 1
         if "NO DATA" in self.buff:
             self.error_nodata += 1
         if "RX ERROR" in self.buff:
@@ -2226,7 +2176,7 @@ class ELM:
 
         roundtrip = tc - tb
 
-        self.screenRefreshTime += roundtrip
+        self.screen_refresh_time += roundtrip
 
         if command[0].isdigit() or command.startswith("STPX"):
             self.response_time = ((self.response_time * 9) + roundtrip) / 10
@@ -2242,9 +2192,9 @@ class ELM:
         self.cmd("atpc")
 
     def start_session(self, start_session_cmd):
-        self.startSession = start_session_cmd
-        if len(self.startSession) > 0:
-            self.lastinitrsp = self.cmd(self.startSession)
+        self.start_session_ = start_session_cmd
+        if len(self.start_session_) > 0:
+            self.last_init_response = self.cmd(self.start_session_)
 
     def check_answer(self, ans):
         if "?" in ans:
@@ -2253,7 +2203,7 @@ class ELM:
             self.supportedCommands += 1
 
     def check_adapter(self):
-        if mod_globals.OPT_DEMO:
+        if config.OPT_DEMO:
             return
         if self.unsupportedCommands == 0:
             return
@@ -2264,16 +2214,15 @@ class ELM:
             self.lastMessage = "\n\n\tBroken or unsupported adapter !!!\n\n"
 
     def init_can(self):
-
-        if not mod_globals.OPT_DEMO:
+        if not config.OPT_DEMO:
             self.port.reinit()
 
-        self.currentprotocol = "can"
-        self.currentaddress = "7e0"  # do not tuch
-        self.startSession = ""
-        self.lastCMDtime = 0
+        self.current_protocol = "can"
+        self.current_address = "7e0"  # do not tuch
+        self.start_session_ = ""
+        self.last_cmd_time = 0
         self.l1_cache = {}
-        self.notSupportedCommands = {}
+        self.not_supported_commands = {}
 
         if self.lf != 0:
             self.lf.write("#" * 60 + "\n# Init CAN\n" + "#" * 60 + "\n")
@@ -2289,7 +2238,7 @@ class ELM:
         self.check_answer(self.cmd("at l0"))
         self.check_answer(self.cmd("at al"))
 
-        if mod_globals.OPT_OBD_LINK and mod_globals.OPT_CAF and not self.ATCFC0:
+        if config.OPT_OBD_LINK and config.OPT_CAF and not self.ATCFC0:
             self.check_answer(self.cmd("AT CAF1"))
             self.check_answer(self.cmd("STCSEGR 1"))
             self.check_answer(self.cmd("STCSEGT 1"))
@@ -2301,58 +2250,57 @@ class ELM:
         else:
             self.check_answer(self.cmd("at cfc1"))
 
-        self.lastCMDtime = 0
+        self.last_cmd_time = 0
 
     def set_can_500(self, addr="XXX"):
         if len(addr) == 3:
             if (
-                mod_globals.OPT_CAN2 and mod_globals.OPT_STN
+                config.OPT_CAN2 and config.OPT_STN
             ):  # for STN with FORD MS-CAN support and pinout changed by soldering
                 self.cmd("STP 53")
                 self.cmd("STPBR 500000")
-                tmprsp = self.send_raw("0210C0")  # send anything
-                if not "CAN ERROR" in tmprsp:
+                tmp_response = self.send_raw("0210C0")  # send anything
+                if not "CAN ERROR" in tmp_response:
                     return
             self.cmd("at sp 6")
         else:
-            if mod_globals.OPT_CAN2 and mod_globals.OPT_STN:
+            if config.OPT_CAN2 and config.OPT_STN:
                 self.cmd("STP 54")
                 self.cmd("STPBR 500000")
-                tmprsp = self.send_raw("0210C0")
-                if not "CAN ERROR" in tmprsp:
+                tmp_response = self.send_raw("0210C0")
+                if not "CAN ERROR" in tmp_response:
                     return
             self.cmd("at sp 7")
 
     def set_can_250(self, addr="XXX"):
         if len(addr) == 3:
-            if mod_globals.OPT_CAN2 and mod_globals.OPT_STN:
+            if config.OPT_CAN2 and config.OPT_STN:
                 self.cmd("STP 53")
                 self.cmd("STPBR 250000")
-                tmprsp = self.send_raw("0210C0")
-                if not "CAN ERROR" in tmprsp:
+                tmp_response = self.send_raw("0210C0")
+                if not "CAN ERROR" in tmp_response:
                     return
             self.cmd("at sp 8")
         else:
-            if mod_globals.OPT_CAN2 and mod_globals.OPT_STN:
+            if config.OPT_CAN2 and config.OPT_STN:
                 self.cmd("STP 54")
                 self.cmd("STPBR 250000")
-                tmprsp = self.send_raw("0210C0")
-                if not "CAN ERROR" in tmprsp:
+                tmp_response = self.send_raw("0210C0")
+                if not "CAN ERROR" in tmp_response:
                     return
             self.cmd("at sp 9")
 
     def set_can_addr(self, addr, ecu):
+        self.not_supported_commands = {}
+        self.tmp_not_supported_commands = {}
 
-        self.notSupportedCommands = {}
-        self.tmpNotSupportedCommands = {}
-
-        if self.currentprotocol == "can" and self.currentaddress == addr:
+        if self.current_protocol == "can" and self.current_address == addr:
             return
 
         if len(ecu.get("idTx", "")):
-            dnat[addr] = ecu["idTx"]
+            DNAT[addr] = ecu["idTx"]
         if len(ecu.get("idRx", "")):
-            snat[addr] = ecu["idRx"]
+            SNAT[addr] = ecu["idRx"]
 
         if self.lf != 0:
             self.lf.write(
@@ -2367,20 +2315,20 @@ class ELM:
             )
             self.lf.flush()
 
-        self.currentprotocol = "can"
-        self.currentaddress = addr
-        self.startSession = ""
-        self.lastCMDtime = 0
+        self.current_protocol = "can"
+        self.current_address = addr
+        self.start_session_ = ""
+        self.last_cmd_time = 0
         self.l1_cache = {}
         self.clear_cache()
 
-        if addr in list(dnat.keys()):
-            TXa = dnat[addr]
+        if addr in list(DNAT.keys()):
+            TXa = DNAT[addr]
         else:
             TXa = "undefined"
 
-        if addr in list(snat.keys()):
-            RXa = snat[addr]
+        if addr in list(SNAT.keys()):
+            RXa = SNAT[addr]
         else:
             RXa = "undefined"
 
@@ -2409,8 +2357,8 @@ class ELM:
                 )
                 self.lf.flush()
             self.set_can_250(TXa)
-            tmprsp = self.send_raw("0210C0")  # send any command
-            if "CAN ERROR" in tmprsp:  # not 250!
+            tmp_response = self.send_raw("0210C0")  # send any command
+            if "CAN ERROR" in tmp_response:  # not 250!
                 ecu["brp"] = "0"  # brp = 0
                 self.set_can_500(TXa)
             else:  # 250!
@@ -2424,27 +2372,31 @@ class ELM:
         self.check_answer(self.cmd("at at 1"))  # reset adaptive timing step 3
         self.check_answer(self.cmd("at cra " + RXa))
 
-        if mod_globals.OPT_OBD_LINK and mod_globals.OPT_CAF:
+        if config.OPT_OBD_LINK and config.OPT_CAF:
             self.check_answer(self.cmd("STCFCPA " + TXa + ", " + RXa))
 
         self.check_adapter()
 
     def init_iso(self):
-
-        if not mod_globals.OPT_DEMO:
+        if not config.OPT_DEMO:
             self.port.reinit()
 
-        self.currentprotocol = "iso"
-        self.currentsubprotocol = ""
-        self.currentaddress = ""
-        self.startSession = ""
-        self.lastCMDtime = 0
-        self.lastinitrsp = ""
-        self.notSupportedCommands = {}
+        self.current_protocol = "iso"
+        self.current_sub_protocol = ""
+        self.current_address = ""
+        self.start_session_ = ""
+        self.last_cmd_time = 0
+        self.last_init_response = ""
+        self.not_supported_commands = {}
 
         if self.lf != 0:
             self.lf.write(
-                "#" * 60 + "\n#[" + log_tmstr() + "] Init ISO\n" + "#" * 60 + "\n"
+                "#" * 60
+                + "\n#["
+                + log_timestamp_str()
+                + "] Init ISO\n"
+                + "#" * 60
+                + "\n"
             )
             self.lf.flush()
         self.check_answer(self.cmd("at ws"))
@@ -2455,13 +2407,13 @@ class ELM:
 
     def set_iso_addr(self, addr, ecu):
 
-        self.notSupportedCommands = {}
-        self.tmpNotSupportedCommands = {}
+        self.not_supported_commands = {}
+        self.tmp_not_supported_commands = {}
 
         if (
-            self.currentprotocol == "iso"
-            and self.currentaddress == addr
-            and self.currentsubprotocol == ecu.get("protocol", "")
+            self.current_protocol == "iso"
+            and self.current_address == addr
+            and self.current_sub_protocol == ecu.get("protocol", "")
         ):
             return
 
@@ -2480,15 +2432,15 @@ class ELM:
             )
             self.lf.flush()
 
-        if self.currentprotocol == "iso":
+        if self.current_protocol == "iso":
             self.check_answer(self.cmd("82"))  # close previous session
 
-        self.currentprotocol = "iso"
-        self.currentsubprotocol = ecu.get("protocol", "")
-        self.currentaddress = addr
-        self.startSession = ""
-        self.lastCMDtime = 0
-        self.lastinitrsp = ""
+        self.current_protocol = "iso"
+        self.current_sub_protocol = ecu.get("protocol", "")
+        self.current_address = addr
+        self.start_session_ = ""
+        self.last_cmd_time = 0
+        self.last_init_response = ""
         self.clear_cache()
 
         self.check_answer(self.cmd("at sh 81 " + addr + " f1"))  # set address
@@ -2499,23 +2451,24 @@ class ELM:
         self.check_answer(self.cmd("at st ff"))  # set timeout to 1 second
         self.check_answer(self.cmd("at at 0"))  # disable adaptive timing
 
-        if "PRNA2000" in ecu.get("protocol", "").upper() or mod_globals.OPT_SI:
+        if "PRNA2000" in ecu.get("protocol", "").upper() or config.OPT_SI:
             self.cmd("at sp 4")  # slow init mode 4
             if len(ecu.get("slowInit", "")) > 0:
                 self.cmd("at iia " + ecu["slowInit"])  # address for slow init
-            rsp = self.lastinitrsp = self.cmd("at si")  # for slow init mode 4
-            # rsp = self.cmd("81")
-            if "ERROR" in rsp and len(ecu.get("fastInit", "")) > 0:
+            response = self.last_init_response = self.cmd(
+                "at si"
+            )  # for slow init mode 4
+            if "ERROR" in response and len(ecu.get("fastInit", "")) > 0:
                 ecu["protocol"] = ""
                 if self.lf != 0:
                     self.lf.write("### Try fast init\n")
                     self.lf.flush()
 
                     # if 'PRNA2000' not in ecu['protocol'].upper() :
-        if "OK" not in self.lastinitrsp:
+        if "OK" not in self.last_init_response:
             self.cmd("at sp 5")  # fast init mode 5
-            self.lastinitrsp = self.cmd("at fi")  # perform fast init mode 5
-            # self.lastinitrsp = self.cmd("81")         #init bus
+            self.last_init_response = self.cmd("at fi")  # perform fast init mode 5
+            # self.last_init_response = self.cmd("81")         #init bus
 
         self.check_answer(self.cmd("at at 1"))  # enable adaptive timing
 
@@ -2524,24 +2477,24 @@ class ELM:
         self.check_adapter()
 
     # check what is the maximum number of parameters that module can handle in one request
-    def checkModulePerformaceLevel(self, dataids):
-        performanceLevels = [3, 2]
+    def check_module_performance_level(self, data_ids):
+        performance_levels = [3, 2]
 
-        for level in performanceLevels:
-            isLevelAccepted = self.checkPerformaceLevel(level, dataids)
-            if isLevelAccepted:
+        for level in performance_levels:
+            is_level_accepted = self.check_performance_level(level, data_ids)
+            if is_level_accepted:
                 break
 
-        if self.performanceModeLevel == 3 and mod_globals.OPT_OBD_LINK:
+        if self.performance_mode_level == 3 and config.OPT_OBD_LINK:
             for level in reversed(
                 list(range(4, 100))
             ):  # 26 - 1 = 25  parameters per page
-                isLevelAccepted = self.checkPerformaceLevel(level, dataids)
-                if isLevelAccepted:
+                is_level_accepted = self.check_performance_level(level, data_ids)
+                if is_level_accepted:
                     return
 
-    def checkPerformaceLevel(self, level, dataids):
-        if len(dataids) >= level:
+    def check_performance_level(self, level, data_ids):
+        if len(data_ids) >= level:
             predicted_response_length = (
                 2  # length of string ReadDataByIdentifier service byte - 0x22
             )
@@ -2551,20 +2504,20 @@ class ELM:
             if level > 3:  # Send multiframe command for more than 3 dataids
                 # Some modules can return NO DATA if multi frame command is sent after some no activity time
                 # Sending anything before main command usually helps that command to be accepted
-                self.send_cmd("22" + list(dataids.keys())[0] + "1")
+                self.send_cmd("22" + list(data_ids.keys())[0] + "1")
 
             # while there is some dataids left and actual number of used dids
             # is lower than requeseted performance level
-            while did_number < len(dataids) and len(param_to_send) / 4 < level:
+            while did_number < len(data_ids) and len(param_to_send) / 4 < level:
                 # get another did
-                did = list(dataids)[did_number]
+                did = list(data_ids)[did_number]
                 did_number += 1
 
                 # exclude did_supported_in_range did
                 # sent seperatly - response provided
                 # sent in multi did request - empty response
                 # these are available only in injection module
-                if not int("0x" + did, 16) % 0x20 and self.currentaddress == "7A":
+                if not int("0x" + did, 16) % 0x20 and self.current_address == "7A":
                     continue
 
                 # check if it is supported
@@ -2573,7 +2526,7 @@ class ELM:
                     # add it to the list
                     param_to_send += did
                     predicted_response_length += (
-                        len(self.getFromCache("22" + did).replace(" ", "")) - 2
+                        len(self.get_from_cache("22" + did).replace(" ", "")) - 2
                     )
 
             # if module does not support any did, we cannot check performance level
@@ -2588,20 +2541,19 @@ class ELM:
             ):
                 return False
 
-            self.performanceModeLevel = len(param_to_send) // 4
+            self.performance_mode_level = len(param_to_send) // 4
             return True
-        else:
-            return False
+        return False
 
-    def getRefreshRate(self):
-        refreshRate = 0
+    def get_refresh_rate(self):
+        refresh_rate = 0
 
-        if not self.screenRefreshTime:
-            return refreshRate
+        if not self.screen_refresh_time:
+            return refresh_rate
 
-        refreshRate = 1 // self.screenRefreshTime
-        self.screenRefreshTime = 0
-        return refreshRate
+        refresh_rate = 1 // self.screen_refresh_time
+        self.screen_refresh_time = 0
+        return refresh_rate
 
     def reset_elm(self):
         self.cmd("at z")

@@ -3,6 +3,7 @@
 import sys
 import xml.dom.minidom
 
+import config
 from mod_utils import pyren_encode
 
 
@@ -63,7 +64,7 @@ def executeService(service, elm, status=[], param="", cache=False):
     sentDataIdentifires = (
         []
     )  # dataids sent in one 22 request, nedded for a response parse
-    performanceMode = mod_globals.OPT_PERFORMANCE and elm.performanceModeLevel > 1
+    performanceMode = config.OPT_PERFORMANCE and elm.performance_mode_level > 1
 
     commandToSend = service.startReq
 
@@ -74,7 +75,7 @@ def executeService(service, elm, status=[], param="", cache=False):
 
     if len(service.params) > 0:  # but I support only one and do not support SnapShot
         if service.params[0]["type"] == "DTC":
-            param = mod_globals.EXT_CUR_DTC
+            param = config.EXT_CUR_DTC
         pos = (int(service.params[0]["pos"]) - 1) * 2
         commandToSend = commandToSend[:pos] + param + commandToSend[pos:]
 

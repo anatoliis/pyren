@@ -259,31 +259,31 @@ def main():
         # demo mode with predefined ecu list
         if "tcom" in config.OPT_ECU_ID.lower() or len(config.OPT_ECU_ID) < 4:
             tcomid = "".join([i for i in config.OPT_ECU_ID if i.isdigit()])
-            se.load_model_ECUs("Vehicles/TCOM_" + tcomid + ".xml")
-            config.OPT_ECU_ID = ",".join(sorted(se.allecus.keys()))
+            se.load_model_ecus("Vehicles/TCOM_" + tcomid + ".xml")
+            config.OPT_ECU_ID = ",".join(sorted(se.all_ecus.keys()))
         else:
-            se.read_Uces_file(all=True)
-        se.detectedEcus = []
+            se.read_uces_file(read_all=True)
+        se.detected_ecus = []
         for i in config.OPT_ECU_ID.split(","):
-            if i in list(se.allecus.keys()):
-                se.allecus[i]["ecuname"] = i
-                se.allecus[i]["idf"] = se.allecus[i]["ModelId"][2:4]
-                if se.allecus[i]["idf"] != "":
-                    if se.allecus[i]["idf"][0] == "0":
-                        se.allecus[i]["idf"] = se.allecus[i]["idf"][1]
+            if i in list(se.all_ecus.keys()):
+                se.all_ecus[i]["ecuname"] = i
+                se.all_ecus[i]["idf"] = se.all_ecus[i]["ModelId"][2:4]
+                if se.all_ecus[i]["idf"] != "":
+                    if se.all_ecus[i]["idf"][0] == "0":
+                        se.all_ecus[i]["idf"] = se.all_ecus[i]["idf"][1]
                 else:
                     continue
-                se.allecus[i]["pin"] = "can"
-                se.detectedEcus.append(se.allecus[i])
+                se.all_ecus[i]["pin"] = "can"
+                se.detected_ecus.append(se.all_ecus[i])
     else:
         if not os.path.isfile(SEFname) or config.OPT_SCAN:
             # choosing model
-            se.chooseModel(config.OPT_CAR)  # choose model of car for doing full scan
+            se.choose_model(config.OPT_CAR)  # choose model of car for doing full scan
 
         # Do this check every time
         se.scan_all_ecus()  # First scan of all ecus
 
-    config.VIN = get_vin(se.detectedEcus, elm, getFirst=True)
+    config.VIN = get_vin(se.detected_ecus, elm, getFirst=True)
 
     print("Loading language ")
     sys.stdout.flush()
@@ -317,7 +317,7 @@ def main():
 
         if config.OPT_DEMO:
             print("Loading dump")
-            ecu.loadDump()
+            ecu.load_dump()
         elif config.OPT_DUMP:
             print("Saving dump")
             ecu.saveDump()

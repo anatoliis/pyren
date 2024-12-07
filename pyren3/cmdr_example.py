@@ -41,7 +41,7 @@ def prepare_ecu():
 
     if not os.path.isfile("savedEcus.p") or config.OPT_SCAN:
         # choosing model
-        se.chooseModel(config.OPT_CAR)  # choose model of a car for doing full scan
+        se.choose_model(config.OPT_CAR)  # choose model of a car for doing full scan
 
     # Do this check every time
     se.scan_all_ecus()  # First scan of all ecus

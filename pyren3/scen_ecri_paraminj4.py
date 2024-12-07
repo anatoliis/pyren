@@ -124,7 +124,7 @@ def run(elm, ecu, command, data):
         tree = et.ElementTree(fileRoot)
         tree.write(config.DUMPS_DIR + ScmParam["FileName"])
 
-    def loadDump():
+    def load_dump():
         dumpScmParam = {}
 
         clear_screen()
@@ -271,7 +271,7 @@ def run(elm, ecu, command, data):
             return
         if value == choice[0]:
             if key == "loadDump":
-                loadDump()
+                load_dump()
             else:
                 resetValues()
             return

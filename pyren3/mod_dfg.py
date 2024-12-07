@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import xml.dom.minidom
 
 import config
@@ -7,8 +6,7 @@ import mod_db_manager
 from mod_utils import ChoiceFromDict, choice_long, clear_screen, pyren_encode
 
 
-class class_dfg:
-
+class ClassDfg:
     tcom = ""
     dfgFile = ""
     cacheFile = ""
@@ -40,7 +38,6 @@ class class_dfg:
     #              'symptomId':[]}
 
     def __init__(self, platform):
-
         # find TCOM by platform
         if platform != "":
             file_list = mod_db_manager.get_file_list_from_clip("Vehicles/TCOM_*.[Xx]ml")
@@ -87,15 +84,14 @@ class class_dfg:
 
         return
 
-    def loadDFG(self):
+    def load_dfg(self):
         try:
             DOMTree = xml.dom.minidom.parse(
                 mod_db_manager.get_file_from_clip(self.dfgFile)
             )
-        except:
+        except Exception:
             print("ERROR loading dfg-file")
-            # if 'DFG_135' in self.dfgFile:
-            #  self.dfgFile = self.dfgFile.replace('DFG_135', 'DFG_147')
+            return
 
         fs = DOMTree.documentElement  # functionsStructure
 
@@ -185,8 +181,7 @@ class class_dfg:
 
         return
 
-    def showMenu(self, zip):
-
+    def show_menu(self, zip):
         while True:
             clear_screen()
             path = "/"
@@ -256,7 +251,7 @@ class class_dfg:
                             "codetext"
                         ] in list(config.LANGUAGE_DICT.keys()):
                             menu[ek] = pyren_encode(
-                                mod_globals.LANGUAGE_DICT[
+                                config.LANGUAGE_DICT[
                                     self.domain[dk]["function"][fk]["feature"][ek][
                                         "codetext"
                                     ]

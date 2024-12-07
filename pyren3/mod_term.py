@@ -6,8 +6,10 @@ import string
 import sys
 import time
 
+import config
 import mod_elm
 import mod_utils
+from serial.tools import list_ports
 
 try:
     import readline
@@ -26,51 +28,6 @@ auto_dia = False
 debug_mode = False
 
 key_pressed = ""
-
-mod_globals.OS = os.name
-
-if mod_globals.OS == "nt":
-    import pip
-
-    try:
-        import serial
-    except ImportError:
-        pip.main(["install", "pyserial"])
-
-    try:
-        import colorama
-    except ImportError:
-        pip.main(["install", "colorama"])
-        try:
-            import colorama
-        except ImportError:
-            print(
-                "\n\n\n\t\t\tGive me access to the Internet for download modules\n\n\n"
-            )
-            sys.exit()
-    colorama.init()
-else:
-    # let's try android
-    try:
-        import androidhelper as android
-
-        mod_globals.OS = "android"
-    except:
-        try:
-            import android
-
-            mod_globals.OS = "android"
-        except:
-            pass
-
-if mod_globals.OS != "android":
-    try:
-        import serial
-        from serial.tools import list_ports
-    except ImportError:
-        print("\n\n\n\tPleas install additional modules")
-        print("\t\t>sudo easy_install pyserial")
-        sys.exit()
 
 
 def init_macro():
@@ -282,7 +239,7 @@ def optParser():
 
     options = parser.parse_args()
 
-    if not options.port and mod_globals.OS != "android":
+    if not options.port and config.OS != "android":
         parser.print_help()
         iterator = sorted(list(list_ports.comports()))
         print("")
@@ -292,17 +249,17 @@ def optParser():
         print("")
         exit(2)
     else:
-        mod_globals.OPT_PORT = options.port
-        mod_globals.OPT_RATE = int(options.rate)
-        mod_globals.OPT_SPEED = int(options.rate)
+        config.OPT_PORT = options.port
+        config.OPT_RATE = int(options.rate)
+        config.OPT_SPEED = int(options.rate)
         auto_macro = options.macro
-        mod_globals.OPT_LOG = options.logfile
-        mod_globals.OPT_DEMO = options.demo
-        mod_globals.OPT_SI = options.si
-        mod_globals.OPT_CFC0 = options.cfc
-        mod_globals.OPT_CAF = options.caf
-        mod_globals.OPT_N1C = options.n1c
-        mod_globals.OPT_MINOR_DTC = options.minordtc
+        config.OPT_LOG = options.logfile
+        config.OPT_DEMO = options.demo
+        config.OPT_SI = options.si
+        config.OPT_CFC0 = options.cfc
+        config.OPT_CAF = options.caf
+        config.OPT_N1C = options.n1c
+        config.OPT_MINOR_DTC = options.minordtc
         auto_dia = options.dia
         debug_mode = options.dbg
 
@@ -427,52 +384,29 @@ class FileChooser:
 
     def choose(self):
         try:
-            import androidhelper as android
+            # Python2
+            import tkinter as tk
+            import tkinter.ttk
+            import tkinter.filedialog as filedialog
+        except ImportError:
+            # Python3
+            import tkinter as tk
+            import tkinter.ttk as ttk
+            import tkinter.filedialog as filedialog
 
-            mod_globals.OS = "android"
-        except:
-            try:
-                import android
+        root = tk.Tk()
+        root.withdraw()
 
-                mod_globals.OS = "android"
-            except:
-                pass
+        my_filetypes = [("command files", ".cmd")]
 
-        if mod_globals.OS != "android":
-            try:
-                # Python2
-                import tkinter as tk
-                import tkinter.ttk
-                import tkinter.filedialog as filedialog
-            except ImportError:
-                # Python3
-                import tkinter as tk
-                import tkinter.ttk as ttk
-                import tkinter.filedialog as filedialog
+        fname = filedialog.askopenfilename(
+            parent=root,
+            initialdir="./macro",
+            title="Please select a file:",
+            filetypes=my_filetypes,
+        )
 
-            root = tk.Tk()
-            root.withdraw()
-
-            my_filetypes = [("command files", ".cmd")]
-
-            fname = filedialog.askopenfilename(
-                parent=root,
-                initialdir="./macro",
-                title="Please select a file:",
-                filetypes=my_filetypes,
-            )
-
-            return fname
-
-        else:
-            try:
-                self.droid = android.Android()
-                self.droid.fullShow(self.lay)
-                self.folderList.insert(0, "./macro/")
-                self.droid.fullSetList("sp_folder", self.folderList)
-                return self.eventloop()
-            finally:
-                self.droid.fullDismiss()
+        return fname
 
 
 def play_macro(mname, elm):
@@ -734,7 +668,7 @@ def wait_kb(ttw):
     global key_pressed
 
     st = mod_elm.pyren_time()
-    kb = mod_utils.KBHit()
+    kb = mod_utils.KeyboardHit()
 
     while mod_elm.pyren_time() < (st + ttw):
         if kb.keyboard_hit():
@@ -806,10 +740,10 @@ def proc_line(l, elm):
         rl = r.split("=")
         var[rl[0]] = rl[1]
         if rl[0] == "$addr":
-            if var["$addr"].upper() in list(mod_elm.dnat.keys()):
-                var["$txa"] = mod_elm.dnat[var["$addr"].upper()]
-                var["$rxa"] = mod_elm.snat[var["$addr"].upper()]
-                elm.currentaddress = var["$addr"].upper()
+            if var["$addr"].upper() in list(mod_elm.DNAT.keys()):
+                var["$txa"] = mod_elm.DNAT[var["$addr"].upper()]
+                var["$rxa"] = mod_elm.SNAT[var["$addr"].upper()]
+                elm.current_address = var["$addr"].upper()
         return
 
     l_parts = l.split()
@@ -822,7 +756,7 @@ def proc_line(l, elm):
 
     if len(l_parts) > 0 and l_parts[0] in ["ses", "session"]:
         try:
-            elm.startSession = l_parts[1]
+            elm.start_session_ = l_parts[1]
             l = l_parts[1]
         except:
             pass
@@ -901,15 +835,15 @@ def main():
     optParser()
 
     print("Opening ELM")
-    elm = mod_elm.ELM(mod_globals.OPT_PORT, mod_globals.OPT_SPEED, True)
+    elm = mod_elm.ELM(config.OPT_PORT, config.OPT_SPEED, True)
 
     # change serial port baud rate
-    if not mod_globals.OPT_DEMO and elm.port and elm.port.portType == 0:
-        if mod_globals.OPT_SPEED < mod_globals.OPT_RATE:
-            elm.port.soft_boudrate(mod_globals.OPT_RATE)
+    if not config.OPT_DEMO and elm.port and elm.port.port_type == 0:
+        if config.OPT_SPEED < config.OPT_RATE:
+            elm.port.soft_boudrate(config.OPT_RATE)
 
-    elm.currentaddress = "7A"
-    elm.currentprotocol = "can"
+    elm.current_address = "7A"
+    elm.current_protocol = "can"
 
     cmd_lines = []
     cmd_ref = 0
@@ -924,8 +858,8 @@ def main():
             f.close()
 
     if debug_mode:
-        mod_globals.OPT_DEMO = True
-        elm.loadDump("./dumps/term_test.txt")
+        config.OPT_DEMO = True
+        elm.load_dump("./dumps/term_test.txt")
         fname = "./macro/test/test.cmd"
         if len(fname) > 0:
             f = open(fname, "rt")

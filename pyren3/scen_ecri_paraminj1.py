@@ -195,7 +195,7 @@ def run(elm, ecu, command, data):
     else:
         correctEcu = ecusList[0]
 
-    if not correctEcu and mod_globals.OPT_DEMO:
+    if not correctEcu and config.OPT_DEMO:
         correctEcu = ecusList[0]
 
     if vdiagExists:
@@ -591,15 +591,15 @@ def run(elm, ecu, command, data):
             fileRoot.insert(1, el)
 
         tree = et.ElementTree(fileRoot)
-        tree.write(mod_globals.DUMPS_DIR + ScmParam["FileName"])
+        tree.write(config.DUMPS_DIR + ScmParam["FileName"])
 
-    def loadDump():
+    def load_dump():
         clear_screen()
 
         paramToSend = ""
         dumpScmParam = {}
         try:
-            dumpData = open(mod_globals.DUMPS_DIR + ScmParam["FileName"], "r")
+            dumpData = open(config.DUMPS_DIR + ScmParam["FileName"], "r")
         except:
             print(get_message_by_id("2194"))
             input()
@@ -687,7 +687,7 @@ def run(elm, ecu, command, data):
             if key in notSupported:
                 ch = input("\nNot Supported yet. Press ENTER to exit")
             elif key == "loadDump":
-                loadDump()
+                load_dump()
             elif key == 1:
                 resetInjetorsData(functions[key][0], functions[key][1])
             elif key == 6:

@@ -14,14 +14,8 @@ from mod_scan_ecus import ScanEcus
 from mod_utils import pyren_encode
 
 
-def prepare_ecus():
+def prepare_ecus(scan_ecus: ScanEcus):
     """This function loads data for ECUs"""
-
-    global elm
-    global ecu
-    global se
-    global lang
-
     pyren3.opt_parser()
 
     mod_utils.chk_dir_tree()
@@ -30,36 +24,19 @@ def prepare_ecus():
     if len(config.OPT_LOG) == 0:
         config.OPT_LOG = "commander_log.txt"
 
-    print("Opening ELM")
-    elm = ELM(config.OPT_PORT, config.OPT_SPEED, config.OPT_LOG)
-
-    print("Loading ECUs list")
-    se = ScanEcus(elm)  # Prepare a list of all ecus
-
     if not os.path.isfile("savedEcus.p") or config.OPT_SCAN:
         # choosing model
-        se.chooseModel(config.OPT_CAR)  # choose model of a car for doing full scan
+        scan_ecus.choose_model(
+            config.OPT_CAR
+        )  # choose model of a car for doing full scan
 
     # Do this check every time
-    se.scan_all_ecus()  # First scan of all ecus
-
-    print("Loading language ")
-    sys.stdout.flush()
-    # loading language data
-    lang = optfile("Location/DiagOnCAN_" + config.OPT_LANG + ".bqm", True)
-    config.LANGUAGE_DICT = lang.dict
-    print("Done")
-
-    return se.detectedEcus
+    scan_ecus.scan_all_ecus()  # First scan of all ecus
+    return scan_ecus.detected_ecus
 
 
-def select_ecu(ecu_number):
-    global elm
-    global ecu
-    global se
-    global lang
-
-    selected_ecu = se.select_ecu(ecu_number)
+def select_ecu(scan_ecus, ecu_number, elm, lang):
+    selected_ecu = scan_ecus.select_ecu(ecu_number)
     if selected_ecu == -1:
         print("#\n" * 3, "#   Unknown ECU defined!!!\n", "#\n" * 3)
         exit(1)
@@ -75,19 +52,29 @@ def select_ecu(ecu_number):
         )  # and save data to cache for next time
 
     ecu.init_elm(elm)  # init ELM for chosen ECU
-
-    # ecu.show_screens()                                      # show ECU screens
+    return ecu
 
 
 def main():
-    list_ = prepare_ecus()
+    print("Opening ELM")
+    elm = ELM(config.OPT_PORT, config.OPT_SPEED, config.OPT_LOG)
+    print("Loading ECUs list")
+    scan_ecus = ScanEcus(elm)  # Prepare a list of all ecus
+    print("Loading language ")
+    sys.stdout.flush()
+    # loading language data
+    lang = optfile("Location/DiagOnCAN_" + config.OPT_LANG + ".bqm", True)
+    config.LANGUAGE_DICT = lang.dict
+    print("Done")
+
+    list_ = prepare_ecus(scan_ecus)
 
     tot = ""
 
     for l in list_:
         if l["idf"] == "1":  # family 01
             print("### Connecting to Engine ###")
-            select_ecu(l["ecuname"])
+            ecu = select_ecu(scan_ecus, l["ecuname"], elm, lang)
             tot += "%-15s : " % "Engine    PR025"
             num, string = ecu.get_pr("PR025")
             print(pyren_encode(string))
@@ -105,7 +92,7 @@ def main():
             print()
         if l["idf"] == "2":  # family 02
             print("### Connecting to ABS ###")
-            select_ecu(l["ecuname"])
+            ecu = select_ecu(scan_ecus, l["ecuname"], elm, lang)
             tot += "%-15s : " % "ABS       PR121"
             num, string = ecu.get_pr("PR121")
             print(pyren_encode(string))
@@ -114,7 +101,7 @@ def main():
             print()
         if l["idf"] == "3":  # family 03
             print("### Connecting to TDB ###")
-            select_ecu(l["ecuname"])
+            ecu = select_ecu(scan_ecus, l["ecuname"], elm, lang)
             tot += "%-15s : " % "TDB       PR009"
             num, string = ecu.get_pr("PR009")
             print(pyren_encode(string))
@@ -186,7 +173,6 @@ def main():
             tot += "\n"
             break
 
-    # print tot
     elm.lastMessage = tot
 
 

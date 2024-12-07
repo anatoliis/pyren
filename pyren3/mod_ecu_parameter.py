@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import xml.dom.minidom
 
 from mod_ecu_mnemonic import *
@@ -40,19 +39,12 @@ def get_parameter(pr, mn, se, elm, calc, dataids={}):
         tmpmin = ""
         tmpmax = ""
 
-    if mod_globals.OS == "android":
-        return (
-            "%-6s %-41s %8s %-5s" % (pr.codeMR, pr.label, pr.value, pr.unit),
-            pr.helps,
-            csv_data,
-        )
-    else:
-        return (
-            "%-6s %-50s %5s %10s %-10s %-5s"
-            % (pr.codeMR, pr.label, tmpmin, pr.value, pr.unit, tmpmax),
-            pr.helps,
-            csv_data,
-        )
+    return (
+        "%-6s %-50s %5s %10s %-10s %-5s"
+        % (pr.codeMR, pr.label, tmpmin, pr.value, pr.unit, tmpmax),
+        pr.helps,
+        csv_data,
+    )
 
 
 class ecu_parameter:

@@ -17,7 +17,7 @@ from collections import OrderedDict
 
 import config
 import mod_db_manager
-from mod_utils import Choice, KBHit, clear_screen, pyren_encode
+from mod_utils import Choice, KeyboardHit, clear_screen, pyren_encode
 
 
 def run(elm, ecu, command, data):
@@ -85,7 +85,7 @@ def run(elm, ecu, command, data):
                 ScmSet[setname] = value
                 ScmParam[name] = value
 
-    kb = KBHit()
+    kb = KeyboardHit()
 
     confirm = get_message_by_id("19800")
     confirmCodes = get_message_by_id("17571")
@@ -368,7 +368,7 @@ def run(elm, ecu, command, data):
                 print("No codes read")
             elif (
                 pyren_encode(value2)
-                == pyren_encode(mod_globals.LANGUAGE_DICT[ScmParam["StateYES"]])
+                == pyren_encode(config.LANGUAGE_DICT[ScmParam["StateYES"]])
                 and len(readCodes) < 4
             ):
                 print("%-50s %-20s" % (readCodeMessage, pyren_encode(readCode)))

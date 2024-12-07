@@ -11,7 +11,7 @@ from mod_acf_proc import acf_mtc_generate_defaults
 from mod_elm import ELM
 from mod_mtc import acf_get_mtc
 from mod_optfile import optfile
-from mod_scan_ecus import ScanEcus, families as families, findTCOM as findTCOM
+from mod_scan_ecus import FAMILIES, ScanEcus, find_tcom
 from mod_utils import get_vin
 from serial.tools import list_ports
 
@@ -179,7 +179,7 @@ def main():
         # load savedEcus.p
         scan_ecus = ScanEcus(elm)  # Prepare a list of all ecus
         scan_ecus.scan_all_ecus()  # First scan of all ecus
-        detected_ecus = scan_ecus.detectedEcus
+        detected_ecus = scan_ecus.detected_ecus
 
         if config.VIN == "":
             print("Reading VINs")
@@ -193,7 +193,7 @@ def main():
         if os.path.isfile(platform_id_cache):  # if cache exists
             platform_id = pickle.load(open(platform_id_cache, "rb"))  # load it
         else:  # else
-            findTCOM("", "", "", True)  # make cache
+            find_tcom("", "", "", True)  # make cache
             platform_id = pickle.load(open(platform_id_cache, "rb"))  # load it
         # but we do not have a platform yet, so load data and then continue
 
@@ -275,8 +275,8 @@ def main():
     for module_ in module_list:
         if "sref" not in list(module_.keys()) or module_["sref"] == "":
             continue
-        if families[module_["idf"]] in list(config.LANGUAGE_DICT.keys()):
-            module_["fam_txt"] = config.LANGUAGE_DICT[families[module_["idf"]]]
+        if FAMILIES[module_["idf"]] in list(config.LANGUAGE_DICT.keys()):
+            module_["fam_txt"] = config.LANGUAGE_DICT[FAMILIES[module_["idf"]]]
         else:
             module_["fam_txt"] = module_["idf"]
         if "sref" in list(module_.keys()):

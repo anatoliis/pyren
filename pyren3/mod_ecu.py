@@ -7,6 +7,7 @@ import xml.dom.minidom
 from collections import OrderedDict
 from datetime import datetime
 
+import config
 import mod_db_manager
 import mod_ecu_command
 import mod_ecu_default
@@ -17,7 +18,7 @@ import mod_optfile
 import mod_ply
 import mod_utils
 from mod_ecu_dataids import ecu_dataids, pyren_encode
-from mod_elm import AllowedList, dnat, pyren_time, snat
+from mod_elm import ALLOWED_LIST, DNAT, SNAT, pyren_time
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
@@ -114,7 +115,7 @@ F2A = {
     "99": "C0",
 }
 
-ecudump = {}  # {'request':'response'}
+ecu_dump = {}  # {'request':'response'}
 favourite_screen = mod_ecu_default.ecu_own_screen("FAV")
 
 
@@ -236,26 +237,26 @@ class ECU:
 
         self.elm.start_session(self.ecudata["startDiagReq"])
 
-        if mod_globals.OS == "android" or mod_globals.OPT_CSV:
+        if config.OS == "android" or config.OPT_CSV:
             if (
                 self.ecudata["pin"].lower() == "can"
                 and self.DataIds
-                and mod_globals.OPT_PERFORMANCE
+                and config.OPT_PERFORMANCE
             ):
-                self.elm.checkModulePerformaceLevel(self.DataIds)
+                self.elm.check_module_performance_level(self.DataIds)
 
         print("Done")
 
-        global ecudump
-        ecudump = {}
+        global ecu_dump
+        ecu_dump = {}
 
     def saveDump(self):
         """save responces from all 21xx, 22xxxx commands"""
 
-        dumpname = (
+        dump_name = (
             "./dumps/" + str(int(time.time())) + "_" + self.ecudata["ecuname"] + ".txt"
         )
-        df = open(dumpname, "wt")
+        df = open(dump_name, "wt")
 
         self.elm.clear_cache()
 
@@ -265,7 +266,7 @@ class ECU:
             i = i + 1
             print("\r\t\t\t\r", str(i) + im, end=" ")
             sys.stdout.flush()
-            if service.startReq[:2] in AllowedList + ["17", "19"]:
+            if service.startReq[:2] in ALLOWED_LIST + ["17", "19"]:
                 if service.startReq[:2] == "19" and service.startReq[:4] != "1902":
                     continue
                 if service.startReq[:2] == "22" and len(service.startReq) < 6:
@@ -278,14 +279,14 @@ class ECU:
 
         df.close()
 
-    def loadDump(self, dumpname=""):
+    def load_dump(self, dump_name=""):
         """load saved dump for demo mode"""
 
-        global ecudump
+        global ecu_dump
 
-        ecudump = {}
+        ecu_dump = {}
 
-        if len(dumpname) == 0:
+        if len(dump_name) == 0:
             flist = []
             for root, dirs, files in os.walk("./dumps"):
                 for f in files:
@@ -295,22 +296,9 @@ class ECU:
             if len(flist) == 0:
                 return
             flist.sort()
-            dumpname = os.path.join("./dumps/", flist[-1])
+            dump_name = os.path.join("./dumps/", flist[-1])
 
-        # print 'Loading dump:', dumpname
-
-        self.elm.loadDump(dumpname)
-        # df = open(dumpname,'rt')
-        # lines = df.readlines()
-        # df.close()
-        #
-        # for l in lines:
-        #  l = l.strip().replace('\n','')
-        #  if l.count(':')==1:
-        #    req,rsp = l.split(':')
-        #    ecudump[req] = rsp
-        #
-        # self.elm.setDump( ecudump )
+        self.elm.load_dump(dump_name)
 
     def get_st(self, name):
         if name not in list(self.States.keys()):
@@ -522,7 +510,7 @@ class ECU:
                 if int(self.States[st].value):
                     masks.append(self.States[st].name)
 
-        if mask and not mod_globals.OPT_DEMO:
+        if mask and not config.OPT_DEMO:
             for dr in datarefs:
                 if dr.type == "State":
                     if (
@@ -557,11 +545,11 @@ class ECU:
                 self.show_commands(datarefs, path)
                 return
 
-        if mod_globals.OPT_CSV and mod_globals.EXT_CUR_DTC == "000000":
+        if config.OPT_CSV and config.EXT_CUR_DTC == "000000":
             # prepare to csv save
             self.min_refresh_rate = 0
-            if mod_globals.OPT_EXCEL:
-                csvline = "sep=" + mod_globals.OPT_CSV_SEP + "\n"
+            if config.OPT_EXCEL:
+                csvline = "sep=" + config.OPT_CSV_SEP + "\n"
             csvline = "Time"
             nparams = 0
             for dr in datarefs:
@@ -584,7 +572,7 @@ class ECU:
                         + "]"
                     )
                     nparams += 1
-            if mod_globals.OPT_USRKEY:
+            if config.OPT_USRKEY:
                 csvline += ";User events"
             csvline = pyren_encode(csvline)
             if nparams:
@@ -597,7 +585,7 @@ class ECU:
                 csv_filename = csv_filename.replace(" : ", "_")
                 csv_filename = csv_filename.replace(" -> ", "_")
                 csv_filename = csv_filename.replace(" ", "_")
-                # if mod_globals.os == 'android':
+                # if config.os == 'android':
                 #  csv_filename = csv_filename.encode("ascii","ignore")
                 csvf = open(
                     "./csv/" + pyren_encode(csv_filename), "w", encoding="utf-8"
@@ -613,7 +601,7 @@ class ECU:
         # debug
         # show_doc(self.ecudata['dst'], IDstr)
 
-        kb = mod_utils.KBHit()
+        kb = mod_utils.KeyboardHit()
 
         tb = pyren_time()  # time of begining
 
@@ -629,7 +617,7 @@ class ECU:
         # 5. Send reqests from the requests list and save the responses in a responseHistory list
         # 6. On exit generate csv log file from the responseHistory
 
-        if mod_globals.OPT_CSV_ONLY:
+        if config.OPT_CSV_ONLY:
             print("Data is sending directly to csv-file")
             print("")
             print("Press any key to exit")
@@ -645,30 +633,30 @@ class ECU:
             strlst = []
             datarefsRequestTime = int(round(pyren_time() * 1000))
 
-            if mod_globals.OPT_CSV_HUMAN and csvf != 0:
+            if config.OPT_CSV_HUMAN and csvf != 0:
                 csvline = csvline + "\n"
-                csvline = csvline.replace(".", mod_globals.OPT_CSV_DEC)
-                csvline = csvline.replace(",", mod_globals.OPT_CSV_DEC)
-                csvline = csvline.replace(";", mod_globals.OPT_CSV_SEP)
+                csvline = csvline.replace(".", config.OPT_CSV_DEC)
+                csvline = csvline.replace(",", config.OPT_CSV_DEC)
+                csvline = csvline.replace(";", config.OPT_CSV_SEP)
                 csvf.write(csvline)
                 csvf.flush()
                 time_diff = int(round(pyren_time() * 1000)) - csv_start_time
                 time_sec = str(time_diff // 1000)
                 time_ms = str((time_diff) % 1000)
-                csvline = time_sec.zfill(2) + mod_globals.OPT_CSV_DEC + time_ms.zfill(3)
+                csvline = time_sec.zfill(2) + config.OPT_CSV_DEC + time_ms.zfill(3)
 
             # Collect all the requests from the current screen
             if (
-                mod_globals.OPT_PERFORMANCE
+                config.OPT_PERFORMANCE
                 and self.elm.performanceModeLevel > 1
-                and mod_globals.OPT_CSV_ONLY
+                and config.OPT_CSV_ONLY
             ):
                 if self.elm.rsp_cache:
                     if not requests:
                         requests = self.generateRequestsList()
 
             self.elm.clear_cache()
-            if not (mod_globals.OPT_CSV_ONLY and requests):
+            if not (config.OPT_CSV_ONLY and requests):
                 for dr in datarefs:
                     data_string = dr.name
                     help = dr.type
@@ -676,8 +664,7 @@ class ECU:
                         if (
                             self.DataIds
                             and "DTC" in path
-                            and dr
-                            in self.Defaults[mod_globals.EXT_CUR_DTC[:4]].memDatarefs
+                            and dr in self.Defaults[config.EXT_CUR_DTC[:4]].memDatarefs
                         ):
                             data_string, help, csvd = mod_ecu_state.get_state(
                                 self.States[dr.name],
@@ -699,8 +686,7 @@ class ECU:
                         if (
                             self.DataIds
                             and "DTC" in path
-                            and dr
-                            in self.Defaults[mod_globals.EXT_CUR_DTC[:4]].memDatarefs
+                            and dr in self.Defaults[config.EXT_CUR_DTC[:4]].memDatarefs
                         ):
                             data_string, help, csvd = mod_ecu_parameter.get_parameter(
                                 self.Parameters[dr.name],
@@ -736,15 +722,15 @@ class ECU:
                         data_string = dr.name
                         help = ""
                     if (
-                        mod_globals.OPT_CSV_HUMAN
+                        config.OPT_CSV_HUMAN
                         and csvf != 0
                         and (dr.type == "State" or dr.type == "Parameter")
                     ):
                         csvline += ";" + pyren_encode(csvd)
 
-                    if not (mod_globals.OPT_CSV and mod_globals.OPT_CSV_ONLY):
+                    if not (config.OPT_CSV and config.OPT_CSV_ONLY):
                         strlst.append(data_string)
-                        if mod_globals.OPT_VERBOSE and len(help) > 0:
+                        if config.OPT_VERBOSE and len(help) > 0:
                             tmp_str = ""
                             for s in help:
                                 # s = s.replace('\n','\n\t')
@@ -763,14 +749,14 @@ class ECU:
                 for req in requests:
                     self.elm.request(req)
 
-            if not (mod_globals.OPT_CSV and mod_globals.OPT_CSV_ONLY):
+            if not (config.OPT_CSV and config.OPT_CSV_ONLY):
                 newScreen = initScreen
                 connectionData = (
                     "   (RT:"
                     + "{0:.4f}".format(self.elm.response_time)
                     + " "
                     + "RR:"
-                    + "{:>5.1f}".format(self.elm.getRefreshRate())
+                    + "{:>5.1f}".format(self.elm.get_refresh_rate())
                     + ")   "
                 )
 
@@ -815,7 +801,7 @@ class ECU:
                 sys.stdout.flush()
 
                 # check refresh rate
-                if mod_globals.OPT_DEMO:
+                if config.OPT_DEMO:
                     self.min_refresh_rate = 1
 
                 tc = pyren_time()
@@ -823,12 +809,12 @@ class ECU:
                     time.sleep(tb + self.min_refresh_rate - tc)
                 tb = tc
 
-            if mod_globals.OPT_CSV_ONLY:
+            if config.OPT_CSV_ONLY:
                 responseHistory[datarefsRequestTime] = (
                     self.elm.rsp_cache
                 )  # Collect data to generate a file
 
-            if mod_globals.OPT_PERFORMANCE and self.elm.performanceModeLevel > 1:
+            if config.OPT_PERFORMANCE and self.elm.performanceModeLevel > 1:
                 self.elm.currentScreenDataIds = self.getDataIds(
                     self.elm.rsp_cache, self.DataIds
                 )
@@ -849,13 +835,13 @@ class ECU:
                         self.add_favourite()
                         kb.set_get_character_term()
                     else:
-                        if mod_globals.OPT_CSV and (c in mod_globals.OPT_USRKEY):
+                        if config.OPT_CSV and (c in config.OPT_USRKEY):
                             csvline += ";" + pyren_encode(c)
                             continue
                         kb.set_normal_term()
                         self.saveFavList()
-                        if mod_globals.OPT_CSV and csvf != 0:
-                            if mod_globals.OPT_CSV_HUMAN:
+                        if config.OPT_CSV and csvf != 0:
+                            if config.OPT_CSV_HUMAN:
                                 csvf.close()
                                 return
                             self.create_file(
@@ -868,7 +854,7 @@ class ECU:
                         return
                 else:
                     n = ord(c) - ord("0")
-                    if (not mod_globals.OPT_CSV_ONLY) and n > 0 and n <= (pages + 1):
+                    if (not config.OPT_CSV_ONLY) and n > 0 and n <= (pages + 1):
                         page = n - 1
                         mod_utils.clear_screen()
                         continue
@@ -885,19 +871,19 @@ class ECU:
                             page = page + 1
                         mod_utils.clear_screen()
                         continue
-                    if mod_globals.OPT_CSV and (c in mod_globals.OPT_USRKEY):
+                    if config.OPT_CSV and (c in config.OPT_USRKEY):
                         csvline += ";" + pyren_encode(c)
                         continue
                     kb.set_normal_term()
-                    if mod_globals.OPT_CSV and csvf != 0:
-                        if mod_globals.OPT_CSV_HUMAN:
+                    if config.OPT_CSV and csvf != 0:
+                        if config.OPT_CSV_HUMAN:
                             csvf.close()
                             return
                         self.create_file(
                             responseHistory, displayed_data_ids, csvline, csvf, datarefs
                         )
                     if "DTC" in path:
-                        mod_globals.EXT_CUR_DTC = "000000"
+                        config.EXT_CUR_DTC = "000000"
                     return
 
     def generateRequestsList(self):
@@ -939,15 +925,15 @@ class ECU:
                     self.elm.rsp_cache[req] = rsp
 
             csv_line = csv_line + "\n"
-            csv_line = csv_line.replace(".", mod_globals.OPT_CSV_DEC)
-            csv_line = csv_line.replace(",", mod_globals.OPT_CSV_DEC)
-            csv_line = csv_line.replace(";", mod_globals.OPT_CSV_SEP)
+            csv_line = csv_line.replace(".", config.OPT_CSV_DEC)
+            csv_line = csv_line.replace(",", config.OPT_CSV_DEC)
+            csv_line = csv_line.replace(";", config.OPT_CSV_SEP)
             csv_file.write(csv_line)
             csv_file.flush()
             time_diff = reqTime - startTime
             time_sec = str(time_diff // 1000)
             time_ms = str((time_diff) % 1000)
-            csv_line = time_sec.zfill(2) + mod_globals.OPT_CSV_DEC + time_ms.zfill(3)
+            csv_line = time_sec.zfill(2) + config.OPT_CSV_DEC + time_ms.zfill(3)
 
             for dr in datarefs:
                 datastr = dr.name
@@ -1183,7 +1169,7 @@ class ECU:
 
             index = int(choice[1]) - 1
             dtchex = listkeys[index] if len(listkeys) > index else listkeys[0]
-            mod_globals.EXT_CUR_DTC = dtchex
+            config.EXT_CUR_DTC = dtchex
 
             path = path + " -> " + defstr[dtchex] + "\n\n" + hlpstr[dtchex] + "\n"
 
@@ -1193,15 +1179,12 @@ class ECU:
             if self.Defaults[dtchex[:4]].datarefs:
                 cur_dtrf = [
                     mod_ecu_default.ecu_screen_dataref(
-                        0, "\n" + mod_globals.LANGUAGE_DICT["300"] + "\n", "Text"
+                        0, "\n" + config.LANGUAGE_DICT["300"] + "\n", "Text"
                     )
                 ] + self.Defaults[dtchex[:4]].datarefs
             if self.Defaults[dtchex[:4]].memDatarefs:
                 mem_dtrf_txt = (
-                    mod_globals.LANGUAGE_DICT["299"]
-                    + " DTC"
-                    + mod_globals.EXT_CUR_DTC
-                    + "\n"
+                    config.LANGUAGE_DICT["299"] + " DTC" + config.EXT_CUR_DTC + "\n"
                 )
                 mem_dtrf = [
                     mod_ecu_default.ecu_screen_dataref(0, mem_dtrf_txt, "Text")
@@ -1256,7 +1239,7 @@ class ECU:
 
             index = int(choice[1]) - 1
             dtchex = listkeys[index] if len(listkeys) > index else listkeys[0]
-            mod_globals.EXT_CUR_DTC = dtchex
+            config.EXT_CUR_DTC = dtchex
 
             path = path + " -> " + defstr[dtchex] + "\n\n" + hlpstr[dtchex] + "\n"
 
@@ -1267,15 +1250,12 @@ class ECU:
             if self.Defaults[dtchex[:4]].datarefs:
                 cur_dtrf = [
                     mod_ecu_default.ecu_screen_dataref(
-                        0, "\n" + mod_globals.LANGUAGE_DICT["300"] + "\n", "Text"
+                        0, "\n" + config.LANGUAGE_DICT["300"] + "\n", "Text"
                     )
                 ] + self.Defaults[dtchex[:4]].datarefs
             if self.Defaults[dtchex[:4]].memDatarefs:
                 mem_dtrf_txt = (
-                    mod_globals.LANGUAGE_DICT["299"]
-                    + " DTC"
-                    + mod_globals.EXT_CUR_DTC
-                    + "\n"
+                    config.LANGUAGE_DICT["299"] + " DTC" + config.EXT_CUR_DTC + "\n"
                 )
                 mem_dtrf = [
                     mod_ecu_default.ecu_screen_dataref(0, mem_dtrf_txt, "Text")
@@ -1283,7 +1263,7 @@ class ECU:
             if self.ext_de:
                 ext_info_dtrf = [
                     mod_ecu_default.ecu_screen_dataref(
-                        0, "\n" + mod_globals.LANGUAGE_DICT["1691"] + "\n", "Text"
+                        0, "\n" + config.LANGUAGE_DICT["1691"] + "\n", "Text"
                     )
                 ] + self.ext_de
 
@@ -1332,7 +1312,7 @@ class ECU:
                 return
 
             dtchex = dtcs[int(choice[1]) - 1]
-            mod_globals.EXT_CUR_DTC = dtchex
+            config.EXT_CUR_DTC = dtchex
 
             path = path + " -> " + defstr[dtchex] + "\n\n" + hlpstr[dtchex] + "\n"
 
@@ -1380,7 +1360,7 @@ class ECU:
                     l.name = "ED : DE extra information"
                     continue
                 menu.append(l.name)
-            if mod_globals.OPT_CMD:
+            if config.OPT_CMD:
                 menu.append("ECM : Extended command set")
             if self.Parameters:
                 menu.append("PRA : Parameters list")
@@ -1388,8 +1368,6 @@ class ECU:
                 menu.append("ETA : States list")
             if self.Identifications:
                 menu.append("IDA : Identifications list")
-            if mod_globals.OPT_DDT:
-                menu.append("DDT : DDT screens")
             if self.acf_ready() != "":
                 menu.append("ACI : Auto Config Info")
             menu.append("<Up>")
@@ -1476,15 +1454,6 @@ class ECU:
                         mod_ecu_default.ecu_screen_dataref("", idk, "Identification")
                     )
                 self.show_screen(scrn)
-                continue
-
-            if choice[0][:3] == "DDT":
-                langmap = self.getLanguageMap()
-                from mod_ddt import DDT
-
-                ddt = DDT(self.elm, self.ecudata, langmap)
-                del ddt
-                # gc.collect ()
                 continue
 
             if choice[0][:3] == "ACI":
@@ -1763,29 +1732,6 @@ def find_real_ecuid(eid):
 
 
 def main():
-
-    try:
-        import androidhelper as android
-
-        mod_globals.OS = "android"
-    except:
-        try:
-            import android
-
-            mod_globals.OS = "android"
-        except:
-            pass
-
-    if mod_globals.OS == "android":
-        ecuid = input("Enetr  ECU ID:")
-        lanid = input("Language [RU]:")
-        if len(lanid) < 2:
-            lanid = "RU"
-        sys.argv = sys.argv[:1]
-        sys.argv.append(ecuid)
-        sys.argv.append(lanid)
-        sys.argv.append("TORQ")
-
     if len(sys.argv) < 3:
         print("Usage: mod_ecu.py <ID> <language> [torq] [nochk]")
         print("Example:")
@@ -1895,8 +1841,8 @@ def main():
     family = sys.argv[1][:2]
     eindex = sys.argv[1][2:]
     if len(candst) > 1:
-        sss = snat[F2A[family]]
-        ddd = dnat[F2A[family]]
+        sss = SNAT[F2A[family]]
+        ddd = DNAT[F2A[family]]
         filename = "PR_" + ddd + "_" + sss + "_" + eindex + "_" + sys.argv[2] + ".csv"
     else:
         sss = "82" + F2A[family] + "F1"
@@ -1904,7 +1850,7 @@ def main():
         filename = "PR_" + F2A[family] + "_" + eindex + "_" + sys.argv[2] + ".csv"
 
     ext_path = "/storage/emulated/0/.torque/extendedpids/"
-    if mod_globals.OS == "android":
+    if config.OS == "android":
         if not os.path.exists(ext_path):
             os.makedirs(ext_path, exist_ok=True)
         filename = ext_path + filename
@@ -2066,7 +2012,7 @@ def main():
     # make profile for torque
     profilename = str(int(time.time())) + ".tdv"
     veh_path = "/storage/emulated/0/.torque/vehicles/"
-    if mod_globals.OS == "android":
+    if config.OS == "android":
         if not os.path.exists(veh_path):
             os.makedirs(veh_path, exist_ok=True)
         profilename = veh_path + str(int(time.time())) + ".tdv"

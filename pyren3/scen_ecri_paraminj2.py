@@ -14,6 +14,7 @@ import xml.dom.minidom
 import xml.etree.cElementTree as et
 from collections import OrderedDict
 
+import config
 import mod_db_manager
 from mod_utils import Choice, clear_screen, pyren_encode
 
@@ -55,19 +56,19 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(mod_globals.LANGUAGE_DICT.keys()):
+        if value.isdigit() and value in list(config.LANGUAGE_DICT.keys()):
             if encode:
-                value = pyren_encode(mod_globals.LANGUAGE_DICT[value])
+                value = pyren_encode(config.LANGUAGE_DICT[value])
             else:
-                value = mod_globals.LANGUAGE_DICT[value]
+                value = config.LANGUAGE_DICT[value]
         return value
 
     def get_message_by_id(id, encode=1):
-        if id.isdigit() and id in list(mod_globals.LANGUAGE_DICT.keys()):
+        if id.isdigit() and id in list(config.LANGUAGE_DICT.keys()):
             if encode:
-                value = pyren_encode(mod_globals.LANGUAGE_DICT[id])
+                value = pyren_encode(config.LANGUAGE_DICT[id])
             else:
-                value = mod_globals.LANGUAGE_DICT[id]
+                value = config.LANGUAGE_DICT[id]
         return value
 
     #
@@ -90,7 +91,7 @@ def run(elm, ecu, command, data):
 
     for Set in ScmSets:
         if len(Set.attributes) != 1:
-            setname = pyren_encode(mod_globals.LANGUAGE_DICT[Set.getAttribute("name")])
+            setname = pyren_encode(config.LANGUAGE_DICT[Set.getAttribute("name")])
             ScmParams = Set.getElementsByTagName("ScmParam")
 
             for Param in ScmParams:
@@ -126,7 +127,7 @@ def run(elm, ecu, command, data):
     else:
         correctEcu = ecusList[0]
 
-    if not correctEcu and mod_globals.OPT_DEMO:
+    if not correctEcu and config.OPT_DEMO:
         correctEcu = ecusList[0]
 
     if vdiagExists:
@@ -516,15 +517,15 @@ def run(elm, ecu, command, data):
             fileRoot.insert(1, el)
 
         tree = et.ElementTree(fileRoot)
-        tree.write(mod_globals.DUMPS_DIR + ScmParam["FileName"])
+        tree.write(config.DUMPS_DIR + ScmParam["FileName"])
 
-    def loadDump():
+    def load_dump():
         clear_screen()
 
         paramToSend = ""
         dumpScmParam = {}
         try:
-            dumpData = open(mod_globals.DUMPS_DIR + ScmParam["FileName"], "r")
+            dumpData = open(config.DUMPS_DIR + ScmParam["FileName"], "r")
         except:
             print(get_message_by_id("2194"))
             input()
@@ -608,7 +609,7 @@ def run(elm, ecu, command, data):
             return
         if value == choice[0]:
             if key == "loadDump":
-                loadDump()
+                load_dump()
             elif key == 1:
                 resetInjetorsData(functions[key][0], functions[key][1])
             elif key == 6:

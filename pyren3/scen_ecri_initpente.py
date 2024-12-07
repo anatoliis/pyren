@@ -2,8 +2,9 @@
 
 import xml.dom.minidom
 
+import config
 import mod_db_manager
-from mod_utils import KBHit, clear_screen, pyren_encode
+from mod_utils import KeyboardHit, clear_screen, pyren_encode
 
 
 def run(elm, ecu, command, data):
@@ -18,13 +19,13 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(mod_globals.LANGUAGE_DICT.keys()):
-            value = pyren_encode(mod_globals.LANGUAGE_DICT[value])
+        if value.isdigit() and value in list(config.LANGUAGE_DICT.keys()):
+            value = pyren_encode(config.LANGUAGE_DICT[value])
         return value
 
     def get_message_by_id(id):
-        if id.isdigit() and id in list(mod_globals.LANGUAGE_DICT.keys()):
-            value = pyren_encode(mod_globals.LANGUAGE_DICT[id])
+        if id.isdigit() and id in list(config.LANGUAGE_DICT.keys()):
+            value = pyren_encode(config.LANGUAGE_DICT[id])
         return value
 
     DOMTree = xml.dom.minidom.parse(mod_db_manager.get_file_from_clip(data))
@@ -38,7 +39,7 @@ def run(elm, ecu, command, data):
 
         ScmParam[name] = value
 
-    kb = KBHit()
+    kb = KeyboardHit()
 
     mainText = get_message("TexteTitre")
     important = get_message("TexteConsigne")

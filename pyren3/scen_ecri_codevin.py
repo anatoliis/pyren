@@ -9,9 +9,9 @@ URL  -  scm:scen_ecri_codevin#scen_ecri_codevin_xxxxx.xml
 'run' procedure will be executed by pyren script
  
 """
-
 import xml.dom.minidom
 
+import config
 import mod_db_manager
 from mod_utils import clear_screen, hex_vin_plus_crc, pyren_encode
 
@@ -38,13 +38,13 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(mod_globals.LANGUAGE_DICT.keys()):
-            value = pyren_encode(mod_globals.LANGUAGE_DICT[value])
+        if value.isdigit() and value in list(config.LANGUAGE_DICT.keys()):
+            value = pyren_encode(config.LANGUAGE_DICT[value])
         return value
 
     def get_message_by_id(id):
-        if id.isdigit() and id in list(mod_globals.LANGUAGE_DICT.keys()):
-            value = pyren_encode(mod_globals.LANGUAGE_DICT[id])
+        if id.isdigit() and id in list(config.LANGUAGE_DICT.keys()):
+            value = pyren_encode(config.LANGUAGE_DICT[id])
         return value
 
     #
@@ -64,7 +64,7 @@ def run(elm, ecu, command, data):
     ScmSets = ScmRoom.getElementsByTagName("ScmSet")
 
     for Set in ScmSets:
-        setname = pyren_encode(mod_globals.LANGUAGE_DICT[Set.getAttribute("name")])
+        setname = pyren_encode(config.LANGUAGE_DICT[Set.getAttribute("name")])
         ScmParams = Set.getElementsByTagName("ScmParam")
 
         for Param in ScmParams:
