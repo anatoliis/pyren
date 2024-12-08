@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
-import sys, os, re
+import os
+import re
 import string
+import sys
 import time
-import mod_globals
+
 import mod_elm
+import mod_globals
 import mod_utils
 
 try:
@@ -12,7 +15,7 @@ try:
 except:
     pass
 
-os.chdir (os.path.dirname (os.path.realpath (sys.argv[0])))
+os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 macro = {}
 var = {}
@@ -23,26 +26,28 @@ auto_macro = ""
 auto_dia = False
 debug_mode = False
 
-key_pressed = ''
+key_pressed = ""
 
 mod_globals.os = os.name
 
-if mod_globals.os == 'nt':
+if mod_globals.os == "nt":
     import pip
 
     try:
         import serial
     except ImportError:
-        pip.main(['install', 'pyserial'])
+        pip.main(["install", "pyserial"])
 
     try:
         import colorama
     except ImportError:
-        pip.main(['install', 'colorama'])
+        pip.main(["install", "colorama"])
         try:
             import colorama
         except ImportError:
-            print("\n\n\n\t\t\tGive me access to the Internet for download modules\n\n\n")
+            print(
+                "\n\n\n\t\t\tGive me access to the Internet for download modules\n\n\n"
+            )
             sys.exit()
     colorama.init()
 else:
@@ -50,16 +55,16 @@ else:
     try:
         import androidhelper as android
 
-        mod_globals.os = 'android'
+        mod_globals.os = "android"
     except:
         try:
             import android
 
-            mod_globals.os = 'android'
+            mod_globals.os = "android"
         except:
             pass
 
-if mod_globals.os != 'android':
+if mod_globals.os != "android":
     try:
         import serial
         from serial.tools import list_ports
@@ -68,89 +73,94 @@ if mod_globals.os != 'android':
         print("\t\t>sudo easy_install pyserial")
         sys.exit()
 
+
 def init_macro():
     global macro
     macro = {}
-    
-def init_var(): 
-    global var
-    var = {}    
-    #predefined variables
-    var['$addr'] = '7A'
-    var['$txa'] = '7E0'
-    var['$rxa'] = '7E8'
-    var['$prompt'] = 'ELM'
 
-def pars_macro( file ):
-    
+
+def init_var():
+    global var
+    var = {}
+    # predefined variables
+    var["$addr"] = "7A"
+    var["$txa"] = "7E0"
+    var["$rxa"] = "7E8"
+    var["$prompt"] = "ELM"
+
+
+def pars_macro(file):
     global macro
     global var
-    
-    print('openning file:', file)
-    f = open( file, 'rt' )
+
+    print("openning file:", file)
+    f = open(file, "rt")
     lines = f.readlines()
     f.close()
-    
-    macroname = ''
+
+    macroname = ""
     macrostrings = []
     line_num = 0
     for l in lines:
-      line_num += 1
-      l = l.split('#')[0] # remove comments
-      l = l.strip()
-      if l == '': continue
-      if '{' in l:
-        if macroname=='':
-          literals =  l.split('{')
-          macroname = literals[0].strip()
-          macroname = macroname.replace(' ', '_').replace('\t', '_')
-          macrostrings = []
-          if len(literals)>1 and literals[1]!='' :
-            macrostrings.append(literals[1])
-          continue
+        line_num += 1
+        l = l.split("#")[0]  # remove comments
+        l = l.strip()
+        if l == "":
+            continue
+        if "{" in l:
+            if macroname == "":
+                literals = l.split("{")
+                macroname = literals[0].strip()
+                macroname = macroname.replace(" ", "_").replace("\t", "_")
+                macrostrings = []
+                if len(literals) > 1 and literals[1] != "":
+                    macrostrings.append(literals[1])
+                continue
+            else:
+                print("Error: empty macro name in line:", line_num)
+                macro = {}
+                var = {}
+                return
+        if "}" in l:
+            if macroname != "":
+                literals = l.split("}")
+                cmd = literals[0].strip()
+                if cmd != "":
+                    macrostrings.append(cmd)
+                macro[macroname] = macrostrings
+                macroname = ""
+                macrostrings = []
+                continue
+            else:
+                print("Error: unexpected end of macro in line:", line_num)
+                macro = {}
+                var = {}
+                return
+        m = re.search("\$\S+\s*=\s*\S+", l)
+        if m and macroname == "":
+            # variable definition
+            r = m.group(0).replace(" ", "").replace("\t", "")
+            rl = r.split("=")
+            var[rl[0]] = rl[1]
         else:
-          print('Error: empty macro name in line:', line_num)
-          macro = {}
-          var = {}
-          return
-      if '}' in l:
-        if macroname!='':
-          literals =  l.split('}')
-          cmd = literals[0].strip()
-          if cmd!='':
-            macrostrings.append(cmd)
-          macro[macroname] = macrostrings
-          macroname = ''
-          macrostrings = []
-          continue
-        else:
-          print('Error: unexpected end of macro in line:', line_num)
-          macro = {}
-          var = {}
-          return
-      m = re.search('\$\S+\s*=\s*\S+', l)
-      if m and macroname=='':
-        #variable definition
-        r = m.group(0).replace(' ', '').replace('\t', '')
-        rl = r.split('=')
-        var[rl[0]]=rl[1]
-      else:
-        macrostrings.append(l)
+            macrostrings.append(l)
 
-def load_macro( mf='' ):
+
+def load_macro(mf=""):
     """
     dynamically loaded macro should have .txt extension and placed in ./macro directory
     """
 
-    if mf=='' :
+    if mf == "":
         for root, dirs, files in os.walk("./macro"):
             for mfile in files:
-                if mfile.endswith('.txt'):
+                if mfile.endswith(".txt"):
                     full_path = os.path.join("./macro/", mfile)
                     pars_macro(full_path)
     else:
-        pars_macro(mf) 
-        
+        pars_macro(mf)
+
+
 def print_help():
     """
     [h]elp                 - this help
@@ -159,133 +169,146 @@ def print_help():
     """
     global var
     global macro
-    
+
     print(print_help.__doc__)
 
-    print('Variables:')
+    print("Variables:")
     for v in list(var.keys()):
-      print('  '+v+' = '+var[v])
+        print("  " + v + " = " + var[v])
     print()
-    print('Macros:')
+    print("Macros:")
     for m in list(macro.keys()):
-      print('  '+m)
+        print("  " + m)
     print()
+
 
 def optParser():
-  '''Parsing of command line parameters. User should define at least com port name'''
-  
-  import argparse
-  
-  global auto_macro
-  global auto_dia
-  global debug_mode
+    """Parsing of command line parameters. User should define at least com port name"""
 
-  parser = argparse.ArgumentParser(
-    description = "pyRen terminal"
-  )
-  
-  parser.add_argument('-p',
-      help="ELM327 com port name",
-      dest="port",
-      default="")
+    import argparse
 
-  parser.add_argument("-r",
-      help="com port rate during diagnostic session {38400[default],57600,115200,230400,500000}",
-      dest="rate",
-      default="38400",)
+    global auto_macro
+    global auto_dia
+    global debug_mode
 
-  parser.add_argument("-m",
-      help="macro file name",
-      dest="macro",
-      default="",)
+    parser = argparse.ArgumentParser(description="pyRen terminal")
 
-  parser.add_argument("--log",
-      help="log file name",
-      dest="logfile",
-      default="")
+    parser.add_argument("-p", help="ELM327 com port name", dest="port", default="")
 
-  parser.add_argument("--demo",
-      help="for debuging purpose. Work without car and ELM",
-      dest="demo",
-      default=False,
-      action="store_true")
+    parser.add_argument(
+        "-r",
+        help="com port rate during diagnostic session {38400[default],57600,115200,230400,500000}",
+        dest="rate",
+        default="38400",
+    )
 
-  parser.add_argument("--si",
-      help="try SlowInit first",
-      dest="si",
-      default=False,
-      action="store_true")
+    parser.add_argument(
+        "-m",
+        help="macro file name",
+        dest="macro",
+        default="",
+    )
 
-  parser.add_argument("--cfc",
-      help="turn off automatic FC and do it by script",
-      dest="cfc",
-      default=False,
-      action="store_true")
+    parser.add_argument("--log", help="log file name", dest="logfile", default="")
 
-  parser.add_argument("--caf",
-      help="turn on CAN Auto Formatting. Available only for OBDLink",
-      dest="caf",
-      default=True,
-      action="store_true")
+    parser.add_argument(
+        "--demo",
+        help="for debuging purpose. Work without car and ELM",
+        dest="demo",
+        default=False,
+        action="store_true",
+    )
 
-  parser.add_argument("--n1c",
-      help="turn off L1 cache",
-      dest="n1c",
-      default=False,
-      action="store_true")
+    parser.add_argument(
+        "--si", help="try SlowInit first", dest="si", default=False, action="store_true"
+    )
 
-  parser.add_argument("-vv", "--verbose",
-      help="show verbose output (unused)",
-      dest="verb",
-      default=False,
-      action="store_true")
+    parser.add_argument(
+        "--cfc",
+        help="turn off automatic FC and do it by script",
+        dest="cfc",
+        default=False,
+        action="store_true",
+    )
 
-  parser.add_argument("--dialog",
-      help="show dialog for selecting macro",
-      dest="dia",
-      default=False,
-      action="store_true")
+    parser.add_argument(
+        "--caf",
+        help="turn on CAN Auto Formatting. Available only for OBDLink",
+        dest="caf",
+        default=True,
+        action="store_true",
+    )
 
-  parser.add_argument("--debug",
-      help="for debug purpose only",
-      dest="dbg",
-      default=False,
-      action="store_true")
+    parser.add_argument(
+        "--n1c",
+        help="turn off L1 cache",
+        dest="n1c",
+        default=False,
+        action="store_true",
+    )
 
-  parser.add_argument("--minordtc",
-      help="use to show all DTCs without checking computation formula",
-      dest="minordtc",
-      default=False,
-      action="store_true")
+    parser.add_argument(
+        "-vv",
+        "--verbose",
+        help="show verbose output (unused)",
+        dest="verb",
+        default=False,
+        action="store_true",
+    )
 
-  options = parser.parse_args()
-  
-  if not options.port and mod_globals.os != 'android':
-    parser.print_help()
-    iterator = sorted(list(list_ports.comports()))
-    print("")
-    print("Available COM ports:")
-    for port, desc, hwid in iterator:
-      print("%-30s \n\tdesc: %s \n\thwid: %s" % (port,desc,hwid))
-    print("")
-    exit(2)
-  else:
-    mod_globals.opt_port      = options.port
-    mod_globals.opt_rate      = int(options.rate)
-    mod_globals.opt_speed     = int(options.rate)
-    auto_macro                = options.macro
-    mod_globals.opt_log       = options.logfile
-    mod_globals.opt_demo      = options.demo
-    mod_globals.opt_si        = options.si
-    mod_globals.opt_cfc0      = options.cfc
-    mod_globals.opt_caf       = options.caf
-    mod_globals.opt_n1c       = options.n1c
-    mod_globals.opt_minordtc  = options.minordtc
-    auto_dia                  = options.dia
-    debug_mode                = options.dbg
+    parser.add_argument(
+        "--dialog",
+        help="show dialog for selecting macro",
+        dest="dia",
+        default=False,
+        action="store_true",
+    )
 
-class FileChooser():
-    lay = '''<?xml version="1.0" encoding="utf-8"?>
+    parser.add_argument(
+        "--debug",
+        help="for debug purpose only",
+        dest="dbg",
+        default=False,
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--minordtc",
+        help="use to show all DTCs without checking computation formula",
+        dest="minordtc",
+        default=False,
+        action="store_true",
+    )
+
+    options = parser.parse_args()
+
+    if not options.port and mod_globals.os != "android":
+        parser.print_help()
+        iterator = sorted(list(list_ports.comports()))
+        print("")
+        print("Available COM ports:")
+        for port, desc, hwid in iterator:
+            print("%-30s \n\tdesc: %s \n\thwid: %s" % (port, desc, hwid))
+        print("")
+        exit(2)
+    else:
+        mod_globals.opt_port = options.port
+        mod_globals.opt_rate = int(options.rate)
+        mod_globals.opt_speed = int(options.rate)
+        auto_macro = options.macro
+        mod_globals.opt_log = options.logfile
+        mod_globals.opt_demo = options.demo
+        mod_globals.opt_si = options.si
+        mod_globals.opt_cfc0 = options.cfc
+        mod_globals.opt_caf = options.caf
+        mod_globals.opt_n1c = options.n1c
+        mod_globals.opt_minordtc = options.minordtc
+        auto_dia = options.dia
+        debug_mode = options.dbg
+
+
+class FileChooser:
+    lay = """<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
@@ -351,50 +374,71 @@ class FileChooser():
 
     </ScrollView>
 
-</RelativeLayout>'''
-    droid  = None
+</RelativeLayout>"""
+    droid = None
     folderList = []
     macroList = []
 
     def newFolderSelected(self):
         self.macroList = []
         fo = self.folder
-        self.macroList = [f for f in os.listdir(fo) if os.path.isfile(fo + f) and f.lower().endswith('.cmd')]
+        self.macroList = [
+            f
+            for f in os.listdir(fo)
+            if os.path.isfile(fo + f) and f.lower().endswith(".cmd")
+        ]
         self.droid.fullSetList("sp_macro", self.macroList)
 
     def eventloop(self):
         while True:
-            sf = self.folderList[int(self.droid.fullQueryDetail("sp_folder").result['selectedItemPosition'])]
+            sf = self.folderList[
+                int(
+                    self.droid.fullQueryDetail("sp_folder").result[
+                        "selectedItemPosition"
+                    ]
+                )
+            ]
             if sf != self.folder:
                 self.folder = sf
                 self.newFolderSelected()
             event = self.droid.eventWait(50).result
-            if event == None: continue
+            if event == None:
+                continue
             if event["name"] == "click":
                 id = event["data"]["id"]
                 if id == "bt_start":
-                    ma = self.macroList[int(self.droid.fullQueryDetail("sp_macro").result['selectedItemPosition'])]
+                    ma = self.macroList[
+                        int(
+                            self.droid.fullQueryDetail("sp_macro").result[
+                                "selectedItemPosition"
+                            ]
+                        )
+                    ]
                     return sf + ma
                 if id == "bt_exit":
                     sys.exit()
 
     def __init__(self):
-        fo = './macro/'
-        self.folderList = [fo + f + '/' for f in os.listdir(fo) if os.path.isdir(fo + f)]
+        fo = "./macro/"
+        self.folderList = [
+            fo + f + "/" for f in os.listdir(fo) if os.path.isdir(fo + f)
+        ]
         self.folder = fo
 
     def choose(self):
         try:
             import androidhelper as android
-            mod_globals.os = 'android'
+
+            mod_globals.os = "android"
         except:
             try:
                 import android
-                mod_globals.os = 'android'
+
+                mod_globals.os = "android"
             except:
                 pass
 
-        if mod_globals.os != 'android':
+        if mod_globals.os != "android":
             try:
                 # Python2
                 import tkinter as tk
@@ -409,12 +453,14 @@ class FileChooser():
             root = tk.Tk()
             root.withdraw()
 
-            my_filetypes = [('command files', '.cmd')]
+            my_filetypes = [("command files", ".cmd")]
 
-            fname = filedialog.askopenfilename(parent=root,
-                                            initialdir="./macro",
-                                            title="Please select a file:",
-                                            filetypes=my_filetypes)
+            fname = filedialog.askopenfilename(
+                parent=root,
+                initialdir="./macro",
+                title="Please select a file:",
+                filetypes=my_filetypes,
+            )
 
             return fname
 
@@ -422,11 +468,12 @@ class FileChooser():
             try:
                 self.droid = android.Android()
                 self.droid.fullShow(self.lay)
-                self.folderList.insert(0,'./macro/')
+                self.folderList.insert(0, "./macro/")
                 self.droid.fullSetList("sp_folder", self.folderList)
                 return self.eventloop()
             finally:
                 self.droid.fullDismiss()
+
 
 def play_macro(mname, elm):
     global macro
@@ -434,7 +481,7 @@ def play_macro(mname, elm):
     global stack
 
     if mname in stack:
-        print('Error: recursion prohibited:', mname)
+        print("Error: recursion prohibited:", mname)
         return
     else:
         stack.append(mname)
@@ -445,9 +492,10 @@ def play_macro(mname, elm):
             play_macro(l, elm)
             continue
 
-        proc_line( l, elm )
+        proc_line(l, elm)
 
     stack.remove(mname)
+
 
 def run_init_function(mname, elm):
     global var
@@ -455,30 +503,31 @@ def run_init_function(mname, elm):
     if mname in ["init_can_250", "can250", "init_can_500", "can500"]:
         elm.init_can()
         if mname in ["init_can_250", "can250"]:
-            elm.set_can_addr(var['$addr'], {'brp': '1'})
+            elm.set_can_addr(var["$addr"], {"brp": "1"})
         else:
-            elm.set_can_addr(var['$addr'], {})
+            elm.set_can_addr(var["$addr"], {})
     elif mname in ["init_iso_slow", "slow", "init_iso_fast", "fast"]:
         elm.init_iso()
         if mname in ["init_iso_slow", "slow"]:
-            elm.set_iso_addr(var['$addr'], {'protocol': 'PRNA2000'})
+            elm.set_iso_addr(var["$addr"], {"protocol": "PRNA2000"})
         else:
-            elm.set_iso_addr(var['$addr'], {})
+            elm.set_iso_addr(var["$addr"], {})
     else:
         print(("Unrecognized init command: ", mname))
 
-def term_cmd( c, elm ):
+
+def term_cmd(c, elm):
     global var
     rsp = elm.request(c, cache=False)
-    #rsp = elm.cmd(rcmd)
-    var['$lastResponse'] = rsp
+    # rsp = elm.cmd(rcmd)
+    var["$lastResponse"] = rsp
     return rsp
 
-def bit_cmd( l, elm, fnc='set_bits' ):
 
+def bit_cmd(l, elm, fnc="set_bits"):
     global var
 
-    error_msg1 = '''ERROR: command should have 5 parameters: 
+    error_msg1 = """ERROR: command should have 5 parameters: 
     <command> <lid> <rsp_len> <offset> <hex mask> <hex value>
         <lid> - ECUs local identifier. Length should be 2 simbols for KWP or 4 for CAN
         <rsp_len> - lengt of command response including positive response bytes, equals MinBytes from ddt db
@@ -487,8 +536,8 @@ def bit_cmd( l, elm, fnc='set_bits' ):
         <hex value> - bit value
     <hex mask> and <hex value> should have equal length
     
-    '''
-    error_msg2 = '''ERROR: command should have 6 parameters: 
+    """
+    error_msg2 = """ERROR: command should have 6 parameters: 
     <command> <lid> <rsp_len> <offset> <hex mask> <hex value> <label>
         <lid> - ECUs local identifier. Length should be 2 simbols for KWP or 4 for CAN
         <rsp_len> - lengt of command response including positive response bytes, equals MinBytes from ddt db
@@ -498,9 +547,9 @@ def bit_cmd( l, elm, fnc='set_bits' ):
         <label> - label to go
     <hex mask> and <hex value> should have equal length
 
-    '''
+    """
 
-    error_msg3 = '''ERROR: command should have 4 or 7 parameters: 
+    error_msg3 = """ERROR: command should have 4 or 7 parameters: 
     <command> <lid> <rsp_len> <offset> <hex mask> <hex value> <label>
         <lid> - ECUs local identifier. Length should be 2 simbols for KWP or 4 for CAN
         <rsp_len> - lengt of command response including positive response bytes, equals MinBytes from ddt db
@@ -510,44 +559,47 @@ def bit_cmd( l, elm, fnc='set_bits' ):
         <val offset> - value offset
         <val divider> - value divider
 
-    '''
-    if fnc not in ['set_bits','xor_bits','exit_if','exit_if_not'] and \
-            fnc not in ['goto_if','goto_if_not', 'value']:
+    """
+    if fnc not in ["set_bits", "xor_bits", "exit_if", "exit_if_not"] and fnc not in [
+        "goto_if",
+        "goto_if_not",
+        "value",
+    ]:
         print("\nERROR: Unknown function\n")
         return
 
-    par = l.strip().split(' ')
+    par = l.strip().split(" ")
 
-    if fnc in ['set_bits','xor_bits','exit_if','exit_if_not']:
+    if fnc in ["set_bits", "xor_bits", "exit_if", "exit_if_not"]:
         error_msg = error_msg1
-        if len(par)!=5:
+        if len(par) != 5:
             print(error_msg)
             return
 
-    if fnc in ['goto_if','goto_if_not']:
+    if fnc in ["goto_if", "goto_if_not"]:
         error_msg = error_msg2
-        if len(par)!=6:
+        if len(par) != 6:
             print(error_msg)
             return
 
-    if fnc in ['value']:
+    if fnc in ["value"]:
         error_msg = error_msg3
-        if len(par)==4:
-            par = par + ['1','0','1']
-        if len(par)!=7:
+        if len(par) == 4:
+            par = par + ["1", "0", "1"]
+        if len(par) != 7:
             print(error_msg)
             return
 
     try:
         lid = par[0].strip()
         lng = int(par[1].strip())
-        off = int(par[2].strip())-1
+        off = int(par[2].strip()) - 1
         mask = par[3].strip()
         val = par[4].strip()
-        if fnc in ['goto_if', 'goto_if_not']:
+        if fnc in ["goto_if", "goto_if_not"]:
             go = par[5].strip()
-        if fnc in ['value']:
-            val = '0'*len(mask)
+        if fnc in ["value"]:
+            val = "0" * len(mask)
             stp = par[4].strip()
             ofs = par[5].strip()
             div = par[6].strip()
@@ -555,55 +607,55 @@ def bit_cmd( l, elm, fnc='set_bits' ):
         print(error_msg)
         return
 
-    if len(lid) in [2,4] and off>=0 and off<=lng:
-        if fnc not in ['value'] and (len(mask)!=len(val)):
+    if len(lid) in [2, 4] and off >= 0 and off <= lng:
+        if fnc not in ["value"] and (len(mask) != len(val)):
             print(error_msg)
             return
     else:
         print(error_msg)
         return
 
-    if len(lid)==2: #KWP
-        rcmd = '21'+lid
-    else: #CAN
-        rcmd = '22' + lid
+    if len(lid) == 2:  # KWP
+        rcmd = "21" + lid
+    else:  # CAN
+        rcmd = "22" + lid
 
-    rsp = term_cmd( rcmd, elm )
-    rsp = rsp.replace(' ','')[:lng*2].upper()
+    rsp = term_cmd(rcmd, elm)
+    rsp = rsp.replace(" ", "")[: lng * 2].upper()
 
-    if fnc not in ['value']:
-        print("read  value:",rsp)
+    if fnc not in ["value"]:
+        print("read  value:", rsp)
 
     if len(rsp) != lng * 2:
-        print('\nERROR: Length is unexpected\n')
-        if fnc.startswith('exit'):
+        print("\nERROR: Length is unexpected\n")
+        if fnc.startswith("exit"):
             sys.exit()
         return
 
     if not all(c in string.hexdigits for c in rsp):
-        if fnc.startswith('exit'):
+        if fnc.startswith("exit"):
             sys.exit()
-        print('\nERROR: Wrong simbol in response\n')
+        print("\nERROR: Wrong simbol in response\n")
         return
 
-    pos_rsp = ('6'+rcmd[1:]).upper()
+    pos_rsp = ("6" + rcmd[1:]).upper()
     if not rsp.startswith(pos_rsp):
-        if fnc.startswith('exit'):
+        if fnc.startswith("exit"):
             sys.exit()
-        print('\nERROR: Not positive response\n')
+        print("\nERROR: Not positive response\n")
         return
 
     diff = 0
     i = 0
     int_val = 0
-    while i<len(mask)//2:
-        c_by = int(rsp[(off+i)*2:(off+i)*2+2],16)
-        c_ma = int(mask[i*2:i*2+2],16)
-        c_va = int(val[i*2:i*2+2],16)
+    while i < len(mask) // 2:
+        c_by = int(rsp[(off + i) * 2 : (off + i) * 2 + 2], 16)
+        c_ma = int(mask[i * 2 : i * 2 + 2], 16)
+        c_va = int(val[i * 2 : i * 2 + 2], 16)
 
-        if fnc == 'xor_bits':
+        if fnc == "xor_bits":
             n_by = c_by ^ (c_va & c_ma)
-        elif fnc == 'set_bits':
+        elif fnc == "set_bits":
             n_by = (c_by & ~c_ma) | c_va
         else:
             n_by = c_by & c_ma
@@ -615,104 +667,114 @@ def bit_cmd( l, elm, fnc='set_bits' ):
 
         str_n_by = hex(n_by & 0xFF).upper()[2:].zfill(2)
 
-        n_rsp = rsp[0:(off+i)*2] + str_n_by + rsp[(off+i+1)*2:]
+        n_rsp = rsp[0 : (off + i) * 2] + str_n_by + rsp[(off + i + 1) * 2 :]
         rsp = n_rsp
         i += 1
 
-    if fnc == 'exit_if':
-        if diff==0:
+    if fnc == "exit_if":
+        if diff == 0:
             print("Match. Exit")
             sys.exit()
         else:
             print("Not match. Continue")
             return
 
-    if fnc == 'exit_if_not':
-        if diff!=0:
+    if fnc == "exit_if_not":
+        if diff != 0:
             print("Not match. Exit")
             sys.exit()
         else:
             print("Match. Continue")
             return
 
-    if fnc == 'goto_if':
-        if diff==0:
+    if fnc == "goto_if":
+        if diff == 0:
             print("Match. goto:", go)
             return go
         else:
             print("Not match. Continue")
             return
 
-    if fnc == 'goto_if_not':
-        if diff!=0:
+    if fnc == "goto_if_not":
+        if diff != 0:
             print("Not match. goto:", go)
             return go
         else:
             print("Match. Continue")
             return
 
-    if fnc == 'value':
-        res = (int_val*float(stp)+float(ofs))/float(div)
-        var['$rawValue'] = str(int_val)
-        var['$scaledValue'] = str(res)
-        var['$hexValue'] = hex(int_val)[2:].upper()
-        print('# LID(',lid,') $rawValue =', var['$rawValue'], ' $scaledValue =', var['$scaledValue'], ' $hexValue =', var['$hexValue'])
+    if fnc == "value":
+        res = (int_val * float(stp) + float(ofs)) / float(div)
+        var["$rawValue"] = str(int_val)
+        var["$scaledValue"] = str(res)
+        var["$hexValue"] = hex(int_val)[2:].upper()
+        print(
+            "# LID(",
+            lid,
+            ") $rawValue =",
+            var["$rawValue"],
+            " $scaledValue =",
+            var["$scaledValue"],
+            " $hexValue =",
+            var["$hexValue"],
+        )
         return
 
-    if rsp[:2]=='61':
-        wcmd = '3B'+rsp[2:]
-    elif rsp[:2]=='62':
-        wcmd = '2E'+rsp[2:]
+    if rsp[:2] == "61":
+        wcmd = "3B" + rsp[2:]
+    elif rsp[:2] == "62":
+        wcmd = "2E" + rsp[2:]
 
     print("write value:", wcmd)
-    print(term_cmd( wcmd, elm ))
+    print(term_cmd(wcmd, elm))
 
-def wait_kb( ttw ):
+
+def wait_kb(ttw):
     global key_pressed
 
     st = mod_elm.pyren_time()
     kb = mod_utils.KBHit()
 
-    while(mod_elm.pyren_time()<(st+ttw)):
+    while mod_elm.pyren_time() < (st + ttw):
         if kb.kbhit():
             key_pressed = kb.getch()
         time.sleep(0.1)
 
     kb.set_normal_term()
 
-def proc_line( l, elm ):
+
+def proc_line(l, elm):
     global macro
     global var
     global cmd_delay
     global key_pressed
 
-
-    if '#' in l:
-        l = l.split('#')[0]
+    if "#" in l:
+        l = l.split("#")[0]
 
     l = l.strip()
 
-    if l.startswith(':'):
+    if l.startswith(":"):
         print(l)
         return
 
     if len(l) == 0:
         return
 
-    if l in ['q', 'quit', 'e', 'exit', 'end']:
+    if l in ["q", "quit", "e", "exit", "end"]:
         sys.exit()
 
-    if l in ['h', 'help', '?']:
+    if l in ["h", "help", "?"]:
         print_help()
         return
 
-    if l in ['var']:
+    if l in ["var"]:
         print("\n###### Variables #####")
         for v in var.keys():
-            print( f'# {v:20} = {var[v]}')
+            print(f"# {v:20} = {var[v]}")
         return
 
-    if l in ['cls']:
+    if l in ["cls"]:
         mod_utils.clearScreen()
         return
 
@@ -724,105 +786,104 @@ def proc_line( l, elm ):
         return
 
     # find veriable usage
-    m = re.search('.+(\$\S+)', l)
+    m = re.search(".+(\$\S+)", l)
     if m:
         while m:
             vu = m.group(1)
             if vu in list(var.keys()):
                 l = re.sub("\\" + vu, var[vu], l)
             else:
-                print('Error: unknown variable', vu)
+                print("Error: unknown variable", vu)
                 return
-            m = re.search('.+(\$\S+)', l)
-        print( "#(subst)", l)
+            m = re.search(".+(\$\S+)", l)
+        print("#(subst)", l)
 
-    m = re.search('\$\S+\s*=\s*\S+', l)
+    m = re.search("\$\S+\s*=\s*\S+", l)
     if m:
         # find variable definition
-        r = m.group(0).replace(' ', '').replace('\t', '')
-        rl = r.split('=')
+        r = m.group(0).replace(" ", "").replace("\t", "")
+        rl = r.split("=")
         var[rl[0]] = rl[1]
-        if rl[0] == '$addr':
-            if var['$addr'].upper() in list(mod_elm.dnat.keys()):
-                var['$txa'] = mod_elm.dnat[var['$addr'].upper()]
-                var['$rxa'] = mod_elm.snat[var['$addr'].upper()]
-                elm.currentaddress = var['$addr'].upper()
+        if rl[0] == "$addr":
+            if var["$addr"].upper() in list(mod_elm.dnat.keys()):
+                var["$txa"] = mod_elm.dnat[var["$addr"].upper()]
+                var["$rxa"] = mod_elm.snat[var["$addr"].upper()]
+                elm.currentaddress = var["$addr"].upper()
         return
 
     l_parts = l.split()
-    if len(l_parts) > 0 and l_parts[0] in ['wait', 'sleep']:
+    if len(l_parts) > 0 and l_parts[0] in ["wait", "sleep"]:
         try:
             wait_kb(float(l_parts[1]))
             return
         except:
             pass
 
-    if len(l_parts) > 0 and l_parts[0] in ['ses', 'session']:
+    if len(l_parts) > 0 and l_parts[0] in ["ses", "session"]:
         try:
             elm.startSession = l_parts[1]
             l = l_parts[1]
         except:
             pass
 
-    if len(l_parts) > 0 and l_parts[0] in ['delay']:
+    if len(l_parts) > 0 and l_parts[0] in ["delay"]:
         cmd_delay = float(l_parts[1])
         return
 
-    if l.lower().startswith('set_bits'):
-        bit_cmd( l.lower()[8:], elm, fnc='set_bits' )
+    if l.lower().startswith("set_bits"):
+        bit_cmd(l.lower()[8:], elm, fnc="set_bits")
         return
 
-    if l.lower().startswith('xor_bits'):
-        bit_cmd( l.lower()[8:], elm, fnc='xor_bits' )
+    if l.lower().startswith("xor_bits"):
+        bit_cmd(l.lower()[8:], elm, fnc="xor_bits")
         return
 
-    if l.lower().startswith('exit_if_not'):
-        bit_cmd( l.lower()[11:], elm, fnc='exit_if_not' )
+    if l.lower().startswith("exit_if_not"):
+        bit_cmd(l.lower()[11:], elm, fnc="exit_if_not")
         return
 
-    if l.lower().startswith('exit_if'):
-        bit_cmd( l.lower()[7:], elm, fnc='exit_if' )
+    if l.lower().startswith("exit_if"):
+        bit_cmd(l.lower()[7:], elm, fnc="exit_if")
         return
 
-    if l.lower().startswith('goto_if_not'):
-        go = bit_cmd( l.lower()[11:], elm, fnc='goto_if_not' )
+    if l.lower().startswith("goto_if_not"):
+        go = bit_cmd(l.lower()[11:], elm, fnc="goto_if_not")
         return go
 
-    if l.lower().startswith('goto_if'):
-        go = bit_cmd( l.lower()[7:], elm, fnc='goto_if' )
+    if l.lower().startswith("goto_if"):
+        go = bit_cmd(l.lower()[7:], elm, fnc="goto_if")
         return go
 
-    if l.lower().startswith('if_key'):
+    if l.lower().startswith("if_key"):
         if len(l_parts) != 3 or l_parts[1] != key_pressed:
             return
         else:
-            key_pressed = ''
+            key_pressed = ""
             return l_parts[2]
 
-    if l.lower().startswith('value'):
-        val = bit_cmd( l.lower()[5:], elm, fnc='value' )
+    if l.lower().startswith("value"):
+        val = bit_cmd(l.lower()[5:], elm, fnc="value")
         return
 
-    if len(l_parts) > 0 and l_parts[0] in ['go','goto']:
+    if len(l_parts) > 0 and l_parts[0] in ["go", "goto"]:
         print(l)
         return l_parts[1]
 
-    if len(l_parts) > 0 and l_parts[0] in ['var','variable']:
+    if len(l_parts) > 0 and l_parts[0] in ["var", "variable"]:
         print(l)
         return
 
-    if l.lower().startswith('_'):
+    if l.lower().startswith("_"):
         print(elm.send_raw(l[1:]))
     else:
-        print(term_cmd( l, elm ))
+        print(term_cmd(l, elm))
 
-    if cmd_delay>0:
-        print('# delay:', cmd_delay)
+    if cmd_delay > 0:
+        print("# delay:", cmd_delay)
         wait_kb(cmd_delay)
 
 
 def main():
-
     global auto_macro
     global auto_dia
     global debug_mode
@@ -834,55 +895,55 @@ def main():
     init_macro()
     init_var()
     load_macro()
-    
+
     optParser()
-    
-    print('Opening ELM')
-    elm = mod_elm.ELM( mod_globals.opt_port, mod_globals.opt_speed, True )
+
+    print("Opening ELM")
+    elm = mod_elm.ELM(mod_globals.opt_port, mod_globals.opt_speed, True)
 
     # change serial port baud rate
-    if not mod_globals.opt_demo and elm.port and elm.port.portType==0:
+    if not mod_globals.opt_demo and elm.port and elm.port.portType == 0:
         if mod_globals.opt_speed < mod_globals.opt_rate:
             elm.port.soft_boudrate(mod_globals.opt_rate)
 
-    elm.currentaddress = '7A'
-    elm.currentprotocol = 'can'
+    elm.currentaddress = "7A"
+    elm.currentprotocol = "can"
 
     cmd_lines = []
     cmd_ref = 0
 
     if auto_dia:
         fname = FileChooser().choose()
-        #debug
-        #fname = './macro/test/test.cmd'
-        if len(fname)>0:
-            f = open(fname, 'rt')
+        # debug
+        # fname = './macro/test/test.cmd'
+        if len(fname) > 0:
+            f = open(fname, "rt")
             cmd_lines = f.readlines()
             f.close()
 
     if debug_mode:
         mod_globals.opt_demo = True
-        elm.loadDump('./dumps/term_test.txt')
-        fname = './macro/test/test.cmd'
-        if len(fname)>0:
-            f = open(fname, 'rt')
+        elm.loadDump("./dumps/term_test.txt")
+        fname = "./macro/test/test.cmd"
+        if len(fname) > 0:
+            f = open(fname, "rt")
             cmd_lines = f.readlines()
             f.close()
 
-    if auto_macro != '':
-      if len(auto_macro) > 2 and auto_macro[0:3] in ["ini", "can", "slo", "fas"]:
-        run_init_function(auto_macro, elm)
-      elif auto_macro in list(macro.keys()):
-        play_macro( auto_macro, elm )
-      else:
-        print('Error: unknown macro name:', auto_macro)
+    if auto_macro != "":
+        if len(auto_macro) > 2 and auto_macro[0:3] in ["ini", "can", "slo", "fas"]:
+            run_init_function(auto_macro, elm)
+        elif auto_macro in list(macro.keys()):
+            play_macro(auto_macro, elm)
+        else:
+            print("Error: unknown macro name:", auto_macro)
 
     while True:
-        print(var['$addr']+':'+var['$txa']+':'+var['$prompt'] + '#', end=' ')
-        if len(cmd_lines)==0:
+        print(var["$addr"] + ":" + var["$txa"] + ":" + var["$prompt"] + "#", end=" ")
+        if len(cmd_lines) == 0:
             l = input()
         else:
-            if cmd_ref<len(cmd_lines):
+            if cmd_ref < len(cmd_lines):
                 l = cmd_lines[cmd_ref].strip()
                 cmd_ref += 1
             else:
@@ -890,20 +951,17 @@ def main():
                 l = "# end of command file"
             print(l)
 
-        goto = proc_line( l, elm )
+        goto = proc_line(l, elm)
 
         if goto and len(cmd_lines):
             c_str = 0
             for c in cmd_lines:
-                if c.startswith(':'):
+                if c.startswith(":"):
                     if goto == c[1:].strip():
                         cmd_ref = c_str
                         break
                 c_str += 1
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
-
-
-
-

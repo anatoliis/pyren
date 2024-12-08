@@ -1,23 +1,15 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-import re
-import time
-import string
-import mod_globals
-import mod_utils
-import mod_ecu
-import mod_db_manager
-from mod_utils import clearScreen
-from mod_utils import pyren_encode
-from mod_utils import KBHit
 import xml.dom.minidom
+
+import mod_db_manager
+import mod_globals
+from mod_utils import KBHit, clearScreen, pyren_encode
 
 
 def run(elm, ecu, command, data):
     clearScreen()
-    header = '[' + command.codeMR + '] ' + command.label
+    header = "[" + command.codeMR + "] " + command.label
 
     ScmSet = {}
     ScmParam = {}
@@ -49,39 +41,39 @@ def run(elm, ecu, command, data):
 
     kb = KBHit()
 
-    mainText = get_message('TexteTitre')
-    important = get_message('TexteConsigne')
-    tilt = get_message('TexteValeurInclinaison')
-    degreeSymbol = get_message('TexteDegre')
-    value2, datastr2 = ecu.get_pr(ScmParam['ParametreInclinaison'])
+    mainText = get_message("TexteTitre")
+    important = get_message("TexteConsigne")
+    tilt = get_message("TexteValeurInclinaison")
+    degreeSymbol = get_message("TexteDegre")
+    value2, datastr2 = ecu.get_pr(ScmParam["ParametreInclinaison"])
 
     clearScreen()
     print(pyren_encode(header))
     print(mainText)
-    print('*' * 80)
+    print("*" * 80)
     print()
     print(important)
     print()
 
-    ch = input('Do you want to continue? <yes/no> ')
-    while (ch.upper() != 'YES') and (ch.upper() != 'NO'):
-        ch = input('Do you want to continue? <yes/no> ')
-    if ch.upper() != 'YES':
+    ch = input("Do you want to continue? <yes/no> ")
+    while (ch.upper() != "YES") and (ch.upper() != "NO"):
+        ch = input("Do you want to continue? <yes/no> ")
+    if ch.upper() != "YES":
         return
 
     clearScreen()
-    cmd = ecu.get_ref_cmd(get_message('Commande1'))
-    resVal = ScmParam['ParametreCommande1']
-    print('*' * 80)
-    responce = ecu.run_cmd(ScmParam['Commande1'], resVal)
-    print('*' * 80)
-    if 'NR' in responce:
-        print(get_message('TexteProcedureInterompue'))
+    cmd = ecu.get_ref_cmd(get_message("Commande1"))
+    resVal = ScmParam["ParametreCommande1"]
+    print("*" * 80)
+    responce = ecu.run_cmd(ScmParam["Commande1"], resVal)
+    print("*" * 80)
+    if "NR" in responce:
+        print(get_message("TexteProcedureInterompue"))
     else:
-        print(get_message('TexteInitialisationEffectuee'))
+        print(get_message("TexteInitialisationEffectuee"))
     print()
-    print(tilt, pyren_encode(':'), value2, degreeSymbol)
+    print(tilt, pyren_encode(":"), value2, degreeSymbol)
     print()
 
-    ch = input('Press ENTER to exit')
+    ch = input("Press ENTER to exit")
     return
