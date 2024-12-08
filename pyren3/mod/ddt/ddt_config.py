@@ -1,4 +1,3 @@
-
 class Option:
     MTC = ""
     VW = ""

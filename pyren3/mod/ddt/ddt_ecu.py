@@ -8,9 +8,10 @@ import time
 import xml.etree.ElementTree as et
 from datetime import datetime
 
-from mod import config, db_manager, ddt_utils
-from mod.ddt_data import DecuDatas
-from mod.ddt_request import DecuRequests
+from mod import config, db_manager
+from mod.ddt import ddt_utils
+from mod.ddt.ddt_data import DecuDatas
+from mod.ddt.ddt_request import DecuRequests
 from mod.elm import AllowedList
 
 if config.OS != "android":

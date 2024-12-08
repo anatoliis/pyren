@@ -28,7 +28,7 @@ from mod.ply import Calc
 from mod.utils import Choice, ChoiceLong, KBHit, clearScreen, show_doc
 
 if config.OS != "android":
-    from mod.ddt import DDT
+    from mod.ddt.ddt import DDT
 
 from mod import config
 from mod import db_manager

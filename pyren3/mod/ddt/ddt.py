@@ -13,9 +13,10 @@ import tkinter.ttk as ttk
 import xml.etree.ElementTree as et
 from shutil import copyfile
 
-from mod import config, db_manager, ddt_ecu, ddt_utils, scan_ecus, utils
-from mod.ddt_ecu import DDTECU
-from mod.ddt_screen import DDTScreen
+from mod import config, db_manager, scan_ecus, utils
+from mod.ddt import ddt_utils
+from mod.ddt.ddt_ecu import DDTECU, ecuSearch
+from mod.ddt.ddt_screen import DDTScreen
 from mod.elm import AllowedList
 
 if config.OS == "nt":
@@ -770,7 +771,7 @@ class DDTLauncher:
                     ):
                         continue
 
-                    candlist = ddt_ecu.ecuSearch(
+                    candlist = ecuSearch(
                         self.v_proj.get(),
                         ce["addr"],
                         DiagVersion,
@@ -858,7 +859,7 @@ class DDTLauncher:
             tkinter.messagebox.showinfo("INFO", "no response from this ECU")
             return
 
-        candlist = ddt_ecu.ecuSearch(
+        candlist = ecuSearch(
             self.v_proj.get(),
             ce["addr"],
             DiagVersion,

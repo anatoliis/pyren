@@ -6,8 +6,9 @@ import sys
 import threading
 import time
 
-from mod import config, db_manager, ddt_utils, utils
-from mod.ddt_ecu import DDTECU
+from mod import config, db_manager, utils
+from mod.ddt import ddt_utils
+from mod.ddt.ddt_ecu import DDTECU
 from mod.elm import ELM, pyren_time
 from mod.utils import ChoiceLong, KBHit, clearScreen
 

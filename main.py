@@ -274,7 +274,7 @@ def run(s, cmd):
     elif cmd == "mon":
         cmdr = __import__("bus_monitor.bus_monitor")
     elif cmd == "ddt":
-        cmdr = __import__("mod.ddt")
+        cmdr = __import__("mod.ddt.ddt")
     elif cmd == "term":
         cmdr = __import__("mod.term")
     elif cmd == "pids":

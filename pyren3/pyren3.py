@@ -51,7 +51,7 @@ if config.OS != "android":
         sys.exit()
 
 from mod import utils
-from mod import ddt_utils
+from mod.ddt import ddt_utils
 
 from mod.elm import ELM
 from mod.scan_ecus import ScanEcus
