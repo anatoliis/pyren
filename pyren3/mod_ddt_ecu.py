@@ -360,9 +360,9 @@ class DDTECU:
                 self.Multipoint = can.attrib["Multipoint"]  # can.attrib["Multipoint")
 
         print("Loading requests")
-        rq_class = decu_requests(self.requests, root)
+        rq_class = DecuRequests(self.requests, root)
         print("Loading datas")
-        dt_class = decu_datas(self.datas, root)
+        dt_class = DecuDatas(self.datas, root)
 
         for r in list(self.requests.values()):
             self.req4sent[r.SentBytes] = r.Name

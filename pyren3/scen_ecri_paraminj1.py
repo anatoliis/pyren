@@ -19,7 +19,7 @@ import mod_globals
 from mod_utils import Choice, clearScreen, pyren_encode
 
 
-class ecus:
+class Ecus:
     vdiag = ""
     buttons = {}
     ncalib = ""
@@ -123,7 +123,7 @@ def run(elm, ecu, command, data):
                                                     ncalibButton.attrib["value"]
                                                 )
                                             ecusList.append(
-                                                ecus(
+                                                Ecus(
                                                     vDiagName.attrib["name"],
                                                     ncalibName.attrib["name"],
                                                     buttons,
@@ -137,7 +137,7 @@ def run(elm, ecu, command, data):
                                             vDiagButton.attrib["value"]
                                         )
                                 ecusList.append(
-                                    ecus(vDiagName.attrib["name"], "", buttons)
+                                    Ecus(vDiagName.attrib["name"], "", buttons)
                                 )
 
     # Get plain buttons with VDiag
@@ -148,14 +148,14 @@ def run(elm, ecu, command, data):
             for name in list(ScmParam.keys()):
                 if name.startswith("InjectorsButton"):
                     if buttons:
-                        ecusList.append(ecus(vdiag, "", buttons))
+                        ecusList.append(Ecus(vdiag, "", buttons))
                     buttons = OrderedDict()
                     vdiag = name[-2:]
                     buttons[name[:-2]] = ScmParam[name]
                 if vdiag:
                     if name.endswith("Button" + vdiag):
                         buttons[name[:-2]] = ScmParam[name]
-            ecusList.append(ecus(vdiag, "", buttons))
+            ecusList.append(Ecus(vdiag, "", buttons))
     else:  # Get buttons without VDiag
         buttons = OrderedDict()
         found = False
@@ -169,7 +169,7 @@ def run(elm, ecu, command, data):
                 else:
                     found = False
                     break
-        ecusList.append(ecus("", "", buttons))
+        ecusList.append(Ecus("", "", buttons))
 
     # Get correct buttons set
     if vdiagExists:

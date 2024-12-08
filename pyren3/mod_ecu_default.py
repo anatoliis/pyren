@@ -388,7 +388,7 @@ def get_default_failflag(df, mn, se, elm, calc):
     return dtcs, descr, helps
 
 
-class ecu_default:
+class EcuDefault:
     name = ""
     code = ""
     agcdRef = ""
@@ -433,7 +433,7 @@ class ecu_default:
                 DataRef = ci.getElementsByTagName("DataRef")
                 if DataRef:
                     for dr in DataRef:
-                        dataref = ecu_screen_dataref(dr)
+                        dataref = EcuScreenDataRef(dr)
                         self.datarefs.append(dataref)
 
         self.memDatarefs = []
@@ -443,7 +443,7 @@ class ecu_default:
                 DataRef = mi.getElementsByTagName("DataRef")
                 if DataRef:
                     for dr in DataRef:
-                        dataref = ecu_screen_dataref(dr)
+                        dataref = EcuScreenDataRef(dr)
                         self.memDatarefs.append(dataref)
 
         self.helps = []
@@ -531,12 +531,12 @@ class ecu_default:
                             self.mnemolistIP.append(mn.getAttribute("name"))
 
 
-class ecu_defaults:
+class EcuDefaults:
     def __init__(self, default_list, mdoc, opt, tran):
         Defaults = mdoc.getElementsByTagName("Default")
         if Defaults:
             for df in Defaults:
-                default = ecu_default(df, opt, tran)
+                default = EcuDefault(df, opt, tran)
                 default_list[default.code] = default
 
     def getDTCCommands(self, mdoc, opt, ecu_type):

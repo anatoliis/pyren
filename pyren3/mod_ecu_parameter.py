@@ -54,7 +54,7 @@ def get_parameter(pr, mn, se, elm, calc, dataids={}):
         )
 
 
-class ecu_parameter:
+class EcuParameter:
     name = ""
     agcdRef = ""
     codeMR = ""
@@ -198,10 +198,10 @@ class ecu_parameter:
                         self.mnemolist.append(mn.getAttribute("name"))
 
 
-class ecu_parameters:
+class EcuParameters:
     def __init__(self, parameter_list, mdoc, opt, tran):
         Parameters = mdoc.getElementsByTagName("Parameter")
         if Parameters:
             for pr in Parameters:
-                parameter = ecu_parameter(pr, opt, tran)
+                parameter = EcuParameter(pr, opt, tran)
                 parameter_list[parameter.name] = parameter

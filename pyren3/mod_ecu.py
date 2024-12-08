@@ -126,7 +126,7 @@ F2A = {
 }
 
 ecudump = {}  # {'request':'response'}
-favouriteScreen = ecu_own_screen("FAV")
+favouriteScreen = EcuOwnScreen("FAV")
 
 
 class ECU:
@@ -183,26 +183,26 @@ class ECU:
 
         print("Loading screens ")
         self.screens = []
-        sc_class = ecu_screens(self.screens, mdoc, tran)
+        sc_class = EcuScreens(self.screens, mdoc, tran)
 
         print("Loading optimyzer")
         self.defaults = []
-        opt_file = optfile(self.path + self.ecudata["OptimizerId"].strip()[:-3] + "xml")
+        opt_file = Optfile(self.path + self.ecudata["OptimizerId"].strip()[:-3] + "xml")
 
         print("Loading defaults")
-        df_class = ecu_defaults(self.Defaults, mdoc, opt_file.dict, tran)
+        df_class = EcuDefaults(self.Defaults, mdoc, opt_file.dict, tran)
         print("Loading parameters")
-        pr_class = ecu_parameters(self.Parameters, mdoc, opt_file.dict, tran)
+        pr_class = EcuParameters(self.Parameters, mdoc, opt_file.dict, tran)
         print("Loading states")
-        st_class = ecu_states(self.States, mdoc, opt_file.dict, tran)
+        st_class = EcuStates(self.States, mdoc, opt_file.dict, tran)
         print("Loading identifications")
-        id_class = ecu_identifications(self.Identifications, mdoc, opt_file.dict, tran)
+        id_class = EcuIdentifications(self.Identifications, mdoc, opt_file.dict, tran)
         print("Loading commands")
-        cm_class = ecu_commands(self.Commands, mdoc, opt_file.dict, tran)
+        cm_class = EcuCommands(self.Commands, mdoc, opt_file.dict, tran)
         print("Loading services")
-        sv_class = ecu_services(self.Services, mdoc, opt_file.dict, tran)
+        sv_class = EcuServices(self.Services, mdoc, opt_file.dict, tran)
         print("Loading mnemonics")
-        mm_class = ecu_mnemonics(self.Mnemonics, mdoc, opt_file.dict, tran)
+        mm_class = EcuMnemonics(self.Mnemonics, mdoc, opt_file.dict, tran)
         print("Loading DTC commands")
         self.getDTCmnemo, self.resetDTCcommand = df_class.getDTCCommands(
             mdoc, opt_file.dict, cecu["stdType"]
@@ -212,7 +212,7 @@ class ECU:
             xmlstr = opt_file.dict["DataIds"]
             ddom = xml.dom.minidom.parseString(xmlstr.encode("utf-8"))
             ddoc = ddom.documentElement
-            di_class = ecu_dataids(self.DataIds, ddoc, opt_file.dict, tran)
+            di_class = EcuDataIds(self.DataIds, ddoc, opt_file.dict, tran)
 
     def initELM(self, elm):
         print("Loading PLY ")
@@ -1007,7 +1007,7 @@ class ECU:
                 if self.Parameters[pr].agcdRef == elem:
                     if not any(pr == dr.name for dr in favouriteScreen.datarefs):
                         favouriteScreen.datarefs.append(
-                            ecu_screen_dataref("", pr, "Parameter")
+                            EcuScreenDataRef("", pr, "Parameter")
                         )
                         return False
                     else:
@@ -1017,7 +1017,7 @@ class ECU:
                 if self.States[st].agcdRef == elem:
                     if not any(st == dr.name for dr in favouriteScreen.datarefs):
                         favouriteScreen.datarefs.append(
-                            ecu_screen_dataref("", st, "State")
+                            EcuScreenDataRef("", st, "State")
                         )
                         return False
                     else:
@@ -1027,7 +1027,7 @@ class ECU:
                 if self.Identifications[idk].agcdRef == elem:
                     if not any(idk == dr.name for dr in favouriteScreen.datarefs):
                         favouriteScreen.datarefs.append(
-                            ecu_screen_dataref("", idk, "Identification")
+                            EcuScreenDataRef("", idk, "Identification")
                         )
                         return False
                     else:
@@ -1175,7 +1175,7 @@ class ECU:
 
             if self.Defaults[dtchex[:4]].datarefs:
                 cur_dtrf = [
-                    ecu_screen_dataref(
+                    EcuScreenDataRef(
                         0, "\n" + mod_globals.language_dict["300"] + "\n", "Text"
                     )
                 ] + self.Defaults[dtchex[:4]].datarefs
@@ -1186,9 +1186,9 @@ class ECU:
                     + mod_globals.ext_cur_DTC
                     + "\n"
                 )
-                mem_dtrf = [
-                    ecu_screen_dataref(0, mem_dtrf_txt, "Text")
-                ] + self.Defaults[dtchex[:4]].memDatarefs
+                mem_dtrf = [EcuScreenDataRef(0, mem_dtrf_txt, "Text")] + self.Defaults[
+                    dtchex[:4]
+                ].memDatarefs
 
             tmp_dtrf = mem_dtrf + cur_dtrf
 
@@ -1249,7 +1249,7 @@ class ECU:
 
             if self.Defaults[dtchex[:4]].datarefs:
                 cur_dtrf = [
-                    ecu_screen_dataref(
+                    EcuScreenDataRef(
                         0, "\n" + mod_globals.language_dict["300"] + "\n", "Text"
                     )
                 ] + self.Defaults[dtchex[:4]].datarefs
@@ -1260,12 +1260,12 @@ class ECU:
                     + mod_globals.ext_cur_DTC
                     + "\n"
                 )
-                mem_dtrf = [
-                    ecu_screen_dataref(0, mem_dtrf_txt, "Text")
-                ] + self.Defaults[dtchex[:4]].memDatarefs
+                mem_dtrf = [EcuScreenDataRef(0, mem_dtrf_txt, "Text")] + self.Defaults[
+                    dtchex[:4]
+                ].memDatarefs
             if self.ext_de:
                 ext_info_dtrf = [
-                    ecu_screen_dataref(
+                    EcuScreenDataRef(
                         0, "\n" + mod_globals.language_dict["1691"] + "\n", "Text"
                     )
                 ] + self.ext_de
@@ -1394,15 +1394,15 @@ class ECU:
                 continue
 
             if choice[0][:3] == "ECM":
-                scrn = ecu_screen("ECM")
+                scrn = EcuScreen("ECM")
                 scrn.datarefs = []
                 for cm in sorted(self.Commands):
-                    scrn.datarefs.append(ecu_screen_dataref("", cm, "Command"))
+                    scrn.datarefs.append(EcuScreenDataRef("", cm, "Command"))
                 self.show_screen(scrn)
                 continue
 
             if choice[0][:3] == "PRA":
-                scrn = ecu_screen("PRA")
+                scrn = EcuScreen("PRA")
                 scrn.datarefs = []
                 tempDict = {}
                 for pr in self.Parameters:
@@ -1417,13 +1417,13 @@ class ECU:
                             self.Parameters[pr[0]].mnemolist[0]
                         ].serviceID:
                             scrn.datarefs.append(
-                                ecu_screen_dataref("", pr[0], "Parameter")
+                                EcuScreenDataRef("", pr[0], "Parameter")
                             )
                 self.show_screen(scrn)
                 continue
 
             if choice[0][:3] == "ETA":
-                scrn = ecu_screen("ETA")
+                scrn = EcuScreen("ETA")
                 scrn.datarefs = []
                 tempDict = {}
                 for st in self.States:
@@ -1441,15 +1441,15 @@ class ECU:
                 for st in sortedStates:
                     if self.States[st[0]].mnemolist:
                         if self.Mnemonics[self.States[st[0]].mnemolist[0]].serviceID:
-                            scrn.datarefs.append(ecu_screen_dataref("", st[0], "State"))
+                            scrn.datarefs.append(EcuScreenDataRef("", st[0], "State"))
                 self.show_screen(scrn)
                 continue
 
             if choice[0][:3] == "IDA":
-                scrn = ecu_screen("IDA")
+                scrn = EcuScreen("IDA")
                 scrn.datarefs = []
                 for idk in sorted(self.Identifications):
-                    scrn.datarefs.append(ecu_screen_dataref("", idk, "Identification"))
+                    scrn.datarefs.append(EcuScreenDataRef("", idk, "Identification"))
                 self.show_screen(scrn)
                 continue
 
@@ -1780,7 +1780,7 @@ def main():
 
     print("Loading language ")
     sys.stdout.flush()
-    lang = optfile("Location/DiagOnCAN_" + lanid + ".bqm", True)
+    lang = Optfile("Location/DiagOnCAN_" + lanid + ".bqm", True)
     print("Done")
     sys.stdout.flush()
 
@@ -1792,21 +1792,20 @@ def main():
 
     print("Loading optimyzer")
     sys.stdout.flush()
-    # opt_file = optfile(mod_db_manager.get_file_from_clip(sgfile))
-    opt_file = optfile(sgfile)
+    opt_file = Optfile(sgfile)
 
     print("Loading defaults")
-    df_class = ecu_defaults(Defaults, mdoc, opt_file.dict, lang.dict)
+    df_class = EcuDefaults(Defaults, mdoc, opt_file.dict, lang.dict)
     print("Loading parameters")
-    pr_class = ecu_parameters(Parameters, mdoc, opt_file.dict, lang.dict)
+    pr_class = EcuParameters(Parameters, mdoc, opt_file.dict, lang.dict)
     print("Loading states")
-    st_class = ecu_states(States, mdoc, opt_file.dict, lang.dict)
+    st_class = EcuStates(States, mdoc, opt_file.dict, lang.dict)
     print("Loading identifications")
-    id_class = ecu_identifications(Identifications, mdoc, opt_file.dict, lang.dict)
+    id_class = EcuIdentifications(Identifications, mdoc, opt_file.dict, lang.dict)
     print("Loading commands")
-    cm_class = ecu_commands(Commands, mdoc, opt_file.dict, lang.dict)
+    cm_class = EcuCommands(Commands, mdoc, opt_file.dict, lang.dict)
     print("Loading mnemonics")
-    mm_class = ecu_mnemonics(Mnemonics, mdoc, opt_file.dict, lang.dict)
+    mm_class = EcuMnemonics(Mnemonics, mdoc, opt_file.dict, lang.dict)
 
     # for p in Parameters.values():
     #  print p

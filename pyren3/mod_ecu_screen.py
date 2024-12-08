@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-class ecu_screen_dataref:
+class EcuScreenDataRef:
     name = ""
     type = ""
 
@@ -14,7 +14,7 @@ class ecu_screen_dataref:
         self.type = dr.getAttribute("type")
 
 
-class ecu_own_screen:
+class EcuOwnScreen:
     datarefs = []
     functions = []
     name = ""
@@ -23,7 +23,7 @@ class ecu_own_screen:
         self.name = n
 
 
-class ecu_screen_subfunction:
+class EcuScreenSubFunction:
     datarefs = []
     name = ""
     text = ""
@@ -42,11 +42,11 @@ class ecu_screen_subfunction:
         if DataRefs:
             self.datarefs = []
             for dr in DataRefs:
-                dataref = ecu_screen_dataref(dr)
+                dataref = EcuScreenDataRef(dr)
                 self.datarefs.append(dataref)
 
 
-class ecu_screen_function:
+class EcuScreenFunction:
     subfunctions = []
     datarefs = []
     name = ""
@@ -66,18 +66,18 @@ class ecu_screen_function:
         if SubFunctions:
             self.subfunctions = []
             for sfu in SubFunctions:
-                subfunction = ecu_screen_subfunction(sfu, tran)
+                subfunction = EcuScreenSubFunction(sfu, tran)
                 self.subfunctions.append(subfunction)
             return
         DataRefs = fu.getElementsByTagName("DataRef")
         if DataRefs:
             self.datarefs = []
             for dr in DataRefs:
-                dataref = ecu_screen_dataref(dr)
+                dataref = EcuScreenDataRef(dr)
                 self.datarefs.append(dataref)
 
 
-class ecu_screen:
+class EcuScreen:
     functions = []
     datarefs = []
     name = ""
@@ -100,24 +100,24 @@ class ecu_screen:
         if Functions:
             self.functions = []
             for fu in Functions:
-                function = ecu_screen_function(fu, tran)
+                function = EcuScreenFunction(fu, tran)
                 self.functions.append(function)
             return
         DataRefs = sc.getElementsByTagName("DataRef")
         if DataRefs:
             self.datarefs = []
             for dr in DataRefs:
-                dataref = ecu_screen_dataref(dr)
+                dataref = EcuScreenDataRef(dr)
                 self.datarefs.append(dataref)
 
 
-class ecu_screens:
+class EcuScreens:
     def __init__(self, screen_list, mdoc, tran):
         Screens = mdoc.getElementsByTagName("Screens").item(0)
         if Screens:
             Screen = Screens.getElementsByTagName("Screen")
             if Screen:
                 for sc in Screen:
-                    screen = ecu_screen(sc, tran)
+                    screen = EcuScreen(sc, tran)
                     if len(screen.functions) > 0 or len(screen.datarefs) > 0:
                         screen_list.append(screen)

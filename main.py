@@ -230,7 +230,7 @@ def getPortList():
     return ret
 
 
-class settings:
+class Settings:
     path = ""
     port = ""
     lang = "RU"
@@ -352,7 +352,7 @@ if osname != "android":
         import tkinter.messagebox
         import tkinter.filedialog
 
-    class desktopGUI(tk.Frame):
+    class DesktopGui(tk.Frame):
         save = None
 
         def guiDestroy(self):
@@ -468,7 +468,7 @@ if osname != "android":
                         break
 
         def __init__(self):
-            self.save = settings()
+            self.save = Settings()
             self.root = tk.Tk()
             self.root.option_add("*Dialog.msg.font", r"Courier\ New 10")
             self.root.geometry("500x500")
@@ -915,7 +915,7 @@ if osname != "android":
             pass
 
     def main():
-        gui = desktopGUI()
+        gui = DesktopGui()
 
     if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
@@ -932,7 +932,7 @@ if osname != "android":
 
 else:
 
-    class androidGUI:
+    class AndroidGui:
         save = None
         pl = []
         ll = []
@@ -1416,7 +1416,7 @@ else:
                         self.cmd_Update()
 
         def __init__(self):
-            self.save = settings()
+            self.save = Settings()
             try:
                 self.droid = android.Android()
                 self.droid.fullShow(self.lay)
@@ -1436,7 +1436,7 @@ else:
             self.droid.fullDismiss()
 
     def main():
-        gui = androidGUI()
+        gui = AndroidGui()
 
     if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))

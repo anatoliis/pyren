@@ -214,7 +214,7 @@ def getHexVal(m, startByte, startBit, resp, raw=False):
     return hexval
 
 
-class ecu_mnemonic:
+class EcuMnemonic:
     name = ""
     littleEndian = ""
     type = ""
@@ -321,7 +321,7 @@ class ecu_mnemonic:
                     continue
 
 
-class ecu_mnemonics:
+class EcuMnemonics:
     def __init__(self, mnemonic_list, mdoc, opt, tran):
         for k in list(opt.keys()):
             if "Mnemonic" in k:
@@ -329,5 +329,5 @@ class ecu_mnemonics:
                 odom = xml.dom.minidom.parseString(xmlstr.encode("utf-8"))
                 odoc = odom.documentElement
 
-                mnemonic = ecu_mnemonic(odoc, opt)
+                mnemonic = EcuMnemonic(odoc, opt)
                 mnemonic_list[mnemonic.name] = mnemonic

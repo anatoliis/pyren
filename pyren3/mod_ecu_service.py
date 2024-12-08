@@ -7,7 +7,7 @@ import mod_globals
 from mod_utils import pyren_encode
 
 
-class ecu_mnemolocation:
+class EcuMnemoLocation:
     name = ""
     startByte = ""
     startBit = ""
@@ -29,7 +29,7 @@ class ecu_mnemolocation:
         self.rOffset = ml.getAttribute("rOffset")
 
 
-class ecu_service_response:
+class EcuServiceResponse:
     val = ""
     status = 0
     mnemolocations = {}
@@ -43,7 +43,7 @@ class ecu_service_response:
         MnemoLocations = sr.getElementsByTagName("MnemoLocation")
         if MnemoLocations:
             for ml in MnemoLocations:
-                mnemoloc = ecu_mnemolocation(ml)
+                mnemoloc = EcuMnemoLocation(ml)
                 self.mnemolocations[mnemoloc.name] = mnemoloc
 
 
@@ -220,7 +220,7 @@ def parseComplexResponse(elm, positiveRsp, response, sentDataIds):
     return first_rsp
 
 
-class ecu_service:
+class EcuService:
     id = ""
     delay = ""
     mode = ""
@@ -274,20 +274,20 @@ class ecu_service:
                 self.simpleRsp = ""
                 Simple = st.getElementsByTagName("Simple").item(0)
                 if Simple:
-                    resp = ecu_service_response(Simple)
+                    resp = EcuServiceResponse(Simple)
                     self.responces[resp.val] = resp
                     self.simpleRsp = resp.val
 
                 RepeatInProgress = st.getElementsByTagName("RepeatInProgress").item(0)
                 if RepeatInProgress:
-                    resp = ecu_service_response(RepeatInProgress)
+                    resp = EcuServiceResponse(RepeatInProgress)
                     self.responces[resp.val] = resp
                     self.startRepeatInProgres[resp.val] = resp
 
                 Resp = st.getElementsByTagName("Resp")
                 if Resp:
                     for rsp in Resp:
-                        resp = ecu_service_response(rsp)
+                        resp = EcuServiceResponse(rsp)
                         self.responces[resp.val] = resp
 
         Repeat = sv.getElementsByTagName("Repeat")
@@ -300,23 +300,23 @@ class ecu_service:
 
                 Simple = rep.getElementsByTagName("Simple").item(0)
                 if Simple:
-                    resp = ecu_service_response(Simple)
+                    resp = EcuServiceResponse(Simple)
                     self.responces[resp.val] = resp
 
                 RepeatInProgress = rep.getElementsByTagName("RepeatInProgress").item(0)
                 if RepeatInProgress:
-                    resp = ecu_service_response(RepeatInProgress)
+                    resp = EcuServiceResponse(RepeatInProgress)
                     self.responcesRepeat[resp.val] = resp
                     self.repeatRepeatInProgres[resp.val] = resp
 
                 Resp = rep.getElementsByTagName("Resp")
                 if Resp:
                     for rsp in Resp:
-                        resp = ecu_service_response(rsp)
+                        resp = EcuServiceResponse(rsp)
                         self.responcesRepeat[resp.val] = resp
 
 
-class ecu_services:
+class EcuServices:
     def __init__(self, service_list, mdoc, opt, tran):
         for k in list(opt.keys()):
             if "Service" in k:
@@ -324,5 +324,5 @@ class ecu_services:
                 odom = xml.dom.minidom.parseString(xmlstr.encode("utf-8"))
                 odoc = odom.documentElement
 
-                service = ecu_service(odoc)
+                service = EcuService(odoc)
                 service_list[service.id] = service

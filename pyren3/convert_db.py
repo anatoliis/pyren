@@ -79,7 +79,7 @@ if __name__ == "__main__":
             try:
                 while len(vf) and vf[0] in [".", "/", "\\"]:
                     vf = vf[1:]
-                optf = optfile(vf, cache=False)
+                optf = Optfile(vf, cache=False)
             except:
                 print("Skipping file ", vf)
                 continue
@@ -95,7 +95,7 @@ if __name__ == "__main__":
             try:
                 while len(vf) and vf[0] in [".", "/", "\\"]:
                     vf = vf[1:]
-                optf = optfile(vf, cache=False)
+                optf = Optfile(vf, cache=False)
             except:
                 print("Skipping file ", vf)
                 continue

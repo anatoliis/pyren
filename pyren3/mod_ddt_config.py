@@ -60,7 +60,7 @@ class Option:
         self.MOD = op.attrib["Mod"]
 
 
-class decu_config:
+class DecuConfig:
     kabs = []
     opts = []
     DI = ""
@@ -140,7 +140,7 @@ class decu_config:
                 self.kabs.append(kab)
 
 
-class decu_configs:
+class DecuConfigs:
     def __init__(self, config_list, xdoc):
         # try to find default endian
 
@@ -158,6 +158,6 @@ class decu_configs:
             Configs = conf[0].findall("Config")
         if Configs:
             for cf in Configs:
-                config = decu_config(cf)
+                config = DecuConfig(cf)
                 config_list.append(config)
                 # print config

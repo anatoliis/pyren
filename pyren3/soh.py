@@ -88,7 +88,7 @@ def vp_start_gui():
     root = tk.Tk()
     root.resizable(width=False, height=False)
     set_Tk_var()
-    top = tl(root)
+    top = Tl(root)
     init(root, top)
     root.mainloop()
 
@@ -118,7 +118,7 @@ def getPortList():
     return ret
 
 
-class tl:
+class Tl:
     cw = 630
     ch = 415
     tab = 20

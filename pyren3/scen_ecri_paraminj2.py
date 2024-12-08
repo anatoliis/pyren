@@ -19,7 +19,7 @@ import mod_globals
 from mod_utils import Choice, clearScreen, pyren_encode
 
 
-class ecus:
+class Ecus:
     vdiag = ""
     buttons = {}
     ncalib = ""
@@ -114,7 +114,7 @@ def run(elm, ecu, command, data):
                             buttons[vDiagButton.attrib["name"]] = vDiagButton.attrib[
                                 "value"
                             ]
-                            ecusList.append(ecus(vDiagName.attrib["name"], "", buttons))
+                            ecusList.append(Ecus(vDiagName.attrib["name"], "", buttons))
 
     # Get correct buttons set
     if vdiagExists:

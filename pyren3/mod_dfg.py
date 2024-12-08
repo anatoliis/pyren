@@ -7,7 +7,7 @@ import mod_globals
 from mod_utils import ChoiceFromDict, ChoiceLong, clearScreen, pyren_encode
 
 
-class class_dfg:
+class ClassDfg:
     tcom = ""
     dfgFile = ""
     cacheFile = ""

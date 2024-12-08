@@ -15,7 +15,7 @@ except:
 from xml.dom.minidom import parseString
 
 
-class optfile:
+class Optfile:
     dict = {}
 
     obf = True
@@ -152,7 +152,7 @@ if __name__ == "__main__":
                         continue
                     print(sgFileName)
                     try:
-                        of = optfile(sgFileName, False, False)
+                        of = Optfile(sgFileName, False, False)
                     except:
                         print("bad file")
                         continue
@@ -183,7 +183,7 @@ if __name__ == "__main__":
             x = x ^ (i & 0xFFFF) ^ 0x5555
             of.write(struct.pack("H", x))
 
-    of = optfile(sys.argv[1])
+    of = Optfile(sys.argv[1])
 
     if len(sys.argv) == 2:
         for k in sorted(of.dict.keys()):

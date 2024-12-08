@@ -24,7 +24,7 @@ def get_identification(id, mn, se, elm, calc, raw=False):
         return "%-6s %-50s %-20s" % (id.codeMR, id.label, id.value), id.helps, id.value
 
 
-class ecu_identification:
+class EcuIdentification:
     name = ""
     agcdRef = ""
     codeMR = ""
@@ -115,10 +115,10 @@ class ecu_identification:
         return comp
 
 
-class ecu_identifications:
+class EcuIdentifications:
     def __init__(self, identification_list, mdoc, opt, tran):
         Identifications = mdoc.getElementsByTagName("Identification")
         if Identifications:
             for id in Identifications:
-                identification = ecu_identification(id, opt, tran)
+                identification = EcuIdentification(id, opt, tran)
                 identification_list[identification.name] = identification

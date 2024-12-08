@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from mod_ecu_service import ecu_mnemolocation
+from mod_ecu_service import EcuMnemoLocation
 from mod_utils import pyren_encode
 
 
-class ecu_dataid:
+class EcuDataId:
     id = ""
     dataBitLength = ""
     mnemolocations = {}
@@ -35,14 +35,14 @@ class ecu_dataid:
         MnemoLocations = di.getElementsByTagName("MnemoLocation")
         if MnemoLocations:
             for ml in MnemoLocations:
-                mnemoloc = ecu_mnemolocation(ml)
+                mnemoloc = EcuMnemoLocation(ml)
                 self.mnemolocations[mnemoloc.name] = mnemoloc
 
 
-class ecu_dataids:
+class EcuDataIds:
     def __init__(self, dataid_list, mdoc, opt, tran):
         DataIds = mdoc.getElementsByTagName("DataId")
         if DataIds:
             for di in DataIds:
-                dataid = ecu_dataid(di, opt, tran)
+                dataid = EcuDataId(di, opt, tran)
                 dataid_list[dataid.id] = dataid

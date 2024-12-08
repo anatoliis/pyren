@@ -34,7 +34,7 @@ def get_state(st, mn, se, elm, calc, dataids={}):
         return "%-6s %-50s %-20s" % (st.codeMR, st.label, st.value), st.helps, csv_val
 
 
-class ecu_state:
+class EcuState:
     name = ""
     agcdRef = ""
     codeMR = ""
@@ -165,12 +165,12 @@ class ecu_state:
                         self.mnemolist.append(mn.getAttribute("name"))
 
 
-class ecu_states:
+class EcuStates:
     def __init__(self, state_list, mdoc, opt, tran):
         States = mdoc.getElementsByTagName("State")
         if States:
             for st in States:
-                state = ecu_state(st, opt, tran)
+                state = EcuState(st, opt, tran)
                 state_list[state.name] = state
 
         Masks = mdoc.getElementsByTagName("MaskList")
@@ -186,6 +186,6 @@ class ecu_states:
                         )
                         mdom = xml.dom.minidom.parseString(tempStateXml)
                         mdocElem = mdom.documentElement
-                        state = ecu_state(mdocElem, opt, tran)
+                        state = EcuState(mdocElem, opt, tran)
                         if state.computation != "":
                             state_list[state.name] = state

@@ -50,7 +50,7 @@ class DataItem:
             self.Ref = False
 
 
-class decu_request:
+class DecuRequest:
     Name = ""
     DossierMaintenabilite = None
     ManuelSend = None
@@ -192,7 +192,7 @@ class decu_request:
                     self.ReceivedDI[dataitem.Name] = dataitem
 
 
-class decu_requests:
+class DecuRequests:
     def __init__(self, requiest_list, xdoc):
         ns = {
             "ns0": "http://www-diag.renault.com/2002/ECU",
@@ -213,6 +213,6 @@ class decu_requests:
         requests = tmpdoc[0].findall("ns0:Request", ns)
         if requests:
             for rq in requests:
-                request = decu_request(rq, defaultEndian)
+                request = DecuRequest(rq, defaultEndian)
                 requiest_list[request.Name] = request
                 # print request

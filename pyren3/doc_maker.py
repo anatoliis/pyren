@@ -4,7 +4,7 @@ import copy
 import xml.etree.ElementTree as et
 
 import mod_utils
-from mod_dfg import class_dfg
+from mod_dfg import ClassDfg
 from mod_mtc import acf_MTC_compare_doc
 from mod_optfile import *
 
@@ -847,7 +847,7 @@ def main():
     sys.stdout.flush()
 
     # loading language data
-    lang = optfile("Location/DiagOnCAN_" + mod_globals.opt_lang + ".bqm", True)
+    lang = Optfile("Location/DiagOnCAN_" + mod_globals.opt_lang + ".bqm", True)
     mod_globals.language_dict = lang.dict
     print("Done")
 
@@ -958,7 +958,7 @@ def main():
         date_madc = vindata.split(";")[4]
 
     # choose and load DFG
-    dfg = class_dfg(platform)
+    dfg = ClassDfg(platform)
 
     if dfg.tcom == "146":
         dfg.tcom = "159"

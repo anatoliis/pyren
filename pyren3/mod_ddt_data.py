@@ -9,7 +9,7 @@ os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 from mod_utils import *
 
 
-class decu_data:
+class DecuData:
     Name = ""
     Comment = ""
     Mnemonic = ""
@@ -182,7 +182,7 @@ class decu_data:
                     self.Unit = sc.attrib["Unit"]
 
 
-class decu_datas:
+class DecuDatas:
     def __init__(self, data_list, xdoc):
         ns = {
             "ns0": "http://www-diag.renault.com/2002/ECU",
@@ -194,6 +194,6 @@ class decu_datas:
         datas = data[0].findall("ns0:Data", ns)
         if datas:
             for dt in datas:
-                data = decu_data(dt)
+                data = DecuData(dt)
                 data_list[data.Name] = data
                 # print data

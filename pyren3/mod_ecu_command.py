@@ -452,7 +452,7 @@ def executeCommand(command, ecu, elm, path):
         sys.exit()
 
 
-class ecu_command:
+class EcuCommand:
     name = ""
     agcdRef = ""
     codeMR = ""
@@ -514,7 +514,7 @@ class ecu_command:
                 DataRef = ci.getElementsByTagName("DataRef")
                 if DataRef:
                     for dr in DataRef:
-                        dataref = ecu_screen_dataref(dr)
+                        dataref = EcuScreenDataRef(dr)
                         self.datarefs.append(dataref)
 
         self.inputlist = {}
@@ -578,10 +578,10 @@ class ecu_command:
     """
 
 
-class ecu_commands:
+class EcuCommands:
     def __init__(self, command_list, mdoc, opt, tran):
         commands = mdoc.getElementsByTagName("Command")
         if commands:
             for co in commands:
-                command = ecu_command(co, opt, tran)
+                command = EcuCommand(co, opt, tran)
                 command_list[command.name] = command
