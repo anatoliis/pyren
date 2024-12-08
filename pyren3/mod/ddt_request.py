@@ -2,8 +2,6 @@
 
 import operator
 
-from mod.utils import pyren_encode
-
 
 class DataItem:
     Name = ""
@@ -20,7 +18,7 @@ class DataItem:
             self.Ref,
             self.Name,
         )
-        return pyren_encode(out)
+        return out
 
     def __init__(self, di, defaultEndian):
         self.Name = di.attrib["Name"]
@@ -99,7 +97,7 @@ class DecuRequest:
             self.ShiftBytesCount,
             self.ReplyBytes,
         )
-        return pyren_encode(out)
+        return out
 
     def __init__(self, rq, defaultEndian):
         ns = {

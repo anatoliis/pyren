@@ -16,7 +16,7 @@ import xml.dom.minidom
 from collections import OrderedDict
 
 from mod import config, db_manager
-from mod.utils import Choice, KBHit, clearScreen, pyren_encode
+from mod.utils import Choice, KBHit, clearScreen
 
 
 def run(elm, ecu, command, data):
@@ -43,7 +43,7 @@ def run(elm, ecu, command, data):
             value = msg
         if value.isdigit() and value in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(config.language_dict[value])
+                value = config.language_dict[value]
             else:
                 value = config.language_dict[value]
         return value
@@ -51,7 +51,7 @@ def run(elm, ecu, command, data):
     def get_message_by_id(id, encode=True):
         if id.isdigit() and id in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(config.language_dict[id])
+                value = config.language_dict[id]
             else:
                 value = config.language_dict[id]
         return value
@@ -65,8 +65,8 @@ def run(elm, ecu, command, data):
     ScmParams = ScmRoom.getElementsByTagName("ScmParam")
 
     for Param in ScmParams:
-        name = pyren_encode(Param.getAttribute("name"))
-        value = pyren_encode(Param.getAttribute("value"))
+        name = Param.getAttribute("name")
+        value = Param.getAttribute("value")
 
         ScmParam[name] = value
 
@@ -74,12 +74,12 @@ def run(elm, ecu, command, data):
 
     for Set in ScmSets:
         if len(Set.attributes) != 1:
-            setname = pyren_encode(config.language_dict[Set.getAttribute("name")])
+            setname = config.language_dict[Set.getAttribute("name")]
             ScmParams = Set.getElementsByTagName("ScmParam")
 
             for Param in ScmParams:
-                name = pyren_encode(Param.getAttribute("name"))
-                value = pyren_encode(Param.getAttribute("value"))
+                name = Param.getAttribute("name")
+                value = Param.getAttribute("value")
 
                 ScmSet[setname] = value
                 ScmParam[name] = value
@@ -239,7 +239,7 @@ def run(elm, ecu, command, data):
                 integratedLines.append(tyreCodesTable[num])
         integratedScreen = screenPartOne + integratedLines
         for lines in integratedScreen:
-            screen = screen + pyren_encode(lines) + "\n"
+            screen = screen + lines + "\n"
         return screen
 
     def writeOneValve():
@@ -268,7 +268,7 @@ def run(elm, ecu, command, data):
                 selectedValve = valveLabelsDict[key]
                 selectedValveKey = key
 
-        userCode = input(pyren_encode(selectedValve) + ": ").upper()
+        userCode = input(selectedValve + ": ").upper()
         while not len(userCode) == 6 or not all(
             c in string.hexdigits for c in userCode
         ):
@@ -276,7 +276,7 @@ def run(elm, ecu, command, data):
                 print("Valve code should be 6 characters long.")
             else:
                 print("Illegal characters in the valve code")
-            userCode = input(pyren_encode(selectedValve) + ": ").upper()
+            userCode = input(selectedValve + ": ").upper()
 
         paramToSend = ""
         if summerTyresSet:
@@ -295,7 +295,7 @@ def run(elm, ecu, command, data):
         clearScreen()
         print(screen)
         print()
-        print(pyren_encode(tyreCodesTable[selectedValveKey]), userCode)
+        print(tyreCodesTable[selectedValveKey], userCode)
         print()
         writeCodes(paramToSend)
 
@@ -345,7 +345,7 @@ def run(elm, ecu, command, data):
             value2, datastr2 = ecu.get_st(ScmParam["State_ET002"])
             oldScreen = ""
             for lines in notUpdatedText:
-                oldScreen = oldScreen + pyren_encode(lines) + "\n"
+                oldScreen = oldScreen + lines + "\n"
 
             clearScreen()
             print(oldScreen)
@@ -358,19 +358,17 @@ def run(elm, ecu, command, data):
             print("*" * 80)
 
             if (
-                pyren_encode(value2)
-                == pyren_encode(config.language_dict[ScmParam["StateNO"]])
+                value2 == config.language_dict[ScmParam["StateNO"]]
                 and len(readCodes) < 4
             ):
-                print("%-50s %-20s" % (readCodeMessage, pyren_encode(readCode)))
+                print("%-50s %-20s" % (readCodeMessage, readCode))
                 print()
                 print("No codes read")
             elif (
-                pyren_encode(value2)
-                == pyren_encode(config.language_dict[ScmParam["StateYES"]])
+                value2 == config.language_dict[ScmParam["StateYES"]]
                 and len(readCodes) < 4
             ):
-                print("%-50s %-20s" % (readCodeMessage, pyren_encode(readCode)))
+                print("%-50s %-20s" % (readCodeMessage, readCode))
                 print()
 
                 if readCode != "000000" and readCode not in list(readCodes.keys()):
@@ -390,7 +388,7 @@ def run(elm, ecu, command, data):
                         "%-60s %-8s"
                         % (
                             searchFinished[code],
-                            pyren_encode(readCodes[list(readCodes.keys())[code]]),
+                            readCodes[list(readCodes.keys())[code]],
                         )
                     )
 

@@ -5,7 +5,6 @@ import xml.dom.minidom
 
 from mod import config
 from mod.ecu_service import executeService
-from mod.utils import pyren_encode
 
 
 def get_mnemonicDTC(m, resp):
@@ -259,7 +258,7 @@ class EcuMnemonic:
             self.positive,
             self.sids,
         )
-        return pyren_encode(out)
+        return out
 
     def __init__(self, sv, opt):
         self.name = sv.getAttribute("name")

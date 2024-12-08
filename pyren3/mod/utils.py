@@ -132,10 +132,10 @@ def Choice(list, question):
     for s in list:
         if s.lower() == "<up>" or s.lower() == "<exit>":
             exitNumber = c
-            print("%-2s - %s" % ("Q", pyren_encode(s)))
+            print("%-2s - %s" % ("Q", s))
             d["Q"] = s
         else:
-            print("%-2s - %s" % (c, pyren_encode(s)))
+            print("%-2s - %s" % (c, s))
             d[str(c)] = s
         c = c + 1
 
@@ -177,15 +177,15 @@ def ChoiceLong(list, question, header=""):
         # print chr(27)+"[2J"+chr(27)+"[;H",                    # clear ANSI screen (thanks colorama for windows)
 
         if len(header):
-            print(pyren_encode(header))
+            print(header)
 
         c = page * page_size
         for s in list[page * page_size : (page + 1) * page_size]:
             c = c + 1
             if s.lower() == "<up>" or s.lower() == "<exit>":
-                print("%-2s - %s" % ("Q", pyren_encode(s)))
+                print("%-2s - %s" % ("Q", s))
             else:
-                print("%-2s - %s" % (c, pyren_encode(s)))
+                print("%-2s - %s" % (c, s))
 
         if len(list) > page_size:
             if page > 0:
@@ -230,13 +230,13 @@ def ChoiceFromDict(dict, question, showId=True):
         s = dict[k]
         if k.lower() == "<up>" or k.lower() == "<exit>":
             exitNumber = c
-            print("%s - %s" % ("Q", pyren_encode(s)))
+            print("%s - %s" % ("Q", s))
             d["Q"] = k
         else:
             if showId:
-                print("%s - (%s) %s" % (c, pyren_encode(k), pyren_encode(s)))
+                print("%s - (%s) %s" % (c, k, s))
             else:
-                print("%s - %s" % (c, pyren_encode(s)))
+                print("%s - %s" % (c, s))
             d[str(c)] = k
         c = c + 1
 
@@ -251,14 +251,6 @@ def ChoiceFromDict(dict, question, showId=True):
             ch = "Q"
         if ch in list(d.keys()):
             return [d[ch], ch]
-
-
-def pyren_encode(inp):
-    return inp
-    # if config.os == 'android':
-    #  return inp.encode('utf-8', errors='replace')
-    # else:
-    #  return inp.encode(sys.stdout.encoding, errors='replace')
 
 
 def clearScreen():

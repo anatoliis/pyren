@@ -27,7 +27,7 @@ from mod.ecu_state import EcuStates, get_state
 from mod.mod_elm import AllowedList, dnat, pyren_time, snat
 from mod.optfile import Optfile
 from mod.ply import Calc
-from mod.utils import Choice, ChoiceLong, KBHit, clearScreen, pyren_encode, show_doc
+from mod.utils import Choice, ChoiceLong, KBHit, clearScreen, show_doc
 
 if config.OS != "android":
     from mod.ddt import DDT
@@ -456,7 +456,7 @@ class ECU:
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
             header = header + "Screen : " + path
-            print(pyren_encode(header))
+            print(header)
             menu = []
             cmds = []
             for dr in datarefs:
@@ -582,7 +582,7 @@ class ECU:
                     nparams += 1
             if config.opt_usrkey:
                 csvline += ";User events"
-            csvline = pyren_encode(csvline)
+            csvline = csvline
             if nparams:
                 csv_start_time = int(round(pyren_time() * 1000))
                 csv_filename = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
@@ -595,9 +595,7 @@ class ECU:
                 csv_filename = csv_filename.replace(" ", "_")
                 # if config.os == 'android':
                 #  csv_filename = csv_filename.encode("ascii","ignore")
-                csvf = open(
-                    "./csv/" + pyren_encode(csv_filename), "w", encoding="utf-8"
-                )
+                csvf = open("./csv/" + csv_filename, "w", encoding="utf-8")
                 csvf.write("\ufeff")
 
         DTCpos = path.find("DTC")
@@ -730,7 +728,7 @@ class ECU:
                         and csvf != 0
                         and (dr.type == "State" or dr.type == "Parameter")
                     ):
-                        csvline += ";" + pyren_encode(csvd)
+                        csvline += ";" + csvd
 
                     if not (config.opt_csv and config.opt_csv_only):
                         strlst.append(datastr)
@@ -772,13 +770,13 @@ class ECU:
                     + "\n"
                 )
                 header = header + "Screen : " + path
-                newScreen = newScreen + pyren_encode(header) + "\n"
+                newScreen = newScreen + header + "\n"
 
                 H = 25
 
                 pages = len(strlst) // H
                 for l in strlst[page * H : (page + 1) * H]:
-                    newScreen = newScreen + pyren_encode(l) + "  \n"
+                    newScreen = newScreen + l + "  \n"
                 if not path[:3] == "FAV":
                     if pages > 0:
                         newScreen = (
@@ -840,7 +838,7 @@ class ECU:
                         kb.set_getch_term()
                     else:
                         if config.opt_csv and (c in config.opt_usrkey):
-                            csvline += ";" + pyren_encode(c)
+                            csvline += ";" + c
                             continue
                         kb.set_normal_term()
                         self.saveFavList()
@@ -876,7 +874,7 @@ class ECU:
                         clearScreen()
                         continue
                     if config.opt_csv and (c in config.opt_usrkey):
-                        csvline += ";" + pyren_encode(c)
+                        csvline += ";" + c
                         continue
                     kb.set_normal_term()
                     if config.opt_csv and csvf != 0:
@@ -1060,7 +1058,7 @@ class ECU:
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
             header = header + "Screen : " + path + " -> " + subfunction.text
-            print(pyren_encode(header))
+            print(header)
 
             menu = []
             if len(subfunction.datarefs) != 0 and len(subfunction.datarefs) > 0:
@@ -1078,7 +1076,7 @@ class ECU:
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
             header = header + "Screen : " + path + " -> " + function.text
-            print(pyren_encode(header))
+            print(header)
 
             menu = []
             if len(function.datarefs) != 0 and len(function.subfunctions) != 0:
@@ -1105,7 +1103,7 @@ class ECU:
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
             header = header + "Screen : " + screen.name
-            print(pyren_encode(header))
+            print(header)
 
             menu = []
             if len(screen.datarefs) != 0 and len(screen.functions) != 0:
@@ -1130,7 +1128,7 @@ class ECU:
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
             header = header + "Screen : " + path
-            print(pyren_encode(header))
+            print(header)
 
             menu = []
 
@@ -1200,7 +1198,7 @@ class ECU:
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
             header = header + "Screen : " + path
-            print(pyren_encode(header))
+            print(header)
 
             menu = []
 
@@ -1278,7 +1276,7 @@ class ECU:
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
             header = header + "Screen : " + path
-            print(pyren_encode(header))
+            print(header)
 
             menu = []
 
@@ -1323,7 +1321,7 @@ class ECU:
             header = (
                 "ECU : " + self.ecudata["ecuname"] + "  " + self.ecudata["doc"] + "\n"
             )
-            print(pyren_encode(header))
+            print(header)
 
             menu = []
             for l in self.screens:
@@ -1814,43 +1812,31 @@ def main():
         print("Defaults")
         print()
         for i in sorted(Defaults.keys()):
-            print(pyren_encode(Defaults[i].name + "[" + i + "] " + Defaults[i].label))
+            print(Defaults[i].name + "[" + i + "] " + Defaults[i].label)
 
         print()
         print("Parameters")
         print()
         for i in sorted(Parameters.keys()):
-            print(
-                pyren_encode(
-                    Parameters[i].codeMR + "[" + i + "] " + Parameters[i].label
-                )
-            )
+            print(Parameters[i].codeMR + "[" + i + "] " + Parameters[i].label)
 
         print()
         print("States")
         print()
         for i in sorted(States.keys()):
-            print(pyren_encode(States[i].codeMR + "[" + i + "] " + States[i].label))
+            print(States[i].codeMR + "[" + i + "] " + States[i].label)
 
         print()
         print("Identifications")
         print()
         for i in sorted(Identifications.keys()):
-            print(
-                pyren_encode(
-                    Identifications[i].codeMR
-                    + "["
-                    + i
-                    + "] "
-                    + Identifications[i].label
-                )
-            )
+            print(Identifications[i].codeMR + "[" + i + "] " + Identifications[i].label)
 
         print()
         print("Commands")
         print()
         for i in sorted(Commands.keys()):
-            print(pyren_encode(Commands[i].codeMR + "[" + i + "] " + Commands[i].label))
+            print(Commands[i].codeMR + "[" + i + "] " + Commands[i].label)
 
         sys.exit(0)
 

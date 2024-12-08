@@ -14,7 +14,7 @@ import re
 import xml.dom.minidom
 
 from mod import config, db_manager, ecu_mnemonic
-from mod.utils import clearScreen, pyren_encode
+from mod.utils import clearScreen
 
 
 def run(elm, ecu, command, data):
@@ -41,7 +41,7 @@ def run(elm, ecu, command, data):
             value = msg
         if value.isdigit() and value in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(config.language_dict[value])
+                value = config.language_dict[value]
             else:
                 value = config.language_dict[value]
         return value
@@ -49,7 +49,7 @@ def run(elm, ecu, command, data):
     def get_message_by_id(id, encode=1):
         if id.isdigit() and id in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(config.language_dict[id])
+                value = config.language_dict[id]
             else:
                 value = config.language_dict[id]
         return value
@@ -63,8 +63,8 @@ def run(elm, ecu, command, data):
     ScmParams = ScmRoom.getElementsByTagName("ScmParam")
 
     for Param in ScmParams:
-        name = pyren_encode(Param.getAttribute("name"))
-        value = pyren_encode(Param.getAttribute("value"))
+        name = Param.getAttribute("name")
+        value = Param.getAttribute("value")
 
         ScmParam[name] = value
 
@@ -72,12 +72,12 @@ def run(elm, ecu, command, data):
 
     for Set in ScmSets:
         if len(Set.attributes) != 1:
-            setname = pyren_encode(config.language_dict[Set.getAttribute("name")])
+            setname = config.language_dict[Set.getAttribute("name")]
             ScmParams = Set.getElementsByTagName("ScmParam")
 
             for Param in ScmParams:
-                name = pyren_encode(Param.getAttribute("name"))
-                value = pyren_encode(Param.getAttribute("value"))
+                name = Param.getAttribute("name")
+                value = Param.getAttribute("value")
 
                 ScmSet[setname] = value
                 ScmParam[name] = value

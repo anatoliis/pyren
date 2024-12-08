@@ -29,7 +29,7 @@ import sys
 import xml.dom.minidom
 
 from mod import config, db_manager, mod_elm as m_elm
-from mod.utils import Choice, ChoiceLong, DBG, pyren_encode
+from mod.utils import Choice, ChoiceLong, DBG
 
 opt_demo = False
 
@@ -454,9 +454,9 @@ class ScanEcus:
 
         if config.OS == "android":
             if config.opt_scan:
-                print(pyren_encode("\n     %-40s %s" % ("Name", "Warn")))
+                print("\n     %-40s %s" % ("Name", "Warn"))
             else:
-                print(pyren_encode("\n     %-40s %s" % ("Name", "Type")))
+                print("\n     %-40s %s" % ("Name", "Type"))
 
             for row in self.detectedEcus:
                 if families[row["idf"]] in list(config.language_dict.keys()):
@@ -474,17 +474,13 @@ class ScanEcus:
         else:
             if config.opt_scan:
                 print(
-                    pyren_encode(
-                        "\n     %-7s %-6s %-5s %-40s %s"
-                        % ("Addr", "Family", "Index", "Name", "Warn")
-                    )
+                    "\n     %-7s %-6s %-5s %-40s %s"
+                    % ("Addr", "Family", "Index", "Name", "Warn")
                 )
             else:
                 print(
-                    pyren_encode(
-                        "\n     %-7s %-6s %-5s %-40s %s"
-                        % ("Addr", "Family", "Index", "Name", "Type")
-                    )
+                    "\n     %-7s %-6s %-5s %-40s %s"
+                    % ("Addr", "Family", "Index", "Name", "Type")
                 )
 
             for row in self.detectedEcus:

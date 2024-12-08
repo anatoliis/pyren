@@ -14,12 +14,12 @@ import time
 import xml.dom.minidom
 
 from mod import config, db_manager
-from mod.utils import KBHit, clearScreen, pyren_encode
+from mod.utils import KBHit, clearScreen
 
 
 # def get_message( value ):
 #  if value.isdigit() and value in config.language_dict.keys():
-#    value = pyren_encode( config.language_dict[value] )
+#    value =  config.language_dict[value]
 #  print value
 
 
@@ -46,12 +46,12 @@ def run(elm, ecu, command, data):
         else:
             value = msg
         if value.isdigit() and value in list(config.language_dict.keys()):
-            value = pyren_encode(config.language_dict[value])
+            value = config.language_dict[value]
         return value
 
     def get_message_by_id(id):
         if id.isdigit() and id in list(config.language_dict.keys()):
-            value = pyren_encode(config.language_dict[id])
+            value = config.language_dict[id]
         return value
 
     #
@@ -64,20 +64,20 @@ def run(elm, ecu, command, data):
     ScmParams = ScmRoom.getElementsByTagName("ScmParam")
 
     for Param in ScmParams:
-        name = pyren_encode(Param.getAttribute("name"))
-        value = pyren_encode(Param.getAttribute("value"))
+        name = Param.getAttribute("name")
+        value = Param.getAttribute("value")
 
         ScmParam[name] = value
 
     ScmSets = ScmRoom.getElementsByTagName("ScmSet")
 
     for Set in ScmSets:
-        setname = pyren_encode(config.language_dict[Set.getAttribute("name")])
+        setname = config.language_dict[Set.getAttribute("name")]
         ScmParams = Set.getElementsByTagName("ScmParam")
 
         for Param in ScmParams:
-            name = pyren_encode(Param.getAttribute("name"))
-            value = pyren_encode(Param.getAttribute("value"))
+            name = Param.getAttribute("name")
+            value = Param.getAttribute("value")
 
             ScmSet[setname] = value
             ScmParam[name] = value
@@ -97,7 +97,7 @@ def run(elm, ecu, command, data):
     #     Important information
     #
     clearScreen()
-    print(pyren_encode(header))
+    print(header)
     print()
     print(get_message("SCMTitle"))
     print()
@@ -113,7 +113,7 @@ def run(elm, ecu, command, data):
     print()
     ch = input("Press ENTER to continue")
     clearScreen()
-    print(pyren_encode(header))
+    print(header)
     print()
     print(get_message("SCMTitle"))
     print()
@@ -131,23 +131,21 @@ def run(elm, ecu, command, data):
     State1_ref = ecu.get_ref_st(ScmParam["State1"])  # Engine state
     value7, datastr7 = ecu.get_st(ScmParam["State1"])
     kb = KBHit()
-    while pyren_encode(value7) != pyren_encode(
-        config.language_dict[ScmParam["TOURNANT"]]
-    ):
+    while value7 != config.language_dict[ScmParam["TOURNANT"]]:
         value7, datastr7 = ecu.get_st(ScmParam["State1"])
         value5, datastr5 = ecu.get_pr(ScmParam["Param6"])
         value6, datastr6 = ecu.get_pr(ScmParam["Param7"])
         clearScreen()
-        print(pyren_encode(header))
+        print(header)
         print()
         print(get_message("SCMTitle"))
         print()
         print("\tCHECK CONDITIONS")
         print()
         print("*" * 90)
-        print(pyren_encode(datastr7))
-        print(pyren_encode(datastr5))
-        print(pyren_encode(datastr6))
+        print(datastr7)
+        print(datastr5)
+        print(datastr6)
         print("*" * 90)
         print(get_message_by_id("1149"))
         print()
@@ -169,7 +167,7 @@ def run(elm, ecu, command, data):
     #     Ask permission to start
     #
     clearScreen()
-    print(pyren_encode(header))
+    print(header)
     print()
     ch = input("Are you ready to start regeneration? <yes/no>:")
     if ch.lower() != "yes":
@@ -214,7 +212,7 @@ def run(elm, ecu, command, data):
         #
         #    Check phase
         #
-        etat = pyren_encode(value8)
+        etat = value8
         if etat == get_message("ETAT1"):
             phase = get_message("Phase1")
             pfe = 0
@@ -239,26 +237,26 @@ def run(elm, ecu, command, data):
         #
         #    Check result
         #
-        rescode = pyren_encode(value9)
-        result = pyren_encode(config.language_dict[ScmSet[rescode]])
+        rescode = value9
+        result = config.language_dict[ScmSet[rescode]]
 
         clearScreen()
-        print(pyren_encode(header))
+        print(header)
         print("\tTime   - ", "{hours:02d}:{minutes:02d}:{seconds:02d}".format(**vars()))
         print("\tPhase  - ", phase)
         # print '\tResult - ', result
         print("*" * 90)
-        print(pyren_encode(datastr0))
-        print(pyren_encode(datastr1))
-        print(pyren_encode(datastr2))
-        print(pyren_encode(datastr3))
-        print(pyren_encode(datastr4))
-        print(pyren_encode(datastr5))
-        print(pyren_encode(datastr6))
-        print(pyren_encode(datastr7))
-        print(pyren_encode(datastr8))
-        print(pyren_encode(datastr9))
-        print(pyren_encode(datastra))
+        print(datastr0)
+        print(datastr1)
+        print(datastr2)
+        print(datastr3)
+        print(datastr4)
+        print(datastr5)
+        print(datastr6)
+        print(datastr7)
+        print(datastr8)
+        print(datastr9)
+        print(datastra)
         print("*" * 90)
         if pfe:
             break

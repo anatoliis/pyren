@@ -4,7 +4,6 @@ import xml.dom.minidom
 
 from mod import config
 from mod.ecu_mnemonic import get_SnapShotMnemonic, get_mnemonic
-from mod.utils import pyren_encode
 
 
 def get_parameter(pr, mn, se, elm, calc, dataids={}):
@@ -111,7 +110,7 @@ class EcuParameter:
             self.computation,
             str(self.mnemolist),
         )
-        return pyren_encode(out)
+        return out
 
     def __init__(self, pr, opt, tran):
         self.name = pr.getAttribute("name")

@@ -14,7 +14,7 @@ URL  -  scm:SCEN_ECRI_GENERIQUE2#SCEN_ECRI_GENERIQUE2_<eid>.xml
 
 import time
 
-from mod.utils import clearScreen, pyren_encode
+from mod.utils import clearScreen
 
 
 def run(elm, ecu, command, data):
@@ -35,7 +35,7 @@ def run(elm, ecu, command, data):
     #     Important information
     #
     clearScreen()
-    print(pyren_encode(header))
+    print(header)
     print()
     print("This scenarium may enable/disable AndroidAuto and CarPlay")
     print()

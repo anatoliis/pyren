@@ -2,8 +2,6 @@
 
 import math
 
-from mod.utils import pyren_encode
-
 
 class DecuData:
     Name = ""
@@ -70,7 +68,7 @@ class DecuData:
             self.Unit,
         )
 
-        return pyren_encode(out)
+        return out
 
     def __init__(self, dt):
         ns = {

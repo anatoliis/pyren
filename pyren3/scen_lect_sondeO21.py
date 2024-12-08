@@ -15,12 +15,12 @@ import xml.dom.minidom
 from copy import deepcopy
 
 from mod import config, db_manager
-from mod.utils import KBHit, clearScreen, pyren_encode
+from mod.utils import KBHit, clearScreen
 
 
 # def get_message( value ):
 #  if value.isdigit() and value in config.language_dict.keys():
-#    value = pyren_encode( config.language_dict[value] )
+#    value =  config.language_dict[value]
 #  print value
 
 
@@ -49,12 +49,12 @@ def run(elm, ecu, command, data):
         else:
             value = msg
         if value.isdigit() and value in list(config.language_dict.keys()):
-            value = pyren_encode(config.language_dict[value])
+            value = config.language_dict[value]
         return value
 
     def get_message_by_id(id):
         if id.isdigit() and id in list(config.language_dict.keys()):
-            value = pyren_encode(config.language_dict[id])
+            value = config.language_dict[id]
         return value
 
     #
@@ -67,8 +67,8 @@ def run(elm, ecu, command, data):
     ScmParams = ScmRoom.getElementsByTagName("ScmParam")
 
     for Param in ScmParams:
-        name = pyren_encode(Param.getAttribute("name"))
-        value = pyren_encode(Param.getAttribute("value"))
+        name = Param.getAttribute("name")
+        value = Param.getAttribute("value")
 
         ScmParam[name] = value
 
@@ -83,8 +83,8 @@ def run(elm, ecu, command, data):
         for Set in ScmUSets:
             ScmParams = Set.getElementsByTagName("ScmParam")
             for Param in ScmParams:
-                name = pyren_encode(Param.getAttribute("name"))
-                value = pyren_encode(Param.getAttribute("value"))
+                name = Param.getAttribute("name")
+                value = Param.getAttribute("value")
                 ScmUSet[name] = value
 
             if listname.lower() == "etats":
@@ -96,7 +96,7 @@ def run(elm, ecu, command, data):
     #     Important information
     #
     clearScreen()
-    print(pyren_encode(header))
+    print(header)
     print()
     print(get_message("TexteScenario"))
     print()
@@ -118,7 +118,7 @@ def run(elm, ecu, command, data):
     #
     i = 1
     clearScreen()
-    print(pyren_encode(header))
+    print(header)
     print()
     print("*" * 80)
     for etat in ScmList_Etats:
@@ -127,11 +127,11 @@ def run(elm, ecu, command, data):
         print("*" * 80)
         state_ref = ecu.get_ref_st(etat["Index"])
         value1, datastr1 = ecu.get_st(etat["Index"])
-        print((pyren_encode(datastr1)))
-        if pyren_encode(value1) != config.language_dict[etat["RefOK"]]:
+        print(datastr1)
+        if value1 != config.language_dict[etat["RefOK"]]:
             value2, datastr2 = ecu.get_st(etat["Donne1"])
-            print(pyren_encode(config.language_dict[etat["TexteSortie"]]))
-            print((pyren_encode(datastr2)))
+            print(config.language_dict[etat["TexteSortie"]])
+            print((datastr2))
             print("*" * 80)
             ch = input("Press ENTER to exit")
             # return
@@ -143,7 +143,7 @@ def run(elm, ecu, command, data):
     print()
     print("*" * 80)
     print()
-    print(pyren_encode(header))
+    print(header)
     print()
     ch = input("Are you ready to start the test? <yes/no>:")
     if ch.lower() != "yes":
@@ -166,12 +166,12 @@ def run(elm, ecu, command, data):
         # get all values before showing them for avoid screen flickering
         value0, datastr0 = ecu.get_st(ScmParam["EtatComTer"])
         value1, datastr1 = ecu.get_st(ScmParam["EtatResultatTest"])
-        phase = pyren_encode(value0)
-        rescode = pyren_encode(value1)
+        phase = value0
+        rescode = value1
         result = rescode
         for m in ScmList_Messages:
-            if rescode in pyren_encode(config.language_dict[m["Valeur"]]):
-                result = pyren_encode(config.language_dict[m["Texte"]])
+            if rescode in config.language_dict[m["Valeur"]]:
+                result = config.language_dict[m["Texte"]]
 
         current_time = time.time()
         elapsed = int(current_time - begin_time)
@@ -182,14 +182,14 @@ def run(elm, ecu, command, data):
         #    Show process
         #
         clearScreen()
-        print(pyren_encode(header))
+        print(header)
         print("\tTime   - ", "{hours:02d}:{minutes:02d}:{seconds:02d}".format(**vars()))
         print("\tPhase  - ", phase)
         print("*" * 90)
-        print((pyren_encode(datastr0)))
-        print((pyren_encode(datastr1)))
+        print(datastr0)
+        print(datastr1)
         print("*" * 90)
-        if pyren_encode(value0) == get_message_by_id("19532"):
+        if value0 == get_message_by_id("19532"):
             pfe = 1
             break
         print("Press Q to emergency exit")

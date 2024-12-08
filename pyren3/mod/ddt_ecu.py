@@ -14,7 +14,6 @@ from mod import config, db_manager, ddt_utils
 from mod.ddt_data import DecuDatas
 from mod.ddt_request import DecuRequests
 from mod.mod_elm import AllowedList
-from mod.utils import pyren_encode
 
 if config.OS != "android":
     import tkinter as tk
@@ -1362,7 +1361,7 @@ def ecuSearch(
 
     ela = el[Address]
     if interactive:
-        print(Address, "#", pyren_encode(ela["FuncName"]))
+        print(Address, "#", ela["FuncName"])
 
     t = ela["targets"]
     cand = {}

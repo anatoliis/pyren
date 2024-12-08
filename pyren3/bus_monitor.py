@@ -11,7 +11,7 @@ import time
 from mod import config, db_manager, ddt_utils, mod_elm, utils
 from mod.ddt_ecu import DDTECU
 from mod.mod_elm import ELM
-from mod.utils import ChoiceLong, KBHit, clearScreen, pyren_encode
+from mod.utils import ChoiceLong, KBHit, clearScreen
 
 if config.OS == "nt":
     import pip
@@ -243,31 +243,25 @@ class DDT_MON:
                     # if self.frames[l]['changes']==0 or self.frames[l]['changes']>10: continue
 
                     if self.frames[l]["Name"] != "Unknown":
-                        ost = pyren_encode(
-                            "%s : %-30s  #%d:%d"
-                            % (
-                                l,
-                                self.frames[l]["Name"],
-                                self.frames[l]["Count"],
-                                self.frames[l]["changes"],
-                            )
+                        ost = "%s : %-30s  #%d:%d" % (
+                            l,
+                            self.frames[l]["Name"],
+                            self.frames[l]["Count"],
+                            self.frames[l]["changes"],
                         )
                     else:
-                        ost = pyren_encode(
-                            "%s : %-30s  #%d:%d"
-                            % (
-                                l,
-                                self.frames[l]["data"],
-                                self.frames[l]["Count"],
-                                self.frames[l]["changes"],
-                            )
+                        ost = "%s : %-30s  #%d:%d" % (
+                            l,
+                            self.frames[l]["data"],
+                            self.frames[l]["Count"],
+                            self.frames[l]["changes"],
                         )
                     print(ost)
             # if len(self.framefilter)==3 and self.framefilter in self.frames.keys():
             if len(self.framefilter) == 3 and self.framefilter in list(self.f2r.keys()):
                 print("*" * 50)
                 for l in list(self.f2r[self.framefilter].ReceivedDI.values()):
-                    ost = pyren_encode("%-50s %s" % (l.Name, self.datas[l.Name]))
+                    ost = "%-50s %s" % (l.Name, self.datas[l.Name])
                     print(ost)
             print(
                 "Frame filter (Q for exit, R for reset counter):",
@@ -293,7 +287,7 @@ class DDT_MON:
 
             for d in self.showList:
                 if d in list(self.datas.keys()):
-                    ost = pyren_encode("%-50s %s" % (d, self.datas[d]))
+                    ost = "%-50s %s" % (d, self.datas[d])
                     print(ost)
 
 

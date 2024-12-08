@@ -2,7 +2,7 @@
 
 from mod import config
 from mod.mtc import acf_MTC_compare
-from mod.utils import hex_VIN_plus_CRC, loadDumpToELM, pyren_encode
+from mod.utils import hex_VIN_plus_CRC, loadDumpToELM
 
 
 def acf_pack_command(write, req, dat, cmd, tram, mask):
@@ -174,10 +174,10 @@ def acf_MTC_generateDefaults(m, mtc):
                 key=lambda x: x.FirstByte * 8 + x.BitOffset,
             ):
                 try:
-                    sf.write(pyren_encode("##     " + di.Name + " = " + di.val + "\n"))
+                    sf.write("##     " + di.Name + " = " + di.val + "\n")
                 except:
                     try:
-                        sf.write(pyren_encode("##     " + di.Name + " = UNDEFINED\n"))
+                        sf.write("##     " + di.Name + " = UNDEFINED\n")
                     except:
                         pass
         sf.write(m["acf_wc"][k] + "\n")

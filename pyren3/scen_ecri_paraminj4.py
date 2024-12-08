@@ -17,7 +17,7 @@ from collections import OrderedDict
 
 from mod import config, db_manager
 from mod.ply import Calc
-from mod.utils import Choice, clearScreen, isHex, pyren_encode
+from mod.utils import Choice, clearScreen, isHex
 
 
 def run(elm, ecu, command, data):
@@ -44,7 +44,7 @@ def run(elm, ecu, command, data):
             value = msg
         if value.isdigit() and value in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(config.language_dict[value])
+                value = config.language_dict[value]
             else:
                 value = config.language_dict[value]
         return value
@@ -52,7 +52,7 @@ def run(elm, ecu, command, data):
     def get_message_by_id(id, encode=True):
         if id.isdigit() and id in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(config.language_dict[id])
+                value = config.language_dict[id]
             else:
                 value = config.language_dict[id]
         return value
@@ -68,21 +68,21 @@ def run(elm, ecu, command, data):
     ScmParams = ScmRoom.getElementsByTagName("ScmParam")
 
     for Param in ScmParams:
-        name = pyren_encode(Param.getAttribute("name"))
-        value = pyren_encode(Param.getAttribute("value"))
+        name = Param.getAttribute("name")
+        value = Param.getAttribute("value")
 
         ScmParam[name] = value
 
     ScmSets = ScmRoom.getElementsByTagName("ScmSet")
 
     for Set in ScmSets:
-        setname = pyren_encode(Set.getAttribute("name"))
+        setname = Set.getAttribute("name")
         ScmParams = Set.getElementsByTagName("ScmParam")
 
         scmParamsDict = OrderedDict()
         for Param in ScmParams:
-            name = pyren_encode(Param.getAttribute("name"))
-            value = pyren_encode(Param.getAttribute("value"))
+            name = Param.getAttribute("name")
+            value = Param.getAttribute("value")
 
             scmParamsDict[name] = value
 
@@ -142,8 +142,8 @@ def run(elm, ecu, command, data):
         dumpScmParams = dumpScmRoot.getElementsByTagName("ScmParam")
 
         for Param in dumpScmParams:
-            name = pyren_encode(Param.getAttribute("name"))
-            value = pyren_encode(Param.getAttribute("value"))
+            name = Param.getAttribute("name")
+            value = Param.getAttribute("value")
 
             dumpScmParam[name] = value
 

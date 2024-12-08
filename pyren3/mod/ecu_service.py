@@ -4,7 +4,6 @@ import sys
 import xml.dom.minidom
 
 from mod import config
-from mod.utils import pyren_encode
 
 
 class EcuMnemoLocation:
@@ -20,7 +19,7 @@ class EcuMnemoLocation:
             self.startBit,
             self.rOffset,
         )
-        return pyren_encode(out)
+        return out
 
     def __init__(self, ml):
         self.name = ml.getAttribute("name")
@@ -121,10 +120,10 @@ def executeService(service, elm, status=[], param="", cache=False):
             if rsp in list(service.responses.keys()) and service.responses[
                 rsp
             ].status in list(status.keys()):
-                # print '\r',' '*80,"\rStatus:",pyren_encode(status[service.responses[rsp].status]),
+                # print '\r',' '*80,"\rStatus:",status[service.responses[rsp].status],
                 print(
                     "\nStatus:",
-                    pyren_encode(status[service.responses[rsp].status]),
+                    status[service.responses[rsp].status],
                     end=" ",
                 )
             sys.stdout.flush()
@@ -157,10 +156,10 @@ def executeService(service, elm, status=[], param="", cache=False):
                 if rsp in list(service.responses.keys()) and service.responses[
                     rsp
                 ].status in list(status.keys()):
-                    # print '\r',' '*80,"\rStatus:",pyren_encode(status[service.responses[rsp].status]), count,
+                    # print '\r',' '*80,"\rStatus:",status[service.responses[rsp].status], count,
                     print(
                         "\nStatus:",
-                        pyren_encode(status[service.responses[rsp].status]),
+                        status[service.responses[rsp].status],
                         end=" ",
                     )
                 sys.stdout.flush()

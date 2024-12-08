@@ -13,7 +13,7 @@ URL  -  scm:scen_ecri_codevin#scen_ecri_codevin_xxxxx.xml
 import xml.dom.minidom
 
 from mod import config, db_manager
-from mod.utils import clearScreen, pyren_encode
+from mod.utils import clearScreen
 
 
 def run(elm, ecu, command, data):
@@ -39,12 +39,12 @@ def run(elm, ecu, command, data):
         else:
             value = msg
         if value.isdigit() and value in list(config.language_dict.keys()):
-            value = pyren_encode(config.language_dict[value])
+            value = config.language_dict[value]
         return value
 
     def get_message_by_id(id):
         if id.isdigit() and id in list(config.language_dict.keys()):
-            value = pyren_encode(config.language_dict[id])
+            value = config.language_dict[id]
         return value
 
     #
@@ -56,8 +56,8 @@ def run(elm, ecu, command, data):
     ScmParams = ScmRoom.getElementsByTagName("ScmParam")
 
     for Param in ScmParams:
-        name = pyren_encode(Param.getAttribute("name"))
-        value = pyren_encode(Param.getAttribute("value"))
+        name = Param.getAttribute("name")
+        value = Param.getAttribute("value")
         ScmParam[name] = value
 
     #

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from mod.ecu_service import EcuMnemoLocation
-from mod.utils import pyren_encode
 
 
 class EcuDataId:
@@ -24,7 +23,7 @@ class EcuDataId:
             self.dataBitLength,
             ml,
         )
-        return pyren_encode(out)
+        return out
 
     def __init__(self, di, opt, tran):
         self.id = di.getAttribute("id")

@@ -13,7 +13,7 @@ URL  -  scm:scen_ecri_calinj1#scen_ecri_calinj1_xxxxx.xml
 import xml.dom.minidom
 
 from mod import config, db_manager
-from mod.utils import ASCIITOHEX, clearScreen, pyren_encode
+from mod.utils import ASCIITOHEX, clearScreen
 
 
 def run(elm, ecu, command, data):
@@ -39,12 +39,12 @@ def run(elm, ecu, command, data):
         else:
             value = msg
         if value.isdigit() and value in list(config.language_dict.keys()):
-            value = pyren_encode(config.language_dict[value])
+            value = config.language_dict[value]
         return value
 
     def get_message_by_id(id):
         if id.isdigit() and id in list(config.language_dict.keys()):
-            value = pyren_encode(config.language_dict[id])
+            value = config.language_dict[id]
         return value
 
     #
@@ -56,20 +56,20 @@ def run(elm, ecu, command, data):
     ScmParams = ScmRoom.getElementsByTagName("ScmParam")
 
     for Param in ScmParams:
-        name = pyren_encode(Param.getAttribute("name"))
-        value = pyren_encode(Param.getAttribute("value"))
+        name = Param.getAttribute("name")
+        value = Param.getAttribute("value")
 
         ScmParam[name] = value
 
     ScmSets = ScmRoom.getElementsByTagName("ScmSet")
 
     for Set in ScmSets:
-        setname = pyren_encode(config.language_dict[Set.getAttribute("name")])
+        setname = config.language_dict[Set.getAttribute("name")]
         ScmParams = Set.getElementsByTagName("ScmParam")
 
         for Param in ScmParams:
-            name = pyren_encode(Param.getAttribute("name"))
-            value = pyren_encode(Param.getAttribute("value"))
+            name = Param.getAttribute("name")
+            value = Param.getAttribute("value")
 
             ScmSet[setname] = value
             ScmParam[name] = value
@@ -82,13 +82,13 @@ def run(elm, ecu, command, data):
     value2, datastr2 = ecu.get_id(ScmParam["Injecteur2"])
     value3, datastr3 = ecu.get_id(ScmParam["Injecteur3"])
     value4, datastr4 = ecu.get_id(ScmParam["Injecteur4"])
-    print(pyren_encode(header))
+    print(header)
     print(get_message("TexteTitre"))
     print("*" * 80)
-    print(pyren_encode(datastr1))
-    print(pyren_encode(datastr2))
-    print(pyren_encode(datastr3))
-    print(pyren_encode(datastr4))
+    print(datastr1)
+    print(datastr2)
+    print(datastr3)
+    print(datastr4)
     print("*" * 80)
 
     ch = input("Are you ready to change the Injector Codes? <y/n>:")
@@ -106,14 +106,14 @@ def run(elm, ecu, command, data):
     value2, datastr2 = ecu.get_id(ScmParam["Injecteur2"])
     value3, datastr3 = ecu.get_id(ScmParam["Injecteur3"])
     value4, datastr4 = ecu.get_id(ScmParam["Injecteur4"])
-    print(pyren_encode(header))
+    print(header)
     print("*" * 80)
-    print(pyren_encode(datastr1))
-    print(pyren_encode(datastr2))
-    print(pyren_encode(datastr3))
-    print(pyren_encode(datastr4))
+    print(datastr1)
+    print(datastr2)
+    print(datastr3)
+    print(datastr4)
     print("*" * 80)
-    print(pyren_encode("Permitted Characters"), get_message("PermittedCharacters"))
+    print("Permitted Characters", get_message("PermittedCharacters"))
     print("*" * 80)
 
     #
@@ -195,19 +195,19 @@ def run(elm, ecu, command, data):
 
     clearScreen()
     print("*" * 80)
-    print(pyren_encode("Old injector codes"))
-    print(pyren_encode(datastr1))
-    print(pyren_encode(datastr2))
-    print(pyren_encode(datastr3))
-    print(pyren_encode(datastr4))
+    print("Old injector codes")
+    print(datastr1)
+    print(datastr2)
+    print(datastr3)
+    print(datastr4)
     print("*" * 80)
-    print(pyren_encode("New injector codes"))
-    print(get_message("dat_Cylindre1"), pyren_encode(":"), pyren_encode(ch1))
-    print(get_message("dat_Cylindre2"), pyren_encode(":"), pyren_encode(ch2))
-    print(get_message("dat_Cylindre3"), pyren_encode(":"), pyren_encode(ch3))
-    print(get_message("dat_Cylindre4"), pyren_encode(":"), pyren_encode(ch4))
+    print("New injector codes")
+    print(get_message("dat_Cylindre1"), ":", ch1)
+    print(get_message("dat_Cylindre2"), ":", ch2)
+    print(get_message("dat_Cylindre3"), ":", ch3)
+    print(get_message("dat_Cylindre4"), ":", ch4)
     print("*" * 80)
-    print(pyren_encode("Permitted Characters"), get_message("PermittedCharacters"))
+    print("Permitted Characters", get_message("PermittedCharacters"))
     print("*" * 80)
 
     ch = input("Start injectors writing? YES/QUIT>")
@@ -229,17 +229,17 @@ def run(elm, ecu, command, data):
     value7, datastr7 = ecu.get_id(ScmParam["Injecteur3"])
     value8, datastr8 = ecu.get_id(ScmParam["Injecteur4"])
     print("*" * 80)
-    print(pyren_encode("Old injector codes"))
-    print(pyren_encode(datastr1))
-    print(pyren_encode(datastr2))
-    print(pyren_encode(datastr3))
-    print(pyren_encode(datastr4))
+    print("Old injector codes")
+    print(datastr1)
+    print(datastr2)
+    print(datastr3)
+    print(datastr4)
     print("*" * 80)
-    print(pyren_encode("New injector codes"))
-    print(pyren_encode(datastr5))
-    print(pyren_encode(datastr6))
-    print(pyren_encode(datastr7))
-    print(pyren_encode(datastr8))
+    print("New injector codes")
+    print(datastr5)
+    print(datastr6)
+    print(datastr7)
+    print(datastr8)
     print("*" * 80)
 
     ch = input("Press ENTER to exit")

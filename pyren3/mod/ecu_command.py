@@ -16,7 +16,6 @@ from mod.utils import (
     StringToIntToHex,
     clearScreen,
     hex_VIN_plus_CRC,
-    pyren_encode,
 )
 
 
@@ -68,7 +67,7 @@ def runCommand(command, ecu, elm, param="", cmdt="HEX"):
                     ecu.elm,
                     ecu.calc,
                 )
-            print(pyren_encode(datastr))
+            print(datastr)
         print("")
         print("#" * 70)
         print("")
@@ -118,13 +117,13 @@ def runCommand(command, ecu, elm, param="", cmdt="HEX"):
                     )
         if len(service.params) == 1:
             ostr = "cmd:" + service.startReq + chosenParameter
-            print(pyren_encode("%-35s " % (ostr)), end=" ")
+            print("%-35s " % (ostr), end=" ")
             resp = executeService(
                 service, elm, command.caracter, chosenParameter, False
             )
         elif len(service.params) == 0:
             ostr = ("cmd:" + service.startReq,)
-            print(pyren_encode("%-35s " % (ostr)), end=" ")
+            print("%-35s " % (ostr), end=" ")
             resp = executeService(service, elm, command.caracter, "", False)
         print("rsp:", resp)
         summary = summary + resp + "\n"
@@ -232,36 +231,32 @@ def executeCommand(command, ecu, elm, path):
     data = ""
     dataid = ""
 
-    print(pyren_encode(path))
+    print(path)
 
     print()
     print("#" * 29, " Command parameters ", "#" * 29)
     print()
-    print("Prerequisite :", pyren_encode(command.prerequisite))
+    print("Prerequisite :", command.prerequisite)
     print()
     print("name         :", command.name)
     print("codeMR       :", command.codeMR)
-    print("label        :", pyren_encode(command.label))
+    print("label        :", command.label)
     print("type         :", command.type)
     print("scenario     :", command.scenario)
     print("inputlist    +")
     for ilk in sorted(command.inputlist.keys()):
         isInputList = 1
-        print(pyren_encode("              : (%-5s) %s" % (ilk, command.inputlist[ilk])))
+        print("              : (%-5s) %s" % (ilk, command.inputlist[ilk]))
     print("serviceID    +")
     for si in command.serviceID:
         isService = 1
         service = ecu.Services[si]
         if len(service.params) == 0:
-            print(pyren_encode("              : (%-5s) %s" % (si, service.startReq)))
+            print("              : (%-5s) %s" % (si, service.startReq))
         else:
             dataid, data = getDataId(service.startReq, ecu, elm)
             isParam += len(service.params)
-            print(
-                pyren_encode(
-                    "              : (%-5s) %s <Params>" % (si, service.startReq)
-                )
-            )
+            print("              : (%-5s) %s <Params>" % (si, service.startReq))
 
     # check conditions
 
@@ -320,7 +315,7 @@ def executeCommand(command, ecu, elm, path):
                     ecu.calc,
                 )
                 mnemo = ecu.Identifications[dr.name].mnemolist[0]
-            print(pyren_encode(datastr))
+            print(datastr)
         print("")
         print("#" * 70)
         print("")
@@ -349,7 +344,7 @@ def executeCommand(command, ecu, elm, path):
             + ") "
             + command.inputlist[chosenParameter]
         )
-        print(pyren_encode(ps), "#" * (70 - len(ps)))
+        print(ps, "#" * (70 - len(ps)))
         print()
 
     if (
@@ -365,10 +360,10 @@ def executeCommand(command, ecu, elm, path):
             service = ecu.Services[si]
             if len(service.params) == 1:
                 ostr = "cmd:" + service.startReq + chosenParameter
-                print(pyren_encode("%-35s \n" % (ostr)), end=" ")
+                print("%-35s \n" % (ostr), end=" ")
             elif len(service.params) == 0:
                 ostr = ("cmd:" + service.startReq,)
-                print(pyren_encode("%-35s \n" % (ostr)), end=" ")
+                print("%-35s \n" % (ostr), end=" ")
 
         ch = input("\nDo you agree? <yes/no>:")
         if ch.lower() != "yes":
@@ -432,13 +427,13 @@ def executeCommand(command, ecu, elm, path):
                     break
         if len(service.params) == 1:
             ostr = "cmd:" + service.startReq + chosenParameter
-            print(pyren_encode("%-35s " % (ostr)), end=" ")
+            print("%-35s " % (ostr), end=" ")
             resp = executeService(
                 service, elm, command.caracter, chosenParameter, False
             )
         elif len(service.params) == 0:
             ostr = ("cmd:" + service.startReq,)
-            print(pyren_encode("%-35s " % (ostr)), end=" ")
+            print("%-35s " % (ostr), end=" ")
             resp = executeService(service, elm, command.caracter, "", False)
         print("rsp:", resp)
 
@@ -570,13 +565,13 @@ class EcuCommand:
 
         """
     print '='*60
-    print pyren_encode( self.name+" "+self.label )
+    print  self.name+" "+self.label 
     print "inputlist"
     for l in self.inputlist.keys():
-      print pyren_encode( "\t"+self.inputlist[l] )
+      print  "\t"+self.inputlist[l] 
     print "caracter"
     for l in self.caracter.keys():
-      print pyren_encode( "\t"+self.caracter[l] )
+      print  "\t"+self.caracter[l] 
     """
 
 

@@ -3,7 +3,7 @@
 import xml.dom.minidom
 
 from mod import config, db_manager
-from mod.utils import ChoiceFromDict, ChoiceLong, clearScreen, pyren_encode
+from mod.utils import ChoiceFromDict, ChoiceLong, clearScreen
 
 
 class ClassDfg:
@@ -188,11 +188,9 @@ class ClassDfg:
             menu = {}
             for dk in list(self.domain.keys()):
                 if self.domain[dk]["codetext"] in list(config.language_dict.keys()):
-                    menu[dk] = pyren_encode(
-                        config.language_dict[self.domain[dk]["codetext"]]
-                    )
+                    menu[dk] = config.language_dict[self.domain[dk]["codetext"]]
                 else:
-                    menu[dk] = pyren_encode(self.domain[dk]["defaultText"])
+                    menu[dk] = self.domain[dk]["defaultText"]
 
             menu["<EXIT>"] = "Exit"
             choice = ChoiceFromDict(menu, "Choose :", False)
@@ -211,15 +209,11 @@ class ClassDfg:
                     if self.domain[dk]["function"][fk]["codetext"] in list(
                         config.language_dict.keys()
                     ):
-                        menu[fk] = pyren_encode(
-                            config.language_dict[
-                                self.domain[dk]["function"][fk]["codetext"]
-                            ]
-                        )
-                    else:
-                        menu[fk] = pyren_encode(
+                        menu[fk] = config.language_dict[
                             self.domain[dk]["function"][fk]["codetext"]
-                        )
+                        ]
+                    else:
+                        menu[fk] = self.domain[dk]["function"][fk]["codetext"]
 
                 menu["<UP>"] = "UP"
                 choice = ChoiceFromDict(menu, "Choose :", False)
@@ -247,19 +241,15 @@ class ClassDfg:
                         if self.domain[dk]["function"][fk]["feature"][ek][
                             "codetext"
                         ] in list(config.language_dict.keys()):
-                            menu[ek] = pyren_encode(
-                                config.language_dict[
-                                    self.domain[dk]["function"][fk]["feature"][ek][
-                                        "codetext"
-                                    ]
-                                ]
-                            )
-                        else:
-                            menu[ek] = pyren_encode(
+                            menu[ek] = config.language_dict[
                                 self.domain[dk]["function"][fk]["feature"][ek][
                                     "codetext"
                                 ]
-                            )
+                            ]
+                        else:
+                            menu[ek] = self.domain[dk]["function"][fk]["feature"][ek][
+                                "codetext"
+                            ]
 
                     menu["<UP>"] = "UP"
                     choice = ChoiceFromDict(menu, "Choose :", False)

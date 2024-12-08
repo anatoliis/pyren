@@ -4,7 +4,6 @@ import xml.dom.minidom
 
 from mod import config
 from mod.ecu_mnemonic import get_SnapShotMnemonic, get_mnemonic
-from mod.utils import pyren_encode
 
 
 def get_state(st, mn, se, elm, calc, dataids={}):
@@ -85,7 +84,7 @@ class EcuState:
             self.computation,
             self.mnemolist,
         )
-        return pyren_encode(out)
+        return out
 
     def __init__(self, st, opt, tran):
         self.name = st.getAttribute("name")

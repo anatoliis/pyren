@@ -10,7 +10,6 @@ from mod.ecu import ECU
 from mod.mod_elm import ELM
 from mod.optfile import Optfile
 from mod.scan_ecus import ScanEcus
-from mod.utils import pyren_encode
 
 try:
     import androidhelper as android
@@ -108,31 +107,31 @@ def main():
             chooseEcu(l["ecuname"])
             tot += "%-15s : " % "Engine    PR025"
             num, string = ecu.get_pr("PR025")
-            print(pyren_encode(string))
+            print(string)
             tot += str(num)
             tot += "\n"
             tot += "%-15s : " % "Engine    PR992"
             num, string = ecu.get_pr("PR992")
-            print(pyren_encode(string))
+            print(string)
             tot += str(num)
             tot += "\n"
             num, string = ecu.get_pr("PR391")
-            print(pyren_encode(string))
+            print(string)
             num, string = ecu.get_pr("PR412")
-            print(pyren_encode(string))
+            print(string)
             # num, string = ecu.get_pr('PR804')
-            # print pyren_encode(string)
+            # print string
             # num, string = ecu.get_pr('PR869')
-            # print pyren_encode(string)
+            # print string
             # num, string = ecu.get_pr('PR870')
-            # print pyren_encode(string)
+            # print string
             print()
         if l["idf"] == "2":  # family 02
             print("### Connecting to ABS ###")
             chooseEcu(l["ecuname"])
             tot += "%-15s : " % "ABS       PR121"
             num, string = ecu.get_pr("PR121")
-            print(pyren_encode(string))
+            print(string)
             tot += str(num)
             tot += "\n"
             print()
@@ -141,22 +140,22 @@ def main():
             chooseEcu(l["ecuname"])
             tot += "%-15s : " % "TDB       PR009"
             num, string = ecu.get_pr("PR009")
-            print(pyren_encode(string))
+            print(string)
             tot += str(num)
             tot += "\n"
             tot += "%-15s : " % "TDB (km)  PR025"
             num, string = ecu.get_pr("PR025")
-            print(pyren_encode(string))
+            print(string)
             tot += str(num)
             tot += "\n"
             tot += "%-15s : " % "TDB (mil) PR026"
             num, string = ecu.get_pr("PR026")
-            print(pyren_encode(string))
+            print(string)
             tot += str(num)
             tot += "\n"
             print()
     if config.OS != "android":
-        print(pyren_encode("Listening to CAN. Please wait a bit..."))
+        print("Listening to CAN. Please wait a bit...")
         elm.cmd("at z")
         elm.cmd("at e1")
         elm.cmd("at l1")

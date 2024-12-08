@@ -4,7 +4,6 @@ import os
 import re
 
 from mod import config, db_manager
-from mod.utils import pyren_encode
 
 
 def playScenario(command, ecu, elm):
@@ -63,7 +62,7 @@ def playScenario(command, ecu, elm):
             if p_value.isdigit() and p_value in list(config.language_dict.keys()):
                 p_value = config.language_dict[p_value]
 
-            print(pyren_encode("  %-20s : %s" % (p_name, p_value)))
+            print("  %-20s : %s" % (p_name, p_value))
 
         else:
             print(l)

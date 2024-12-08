@@ -15,7 +15,7 @@ import xml.etree.cElementTree as et
 from collections import OrderedDict
 
 from mod import config, db_manager
-from mod.utils import Choice, clearScreen, pyren_encode
+from mod.utils import Choice, clearScreen
 
 
 class Ecus:
@@ -56,7 +56,7 @@ def run(elm, ecu, command, data):
             value = msg
         if value.isdigit() and value in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(config.language_dict[value])
+                value = config.language_dict[value]
             else:
                 value = config.language_dict[value]
         return value
@@ -64,7 +64,7 @@ def run(elm, ecu, command, data):
     def get_message_by_id(id, encode=1):
         if id.isdigit() and id in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(config.language_dict[id])
+                value = config.language_dict[id]
             else:
                 value = config.language_dict[id]
         return value
@@ -80,8 +80,8 @@ def run(elm, ecu, command, data):
     ScmParams = ScmRoom.getElementsByTagName("ScmParam")
 
     for Param in ScmParams:
-        name = pyren_encode(Param.getAttribute("name"))
-        value = pyren_encode(Param.getAttribute("value"))
+        name = Param.getAttribute("name")
+        value = Param.getAttribute("value")
 
         ScmParam[name] = value
 
@@ -89,12 +89,12 @@ def run(elm, ecu, command, data):
 
     for Set in ScmSets:
         if len(Set.attributes) != 1:
-            setname = pyren_encode(config.language_dict[Set.getAttribute("name")])
+            setname = config.language_dict[Set.getAttribute("name")]
             ScmParams = Set.getElementsByTagName("ScmParam")
 
             for Param in ScmParams:
-                name = pyren_encode(Param.getAttribute("name"))
-                value = pyren_encode(Param.getAttribute("value"))
+                name = Param.getAttribute("name")
+                value = Param.getAttribute("value")
 
                 ScmSet[setname] = value
                 ScmParam[name] = value
@@ -286,7 +286,7 @@ def run(elm, ecu, command, data):
 
         print(mainText)
         print("*" * 80)
-        print(pyren_encode(buttons[button]))
+        print(buttons[button])
         print("*" * 80)
         print(injectorsInfoMessage)
         print("*" * 80)
@@ -319,7 +319,7 @@ def run(elm, ecu, command, data):
         clearScreen()
         print(mainText)
         print("*" * 80)
-        print(pyren_encode(buttons[button]))
+        print(buttons[button])
         print("*" * 80)
         print(infoMessage)
         print("*" * 80)
@@ -404,7 +404,7 @@ def run(elm, ecu, command, data):
         clearScreen()
         print(mainText)
         print("*" * 80)
-        print(pyren_encode(buttons[button]))
+        print(buttons[button])
         print("*" * 80)
         print(message)
         print("*" * 80)
@@ -457,7 +457,7 @@ def run(elm, ecu, command, data):
 
         print(mainText)
         print("*" * 80)
-        print(pyren_encode(buttons[button]))
+        print(buttons[button])
         print("*" * 80)
         if button == 4:
             print(get_message_by_id("55662"))
@@ -534,8 +534,8 @@ def run(elm, ecu, command, data):
         dumpScmParams = dumpScmRoot.getElementsByTagName("ScmParam")
 
         for Param in dumpScmParams:
-            name = pyren_encode(Param.getAttribute("name"))
-            value = pyren_encode(Param.getAttribute("value"))
+            name = Param.getAttribute("name")
+            value = Param.getAttribute("value")
 
             dumpScmParam[name] = value
 

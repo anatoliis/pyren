@@ -13,7 +13,7 @@ URL  -  scm:scen_ecri_codevin#scen_ecri_codevin_xxxxx.xml
 import xml.dom.minidom
 
 from mod import config, db_manager
-from mod.utils import clearScreen, hex_VIN_plus_CRC, pyren_encode
+from mod.utils import clearScreen, hex_VIN_plus_CRC
 
 
 def run(elm, ecu, command, data):
@@ -39,12 +39,12 @@ def run(elm, ecu, command, data):
         else:
             value = msg
         if value.isdigit() and value in list(config.language_dict.keys()):
-            value = pyren_encode(config.language_dict[value])
+            value = config.language_dict[value]
         return value
 
     def get_message_by_id(id):
         if id.isdigit() and id in list(config.language_dict.keys()):
-            value = pyren_encode(config.language_dict[id])
+            value = config.language_dict[id]
         return value
 
     #
@@ -56,20 +56,20 @@ def run(elm, ecu, command, data):
     ScmParams = ScmRoom.getElementsByTagName("ScmParam")
 
     for Param in ScmParams:
-        name = pyren_encode(Param.getAttribute("name"))
-        value = pyren_encode(Param.getAttribute("value"))
+        name = Param.getAttribute("name")
+        value = Param.getAttribute("value")
 
         ScmParam[name] = value
 
     ScmSets = ScmRoom.getElementsByTagName("ScmSet")
 
     for Set in ScmSets:
-        setname = pyren_encode(config.language_dict[Set.getAttribute("name")])
+        setname = config.language_dict[Set.getAttribute("name")]
         ScmParams = Set.getElementsByTagName("ScmParam")
 
         for Param in ScmParams:
-            name = pyren_encode(Param.getAttribute("name"))
-            value = pyren_encode(Param.getAttribute("value"))
+            name = Param.getAttribute("name")
+            value = Param.getAttribute("value")
 
             ScmSet[setname] = value
             ScmParam[name] = value
@@ -79,7 +79,7 @@ def run(elm, ecu, command, data):
     #
     clearScreen()
     value1, datastr1 = ecu.get_id(ScmParam["identVIN"])
-    print(pyren_encode(header))
+    print(header)
     print()
     print(get_message("TextTitre"))
     print()
@@ -87,7 +87,7 @@ def run(elm, ecu, command, data):
     print()
     print("*" * 80)
     print()
-    print(pyren_encode(datastr1))
+    print(datastr1)
     print()
     print("*" * 80)
     ch = input("Are you ready to change the VIN? <yes/no>:")
@@ -98,7 +98,7 @@ def run(elm, ecu, command, data):
     #     Enter new VIN
     #
     clearScreen()
-    print(pyren_encode(header))
+    print(header)
     print()
     print(get_message("TextTitre"))
     print()
@@ -126,7 +126,7 @@ def run(elm, ecu, command, data):
     print()
     print("*" * 80)
     print()
-    print(pyren_encode(datastr1))
+    print(datastr1)
     print()
     print("*" * 80)
 

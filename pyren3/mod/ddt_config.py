@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from mod.utils import pyren_encode
-
 
 class Option:
     MTC = ""
@@ -37,7 +35,7 @@ class Option:
                 self.MOD,
             )
         )
-        return pyren_encode(out)
+        return out
 
     def __init__(self, op):
         self.MTC = op.attrib["MTC"]
@@ -77,7 +75,7 @@ class DecuConfig:
         for k in self.kabs:
             # k = k.strip()
             try:
-                sd = sd + "\nKAbsence:" + pyren_encode(k)
+                sd = sd + "\nKAbsence:" + k
             except:
                 print("<" + k + ">")
 
@@ -102,7 +100,7 @@ class DecuConfig:
             self.DR,
             sd,
         )
-        return pyren_encode(out)
+        return out
 
     def __init__(self, cf):
         ns = {

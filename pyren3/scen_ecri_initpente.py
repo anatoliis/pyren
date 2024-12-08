@@ -3,7 +3,7 @@
 import xml.dom.minidom
 
 from mod import config, db_manager
-from mod.utils import KBHit, clearScreen, pyren_encode
+from mod.utils import KBHit, clearScreen
 
 
 def run(elm, ecu, command, data):
@@ -19,12 +19,12 @@ def run(elm, ecu, command, data):
         else:
             value = msg
         if value.isdigit() and value in list(config.language_dict.keys()):
-            value = pyren_encode(config.language_dict[value])
+            value = config.language_dict[value]
         return value
 
     def get_message_by_id(id):
         if id.isdigit() and id in list(config.language_dict.keys()):
-            value = pyren_encode(config.language_dict[id])
+            value = config.language_dict[id]
         return value
 
     DOMTree = xml.dom.minidom.parse(db_manager.get_file_from_clip(data))
@@ -33,8 +33,8 @@ def run(elm, ecu, command, data):
     ScmParams = ScmRoom.getElementsByTagName("ScmParam")
 
     for Param in ScmParams:
-        name = pyren_encode(Param.getAttribute("name"))
-        value = pyren_encode(Param.getAttribute("value"))
+        name = Param.getAttribute("name")
+        value = Param.getAttribute("value")
 
         ScmParam[name] = value
 
@@ -47,7 +47,7 @@ def run(elm, ecu, command, data):
     value2, datastr2 = ecu.get_pr(ScmParam["ParametreInclinaison"])
 
     clearScreen()
-    print(pyren_encode(header))
+    print(header)
     print(mainText)
     print("*" * 80)
     print()
@@ -71,7 +71,7 @@ def run(elm, ecu, command, data):
     else:
         print(get_message("TexteInitialisationEffectuee"))
     print()
-    print(tilt, pyren_encode(":"), value2, degreeSymbol)
+    print(tilt, ":", value2, degreeSymbol)
     print()
 
     ch = input("Press ENTER to exit")
