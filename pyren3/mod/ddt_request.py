@@ -2,7 +2,7 @@
 
 import operator
 
-from mod.utils import pyren_decode, pyren_encode
+from mod.utils import pyren_encode
 
 
 class DataItem:
@@ -66,7 +66,6 @@ class DecuRequest:
             key=operator.attrgetter("FirstByte", "BitOffset"),
         ):
             sd = sd + "\n" + str(s)
-        sd = pyren_decode(sd)
 
         rd = ""
         for r in sorted(
@@ -74,7 +73,6 @@ class DecuRequest:
             key=operator.attrgetter("FirstByte", "BitOffset"),
         ):
             rd = rd + "\n" + str(r)
-        rd = pyren_decode(rd)
 
         out = """
   Name                  = %s

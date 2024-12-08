@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from mod.utils import pyren_decode, pyren_encode
+from mod.utils import pyren_encode
 
 
 class Option:
@@ -80,7 +80,6 @@ class DecuConfig:
                 sd = sd + "\nKAbsence:" + pyren_encode(k)
             except:
                 print("<" + k + ">")
-        sd = pyren_decode(sd)
 
         out = """
   DiagItem      = %s
