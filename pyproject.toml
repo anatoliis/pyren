@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "pyren"
+version = "3.2.0"
+description = ""
+authors = ["anatoliis <15053145+anatoliis@users.noreply.github.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pyjnius = "^1.6.1"
+pyserial = "^3.5"
+
+[tool.black]
+line-length = 88
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
