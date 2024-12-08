@@ -1,7 +1,7 @@
 import sys
 import xml.dom.minidom
 
-from mod import config
+from pyren3.mod import config
 
 
 class EcuMnemoLocation:

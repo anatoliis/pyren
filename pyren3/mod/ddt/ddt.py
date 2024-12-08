@@ -13,17 +13,17 @@ import tkinter.ttk as ttk
 import xml.etree.ElementTree as et
 from shutil import copyfile
 
-from mod import config, db_manager, scan_ecus, utils
-from mod.ddt import ddt_utils
-from mod.ddt.ddt_ecu import DDTECU, ecuSearch
-from mod.ddt.ddt_screen import DDTScreen
-from mod.elm import AllowedList
+from pyren3.mod import config, db_manager, scan_ecus, utils
+from pyren3.mod.ddt import ddt_utils
+from pyren3.mod.ddt.ddt_ecu import DDTECU, ecuSearch
+from pyren3.mod.ddt.ddt_screen import DDTScreen
+from pyren3.mod.elm import AllowedList
 
 if config.OS == "nt":
     import pip
 
     try:
-        import serial
+        from pyren3 import serial
     except ImportError:
         pip.main(["install", "pyserial"])
 
@@ -43,15 +43,15 @@ else:
 
 if config.OS != "android":
     try:
-        import serial
-        from serial.tools import list_ports
+        from pyren3 import serial
+        from pyren3.serial.tools import list_ports
     except ImportError:
         print("\n\n\n\tPleas install additional modules")
         print("\t\t>sudo easy_install pyserial")
         sys.exit()
 
-from mod.elm import ELM
-from mod.utils import clearScreen
+from pyren3.mod.elm import ELM
+from pyren3.mod.utils import clearScreen
 
 
 class DDT:

@@ -1,8 +1,8 @@
 import string
 import xml.dom.minidom
 
-from mod import config
-from mod.ecu.service import executeService
+from pyren3.mod import config
+from pyren3.mod.ecu.service import executeService
 
 
 def get_mnemonicDTC(m, resp):

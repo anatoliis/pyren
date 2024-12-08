@@ -5,10 +5,10 @@ import xml.etree.ElementTree as et
 from copy import deepcopy
 from operator import itemgetter
 
-from mod import config, db_manager
+from pyren3.mod import config, db_manager
 
 if config.OS != "android":
-    import serial
+    from pyren3 import serial
 
 try:
     import pickle as pickle

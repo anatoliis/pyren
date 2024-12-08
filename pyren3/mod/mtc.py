@@ -3,8 +3,8 @@ import os
 import shutil
 import zipfile
 
-from mod import config
-from mod.utils import Choice
+from pyren3.mod import config
+from pyren3.mod.utils import Choice
 
 
 def acf_saveMTCtoFile(folder, vindata, mtcdata, refdata, platform):

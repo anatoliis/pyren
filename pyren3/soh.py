@@ -30,10 +30,10 @@ import tkinter as tk
 import tkinter.messagebox
 import tkinter.ttk
 
-from serial.tools import list_ports
+from pyren3.serial.tools import list_ports
 
-from mod import config
-from mod.elm import ELM
+from pyren3.mod import config
+from pyren3.mod.elm import ELM
 
 
 def set_Tk_var():

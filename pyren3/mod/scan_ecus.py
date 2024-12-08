@@ -27,9 +27,9 @@ import string
 import sys
 import xml.dom.minidom
 
-from mod import config, db_manager
-from mod.elm import dnat, snat
-from mod.utils import Choice, ChoiceLong, DBG
+from pyren3.mod import config, db_manager
+from pyren3.mod.elm import dnat, snat
+from pyren3.mod.utils import Choice, ChoiceLong, DBG
 
 opt_demo = False
 

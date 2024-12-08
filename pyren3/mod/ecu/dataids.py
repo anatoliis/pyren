@@ -1,4 +1,4 @@
-from mod.ecu.service import EcuMnemoLocation
+from pyren3.mod.ecu.service import EcuMnemoLocation
 
 
 class EcuDataId:

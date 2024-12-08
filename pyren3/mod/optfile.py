@@ -4,7 +4,7 @@ import struct
 import sys
 from xml.dom.minidom import parseString
 
-from mod import config, db_manager
+from pyren3.mod import config, db_manager
 
 
 class Optfile:

@@ -2,12 +2,12 @@ import os
 import pickle
 import sys
 
-import pyren3
-from mod import config, db_manager, utils
-from mod.ecu.ecu import ECU
-from mod.elm import ELM
-from mod.optfile import Optfile
-from mod.scan_ecus import ScanEcus
+from pyren3 import pyren3
+from pyren3.mod import config, db_manager, utils
+from pyren3.mod.ecu.ecu import ECU
+from pyren3.mod.elm import ELM
+from pyren3.mod.optfile import Optfile
+from pyren3.mod.scan_ecus import ScanEcus
 
 try:
     import androidhelper as android
@@ -23,8 +23,8 @@ except:
 
 if config.OS != "android":
     try:
-        import serial
-        from serial.tools import list_ports
+        from pyren3 import serial
+        from pyren3.serial.tools import list_ports
     except ImportError:
         sys.exit()
 

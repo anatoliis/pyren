@@ -4,8 +4,8 @@ import string
 import sys
 import time
 
-from mod import config, utils
-from mod.elm import ELM, dnat, pyren_time, snat
+from pyren3.mod import config, utils
+from pyren3.mod.elm import ELM, dnat, pyren_time, snat
 
 macro = {}
 var = {}
@@ -22,7 +22,7 @@ if config.OS == "nt":
     import pip
 
     try:
-        import serial
+        from pyren3 import serial
     except ImportError:
         pip.main(["install", "pyserial"])
 
@@ -54,8 +54,8 @@ else:
 
 if config.OS != "android":
     try:
-        import serial
-        from serial.tools import list_ports
+        from pyren3 import serial
+        from pyren3.serial.tools import list_ports
     except ImportError:
         print("\n\n\n\tPleas install additional modules")
         print("\t\t>sudo easy_install pyserial")

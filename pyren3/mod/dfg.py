@@ -1,7 +1,7 @@
 import xml.dom.minidom
 
-from mod import config, db_manager
-from mod.utils import ChoiceFromDict, ChoiceLong, clearScreen
+from pyren3.mod import config, db_manager
+from pyren3.mod.utils import ChoiceFromDict, ChoiceLong, clearScreen
 
 
 class ClassDfg:

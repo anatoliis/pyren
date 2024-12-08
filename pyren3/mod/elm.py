@@ -12,7 +12,7 @@ import time
 from collections import OrderedDict
 from datetime import datetime
 
-from mod import config
+from pyren3.mod import config
 
 try:
     import androidhelper as android
@@ -27,8 +27,8 @@ except:
         pass
 
 if config.OS != "android":
-    import serial  # sudo easy_install pyserial
-    from serial.tools import list_ports
+    from pyren3 import serial  # sudo easy_install pyserial
+    from pyren3.serial.tools import list_ports
 
 # List of commands which may require to open another Developer session (option --dev)
 DevList = ["27", "28", "2E", "30", "31", "32", "34", "35", "36", "37", "3B", "3D"]

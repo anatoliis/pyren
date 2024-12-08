@@ -2,15 +2,15 @@ import os
 import pickle
 import sys
 
-from mod import config, db_manager
-from mod.optfile import Optfile
-from mod.utils import clearScreen, getVIN
+from pyren3.mod import config, db_manager
+from pyren3.mod.optfile import Optfile
+from pyren3.mod.utils import clearScreen, getVIN
 
 if config.OS == "nt":
     import pip
 
     try:
-        import serial
+        from pyren3 import serial
     except ImportError:
         pip.main(["install", "pyserial"])
 
@@ -42,20 +42,20 @@ else:
 
 if config.OS != "android":
     try:
-        import serial
-        from serial.tools import list_ports
+        from pyren3 import serial
+        from pyren3.serial.tools import list_ports
     except ImportError:
         print("\n\n\n\tPleas install additional modules")
         print("\t\t>sudo easy_install pyserial")
         # print "\t\t>sudo easy_install ply"
         sys.exit()
 
-from mod import utils
-from mod.ddt import ddt_utils
+from pyren3.mod import utils
+from pyren3.mod.ddt import ddt_utils
 
-from mod.elm import ELM
-from mod.scan_ecus import ScanEcus
-from mod.ecu.ecu import ECU
+from pyren3.mod.elm import ELM
+from pyren3.mod.scan_ecus import ScanEcus
+from pyren3.mod.ecu.ecu import ECU
 
 
 def optParser():

@@ -1,5 +1,5 @@
-from mod import config
-from mod.elm import ELM, dnat, snat
+from pyren3.mod import config
+from pyren3.mod.elm import ELM, dnat, snat
 
 ############## change me ################
 

@@ -47,7 +47,7 @@ if osname == "nt":
     import pip
 
     try:
-        import serial
+        from pyren3 import serial
     except ImportError:
         pip.main(["install", "pyserial"])
 try:
@@ -324,8 +324,8 @@ def run(s, cmd):
 
 if osname != "android":
     try:
-        import serial
-        from serial.tools import list_ports
+        from pyren3 import serial
+        from pyren3.serial.tools import list_ports
     except ImportError:
         print("\n\n\n\tPleas install additional modules")
         print("\t\t>sudo easy_install pyserial")

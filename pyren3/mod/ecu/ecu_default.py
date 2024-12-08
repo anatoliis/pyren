@@ -1,10 +1,10 @@
 import string
 import xml.dom.minidom
 
-from mod import config
-from mod.ecu.mnemonic import get_mnemonic, get_mnemonicDTC
-from mod.ecu.screen import EcuScreenDataRef
-from mod.ecu.service import executeService
+from pyren3.mod import config
+from pyren3.mod.ecu.mnemonic import get_mnemonic, get_mnemonicDTC
+from pyren3.mod.ecu.screen import EcuScreenDataRef
+from pyren3.mod.ecu.service import executeService
 
 
 def get_default_std_a(df, mn, se, elm, calc, getDTCmnemo):

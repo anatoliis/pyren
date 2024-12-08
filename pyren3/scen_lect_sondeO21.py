@@ -13,8 +13,8 @@ import time
 import xml.dom.minidom
 from copy import deepcopy
 
-from mod import config, db_manager
-from mod.utils import KBHit, clearScreen
+from pyren3.mod import config, db_manager
+from pyren3.mod.utils import KBHit, clearScreen
 
 
 # def get_message( value ):

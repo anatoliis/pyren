@@ -6,32 +6,36 @@ import xml.dom.minidom
 from collections import OrderedDict
 from datetime import datetime
 
-from mod import config
-from mod.ecu.command import EcuCommands, executeCommand, runCommand
-from mod.ecu.dataids import EcuDataIds
-from mod.ecu.ecu_default import (
+from pyren3.mod import config
+from pyren3.mod.ecu.command import EcuCommands, executeCommand, runCommand
+from pyren3.mod.ecu.dataids import EcuDataIds
+from pyren3.mod.ecu.ecu_default import (
     EcuDefaults,
     EcuScreenDataRef,
     get_default_failflag,
     get_default_std_a,
     get_default_std_b,
 )
-from mod.ecu.identification import EcuIdentifications, get_identification
-from mod.ecu.mnemonic import EcuMnemonics
-from mod.ecu.parameter import EcuParameters, get_parameter
-from mod.ecu.screen import EcuOwnScreen, EcuScreen, EcuScreens
-from mod.ecu.service import EcuServices, parseComplexResponse, prepareComplexRequest
-from mod.ecu.state import EcuStates, get_state
-from mod.elm import AllowedList, dnat, pyren_time, snat
-from mod.optfile import Optfile
-from mod.ply import Calc
-from mod.utils import Choice, ChoiceLong, KBHit, clearScreen, show_doc
+from pyren3.mod.ecu.identification import EcuIdentifications, get_identification
+from pyren3.mod.ecu.mnemonic import EcuMnemonics
+from pyren3.mod.ecu.parameter import EcuParameters, get_parameter
+from pyren3.mod.ecu.screen import EcuOwnScreen, EcuScreen, EcuScreens
+from pyren3.mod.ecu.service import (
+    EcuServices,
+    parseComplexResponse,
+    prepareComplexRequest,
+)
+from pyren3.mod.ecu.state import EcuStates, get_state
+from pyren3.mod.elm import AllowedList, dnat, pyren_time, snat
+from pyren3.mod.optfile import Optfile
+from pyren3.mod.ply import Calc
+from pyren3.mod.utils import Choice, ChoiceLong, KBHit, clearScreen, show_doc
 
 if config.OS != "android":
-    from mod.ddt.ddt import DDT
+    from pyren3.mod.ddt.ddt import DDT
 
-from mod import config
-from mod import db_manager
+from pyren3.mod import config
+from pyren3.mod import db_manager
 
 F2A = {
     "01": "7A",

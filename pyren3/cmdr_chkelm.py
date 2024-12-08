@@ -1,7 +1,7 @@
 import sys
 
-import pyren3
-from mod import config
+from pyren3 import pyren3
+from pyren3.mod import config
 
 cmdb = """
 #v1.0 ;AC P; ATZ                   ; Z                  ; reset all
@@ -133,12 +133,12 @@ except:
 
 if config.OS != "android":
     try:
-        import serial
-        from serial.tools import list_ports
+        from pyren3 import serial
+        from pyren3.serial.tools import list_ports
     except ImportError:
         sys.exit()
 
-from mod.elm import ELM
+from pyren3.mod.elm import ELM
 
 
 def main():

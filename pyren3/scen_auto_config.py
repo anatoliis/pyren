@@ -11,8 +11,8 @@ URL  -  scm:scen_ecri_codevin#scen_ecri_codevin_xxxxx.xml
 
 import xml.dom.minidom
 
-from mod import config, db_manager
-from mod.utils import clearScreen
+from pyren3.mod import config, db_manager
+from pyren3.mod.utils import clearScreen
 
 
 def run(elm, ecu, command, data):

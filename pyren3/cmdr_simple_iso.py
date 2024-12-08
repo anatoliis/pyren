@@ -1,5 +1,5 @@
-from mod import config
-from mod.elm import ELM
+from pyren3.mod import config
+from pyren3.mod.elm import ELM
 
 ############## change me ################
 

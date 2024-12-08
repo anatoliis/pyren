@@ -1,16 +1,16 @@
 import os
 import pickle
 
-from serial.tools import list_ports
+from pyren3.serial.tools import list_ports
 
-from mod import config, db_manager, utils
-from mod.acf_func import acf_loadModules
-from mod.acf_proc import acf_MTC_generateDefaults, acf_MTC_optionsExplorer
-from mod.elm import ELM
-from mod.mtc import acf_getMTC
-from mod.optfile import Optfile
-from mod.scan_ecus import ScanEcus, families as families, findTCOM as findTCOM
-from mod.utils import getVIN
+from pyren3.mod import config, db_manager, utils
+from pyren3.mod.acf_func import acf_loadModules
+from pyren3.mod.acf_proc import acf_MTC_generateDefaults, acf_MTC_optionsExplorer
+from pyren3.mod.elm import ELM
+from pyren3.mod.mtc import acf_getMTC
+from pyren3.mod.optfile import Optfile
+from pyren3.mod.scan_ecus import ScanEcus, families as families, findTCOM as findTCOM
+from pyren3.mod.utils import getVIN
 
 
 def optParser():

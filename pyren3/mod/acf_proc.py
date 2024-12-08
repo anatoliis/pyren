@@ -1,6 +1,6 @@
-from mod import config
-from mod.mtc import acf_MTC_compare
-from mod.utils import hex_VIN_plus_CRC, loadDumpToELM
+from pyren3.mod import config
+from pyren3.mod.mtc import acf_MTC_compare
+from pyren3.mod.utils import hex_VIN_plus_CRC, loadDumpToELM
 
 
 def acf_pack_command(write, req, dat, cmd, tram, mask):

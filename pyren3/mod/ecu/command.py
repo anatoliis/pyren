@@ -2,13 +2,13 @@ import string
 import sys
 import xml.dom.minidom
 
-from mod.ecu.identification import get_identification
-from mod.ecu.parameter import get_parameter
-from mod.ecu.scenario import playScenario
-from mod.ecu.screen import EcuScreenDataRef
-from mod.ecu.service import executeService
-from mod.ecu.state import get_state
-from mod.utils import (
+from pyren3.mod.ecu.identification import get_identification
+from pyren3.mod.ecu.parameter import get_parameter
+from pyren3.mod.ecu.scenario import playScenario
+from pyren3.mod.ecu.screen import EcuScreenDataRef
+from pyren3.mod.ecu.service import executeService
+from pyren3.mod.ecu.state import get_state
+from pyren3.mod.utils import (
     ASCIITOHEX,
     ChoiceFromDict,
     StringToIntToHex,

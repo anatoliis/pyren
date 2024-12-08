@@ -3,10 +3,10 @@ import os
 import sys
 import xml.etree.ElementTree as et
 
-from mod import config, db_manager, utils
-from mod.dfg import ClassDfg
-from mod.mtc import acf_MTC_compare_doc
-from mod.optfile import Optfile
+from pyren3.mod import config, db_manager, utils
+from pyren3.mod.dfg import ClassDfg
+from pyren3.mod.mtc import acf_MTC_compare_doc
+from pyren3.mod.optfile import Optfile
 
 style = """
 div.zdiagnostic {
@@ -95,18 +95,18 @@ else:
 
 if config.OS != "android":
     try:
-        import serial
-        from serial.tools import list_ports
+        from pyren3 import serial
+        from pyren3.serial.tools import list_ports
     except ImportError:
         print("\n\n\n\tPleas install additional modules")
         print("\t\t>sudo easy_install pyserial")
         sys.exit()
 
-from mod.elm import ELM
-from mod.scan_ecus import ScanEcus
-from mod.utils import getVIN
-from mod.mtc import acf_getMTC
-from mod.mtc import acf_buildFull
+from pyren3.mod.elm import ELM
+from pyren3.mod.scan_ecus import ScanEcus
+from pyren3.mod.utils import getVIN
+from pyren3.mod.mtc import acf_getMTC
+from pyren3.mod.mtc import acf_buildFull
 
 # global variables
 

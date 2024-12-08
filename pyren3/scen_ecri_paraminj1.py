@@ -13,8 +13,8 @@ import xml.dom.minidom
 import xml.etree.cElementTree as et
 from collections import OrderedDict
 
-from mod import config, db_manager
-from mod.utils import Choice, clearScreen
+from pyren3.mod import config, db_manager
+from pyren3.mod.utils import Choice, clearScreen
 
 
 class Ecus:

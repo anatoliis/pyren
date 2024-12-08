@@ -1,7 +1,7 @@
 import xml.dom.minidom
 
-from mod import config, db_manager
-from mod.utils import KBHit, clearScreen
+from pyren3.mod import config, db_manager
+from pyren3.mod.utils import KBHit, clearScreen
 
 
 def run(elm, ecu, command, data):

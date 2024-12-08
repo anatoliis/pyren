@@ -5,8 +5,8 @@ import sys
 import zipfile
 from io import BytesIO
 
-from mod import db_manager
-from mod.optfile import Optfile
+from pyren3.mod import db_manager
+from pyren3.mod.optfile import Optfile
 
 if __name__ == "__main__":
     zipoutput = BytesIO()

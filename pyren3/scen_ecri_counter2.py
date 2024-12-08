@@ -12,9 +12,9 @@ URL  -  scm:scen_ecri_calinj1#scen_ecri_calinj1_xxxxx.xml
 import re
 import xml.dom.minidom
 
-from mod import config, db_manager
-from mod.ecu.mnemonic import get_mnemonic
-from mod.utils import clearScreen
+from pyren3.mod import config, db_manager
+from pyren3.mod.ecu.mnemonic import get_mnemonic
+from pyren3.mod.utils import clearScreen
 
 
 def run(elm, ecu, command, data):

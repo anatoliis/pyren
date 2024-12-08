@@ -13,7 +13,7 @@ URL  -  scm:SCEN_ECRI_GENERIQUE2#SCEN_ECRI_GENERIQUE2_<eid>.xml
 
 import time
 
-from mod.utils import clearScreen
+from pyren3.mod.utils import clearScreen
 
 
 def run(elm, ecu, command, data):

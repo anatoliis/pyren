@@ -1,8 +1,8 @@
 import argparse
 import sys
 
-from mod import config
-from mod.elm import ELM
+from pyren3.mod import config
+from pyren3.mod.elm import ELM
 
 parser = argparse.ArgumentParser(
     version="bus_playback Version 0.1",
@@ -33,7 +33,7 @@ if not options.port and config.OS != "android":
     parser.print_help()
 
     try:
-        from serial.tools import list_ports
+        from pyren3.serial.tools import list_ports
     except ImportError as e:
         print("WARNING:", e, file=sys.stderr)
         exit(-1)

@@ -5,8 +5,8 @@ import time
 sys.path.insert(0, "../..")
 sys.path.insert(0, "./ply")
 
-import ply.lex as lex
-import ply.yacc as yacc
+from pyren3.ply import lex
+from pyren3.ply import yacc
 
 
 class Parser:

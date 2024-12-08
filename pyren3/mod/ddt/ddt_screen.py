@@ -2,31 +2,15 @@ import copy
 import datetime
 import gc
 import os
+import tkinter as tk
+import tkinter.filedialog
+import tkinter.font
+import tkinter.messagebox
+import tkinter.ttk as ttk
 
-from mod import db_manager
-from mod.utils import clearScreen
-
-try:
-    # Python2
-    import tkinter as tk
-    import tkinter.ttk
-    import tkinter.font
-    import tkinter.messagebox
-    import tkinter.filedialog
-    import tkinter.simpledialog
-
-except ImportError:
-    # Python3
-    import tkinter as tk
-    import tkinter.ttk as ttk
-    import tkinter.font
-    import tkinter.messagebox
-    import tkinter.filedialog
-
-from mod import config
-from mod.elm import AllowedList
-from mod.elm import dnat
-from mod.elm import pyren_time
+from pyren3.mod import config, db_manager
+from pyren3.mod.elm import AllowedList, dnat, pyren_time
+from pyren3.mod.utils import clearScreen
 
 
 class screenSettings:  # for future use.

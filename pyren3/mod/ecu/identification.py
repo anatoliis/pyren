@@ -1,7 +1,7 @@
 import xml.dom.minidom
 
-from mod import config
-from mod.ecu.mnemonic import get_mnemonic
+from pyren3.mod import config
+from pyren3.mod.ecu.mnemonic import get_mnemonic
 
 
 def get_identification(id, mn, se, elm, calc, raw=False):

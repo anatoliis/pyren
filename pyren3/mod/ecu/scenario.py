@@ -1,7 +1,7 @@
 import os
 import re
 
-from mod import config, db_manager
+from pyren3.mod import config, db_manager
 
 
 def playScenario(command, ecu, elm):

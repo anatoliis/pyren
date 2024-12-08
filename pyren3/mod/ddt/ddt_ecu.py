@@ -8,11 +8,11 @@ import time
 import xml.etree.ElementTree as et
 from datetime import datetime
 
-from mod import config, db_manager
-from mod.ddt import ddt_utils
-from mod.ddt.ddt_data import DecuDatas
-from mod.ddt.ddt_request import DecuRequests
-from mod.elm import AllowedList
+from pyren3.mod import config, db_manager
+from pyren3.mod.ddt import ddt_utils
+from pyren3.mod.ddt.ddt_data import DecuDatas
+from pyren3.mod.ddt.ddt_request import DecuRequests
+from pyren3.mod.elm import AllowedList
 
 if config.OS != "android":
     import tkinter as tk
