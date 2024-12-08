@@ -158,7 +158,7 @@ class DDT_MON:
     def parser(self, buf):
         global show_loc
 
-        if show_loc == None or show_loc.isSet():
+        if show_loc is None or show_loc.isSet():
             self.sendAllow.clear()
             return
 

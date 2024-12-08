@@ -459,7 +459,7 @@ def getVIN(de, elm, getFirst=False):
 
 
 def DBG(tag, s):
-    if config.opt_debug and config.debug_file != None:
+    if config.opt_debug and config.debug_file is not None:
         config.debug_file.write("### " + tag + "\n")
         config.debug_file.write('"' + s + '"\n')
 
@@ -479,7 +479,7 @@ def show_doc(addr, id):
     if config.vin == "" and not config.opt_sd:
         return
 
-    if config.doc_server_proc == None:
+    if config.doc_server_proc is None:
         config.doc_server_proc = subprocess.Popen(
             ["python3", "-m", "http.server", "59152"]
         )

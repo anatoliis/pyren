@@ -758,7 +758,7 @@ class DDTScreen(tk.Frame):
         # show confirmation dialog if approve is True
         confirmed = True
         xText = f"#The macro made by mod_ddt from file {fname}\n\n"
-        if self.decu.cecu != None:
+        if self.decu.cecu is not None:
             xText += f'$addr = {self.decu.cecu["dst"]}\n\n'
             if self.decu.cecu["pin"] == "can" and self.decu.cecu["brp"] == "0":
                 xText += f"can500  # init can macro\n\n"

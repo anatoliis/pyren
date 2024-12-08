@@ -1387,7 +1387,7 @@ else:
         def eventloop(self):
             while True:
                 event = self.droid.eventWait(50).result
-                if event == None:
+                if event is None:
                     continue
                 if event["name"] == "click":
                     id = event["data"]["id"]
