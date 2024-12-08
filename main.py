@@ -272,7 +272,7 @@ def run(s, cmd):
     elif cmd == "check":
         cmdr = __import__("cmdr_chkelm")
     elif cmd == "mon":
-        cmdr = __import__("bus_monitor")
+        cmdr = __import__("bus_monitor.bus_monitor")
     elif cmd == "ddt":
         cmdr = __import__("mod.ddt")
     elif cmd == "term":
