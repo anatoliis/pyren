@@ -13,7 +13,7 @@ import time
 
 import pyren3
 from mod import config
-from mod.ecu import ECU
+from mod.ecu.ecu import ECU
 from mod.elm import ELM
 from mod.optfile import Optfile
 from mod.scan_ecus import ScanEcus

@@ -12,7 +12,8 @@ URL  -  scm:scen_ecri_calinj1#scen_ecri_calinj1_xxxxx.xml
 import re
 import xml.dom.minidom
 
-from mod import config, db_manager, ecu_mnemonic
+from mod import config, db_manager
+from mod.ecu.mnemonic import get_mnemonic
 from mod.utils import clearScreen
 
 
@@ -103,8 +104,8 @@ def run(elm, ecu, command, data):
     resetBytes = byteCount * "00"
     params_to_send_length = int(mnemo2[-2:])
 
-    mnemo1Data = ecu_mnemonic.get_mnemonic(ecu.Mnemonics[mnemo1], ecu.Services, elm, 1)
-    mnemo2Data = ecu_mnemonic.get_mnemonic(ecu.Mnemonics[mnemo2], ecu.Services, elm, 1)
+    mnemo1Data = get_mnemonic(ecu.Mnemonics[mnemo1], ecu.Services, elm, 1)
+    mnemo2Data = get_mnemonic(ecu.Mnemonics[mnemo2], ecu.Services, elm, 1)
 
     paramsToSend = mnemo1Data + resetBytes + mnemo2Data
 

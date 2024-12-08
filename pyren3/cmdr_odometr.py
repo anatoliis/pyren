@@ -4,7 +4,7 @@ import sys
 
 import pyren3
 from mod import config, db_manager, utils
-from mod.ecu import ECU
+from mod.ecu.ecu import ECU
 from mod.elm import ELM
 from mod.optfile import Optfile
 from mod.scan_ecus import ScanEcus

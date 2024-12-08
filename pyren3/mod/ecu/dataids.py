@@ -1,4 +1,4 @@
-from mod.ecu_service import EcuMnemoLocation
+from mod.ecu.service import EcuMnemoLocation
 
 
 class EcuDataId:

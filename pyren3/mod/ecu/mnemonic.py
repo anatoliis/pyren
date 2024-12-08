@@ -2,7 +2,7 @@ import string
 import xml.dom.minidom
 
 from mod import config
-from mod.ecu_service import executeService
+from mod.ecu.service import executeService
 
 
 def get_mnemonicDTC(m, resp):

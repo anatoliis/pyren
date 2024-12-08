@@ -2,9 +2,9 @@ import string
 import xml.dom.minidom
 
 from mod import config
-from mod.ecu_mnemonic import get_mnemonic, get_mnemonicDTC
-from mod.ecu_screen import EcuScreenDataRef
-from mod.ecu_service import executeService
+from mod.ecu.mnemonic import get_mnemonic, get_mnemonicDTC
+from mod.ecu.screen import EcuScreenDataRef
+from mod.ecu.service import executeService
 
 
 def get_default_std_a(df, mn, se, elm, calc, getDTCmnemo):

@@ -2,12 +2,12 @@ import string
 import sys
 import xml.dom.minidom
 
-from mod.ecu_identification import get_identification
-from mod.ecu_parameter import get_parameter
-from mod.ecu_scenario import playScenario
-from mod.ecu_screen import EcuScreenDataRef
-from mod.ecu_service import executeService
-from mod.ecu_state import get_state
+from mod.ecu.identification import get_identification
+from mod.ecu.parameter import get_parameter
+from mod.ecu.scenario import playScenario
+from mod.ecu.screen import EcuScreenDataRef
+from mod.ecu.service import executeService
+from mod.ecu.state import get_state
 from mod.utils import (
     ASCIITOHEX,
     ChoiceFromDict,

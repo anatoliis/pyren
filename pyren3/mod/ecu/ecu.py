@@ -7,21 +7,21 @@ from collections import OrderedDict
 from datetime import datetime
 
 from mod import config
-from mod.ecu_command import EcuCommands, executeCommand, runCommand
-from mod.ecu_dataids import EcuDataIds
-from mod.ecu_default import (
+from mod.ecu.command import EcuCommands, executeCommand, runCommand
+from mod.ecu.dataids import EcuDataIds
+from mod.ecu.ecu_default import (
     EcuDefaults,
     EcuScreenDataRef,
     get_default_failflag,
     get_default_std_a,
     get_default_std_b,
 )
-from mod.ecu_identification import EcuIdentifications, get_identification
-from mod.ecu_mnemonic import EcuMnemonics
-from mod.ecu_parameter import EcuParameters, get_parameter
-from mod.ecu_screen import EcuOwnScreen, EcuScreen, EcuScreens
-from mod.ecu_service import EcuServices, parseComplexResponse, prepareComplexRequest
-from mod.ecu_state import EcuStates, get_state
+from mod.ecu.identification import EcuIdentifications, get_identification
+from mod.ecu.mnemonic import EcuMnemonics
+from mod.ecu.parameter import EcuParameters, get_parameter
+from mod.ecu.screen import EcuOwnScreen, EcuScreen, EcuScreens
+from mod.ecu.service import EcuServices, parseComplexResponse, prepareComplexRequest
+from mod.ecu.state import EcuStates, get_state
 from mod.elm import AllowedList, dnat, pyren_time, snat
 from mod.optfile import Optfile
 from mod.ply import Calc

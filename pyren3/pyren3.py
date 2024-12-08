@@ -55,7 +55,7 @@ from mod.ddt import ddt_utils
 
 from mod.elm import ELM
 from mod.scan_ecus import ScanEcus
-from mod.ecu import ECU
+from mod.ecu.ecu import ECU
 
 
 def optParser():

@@ -1,4 +1,3 @@
-
 class EcuScreenDataRef:
     name = ""
     type = ""

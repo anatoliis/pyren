@@ -1,7 +1,7 @@
 import xml.dom.minidom
 
 from mod import config
-from mod.ecu_mnemonic import get_SnapShotMnemonic, get_mnemonic
+from mod.ecu.mnemonic import get_SnapShotMnemonic, get_mnemonic
 
 
 def get_state(st, mn, se, elm, calc, dataids={}):
