@@ -15,16 +15,16 @@ from mod.utils import pyren_encode
 try:
     import androidhelper as android
 
-    config.os = "android"
+    config.OS = "android"
 except:
     try:
         import android
 
-        config.os = "android"
+        config.OS = "android"
     except:
         pass
 
-if config.os != "android":
+if config.OS != "android":
     try:
         import serial
         from serial.tools import list_ports
@@ -155,7 +155,7 @@ def main():
             tot += str(num)
             tot += "\n"
             print()
-    if config.os != "android":
+    if config.OS != "android":
         print(pyren_encode("Listening to CAN. Please wait a bit..."))
         elm.cmd("at z")
         elm.cmd("at e1")

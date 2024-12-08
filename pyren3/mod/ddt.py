@@ -19,9 +19,7 @@ from mod import config, db_manager, ddt_ecu, ddt_utils, mod_elm, scan_ecus, util
 from mod.ddt_ecu import DDTECU
 from mod.ddt_screen import DDTScreen
 
-config.os = os.name
-
-if config.os == "nt":
+if config.OS == "nt":
     import pip
 
     try:
@@ -34,16 +32,16 @@ else:
     try:
         import androidhelper as android
 
-        config.os = "android"
+        config.OS = "android"
     except:
         try:
             import android
 
-            config.os = "android"
+            config.OS = "android"
         except:
             pass
 
-if config.os != "android":
+if config.OS != "android":
     try:
         import serial
         from serial.tools import list_ports
@@ -228,7 +226,7 @@ def optParser():
 
     options = parser.parse_args()
 
-    if not options.port and config.os != "android":
+    if not options.port and config.OS != "android":
         parser.print_help()
         iterator = sorted(list(list_ports.comports()))
         print("")

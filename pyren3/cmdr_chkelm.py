@@ -124,16 +124,16 @@ cmdb = """
 try:
     import androidhelper as android
 
-    config.os = "android"
+    config.OS = "android"
 except:
     try:
         import android
 
-        config.os = "android"
+        config.OS = "android"
     except:
         pass
 
-if config.os != "android":
+if config.OS != "android":
     try:
         import serial
         from serial.tools import list_ports
@@ -160,9 +160,9 @@ def main():
         cm = st.split(";")
 
         if len(cm) > 1:
-            if config.os == "android" and "A" not in cm[1].upper():
+            if config.OS == "android" and "A" not in cm[1].upper():
                 continue
-            if config.os != "android" and "C" not in cm[1].upper():
+            if config.OS != "android" and "C" not in cm[1].upper():
                 continue
 
             if len(cm[2].strip()):

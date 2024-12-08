@@ -18,16 +18,16 @@ from mod import config
 try:
     import androidhelper as android
 
-    config.os = "android"
+    config.OS = "android"
 except:
     try:
         import android
 
-        config.os = "android"
+        config.OS = "android"
     except:
         pass
 
-if config.os != "android":
+if config.OS != "android":
     import serial  # sudo easy_install pyserial
     from serial.tools import list_ports
 
@@ -352,7 +352,7 @@ class Port:
             upPortName = upPortName.replace(":", "").replace(".", "")
             MAC = ":".join(a + b for a, b in zip(upPortName[::2], upPortName[1::2]))
 
-        if config.os != "android" and MAC:
+        if config.OS != "android" and MAC:
             try:
                 self.macaddr = portName
                 self.channel = 1
@@ -381,7 +381,7 @@ class Port:
                 print(" \n\nERROR: Can't connect to WiFi ELM\n\n")
                 config.opt_demo = True
                 sys.exit()
-        elif config.os == "android" and (portName == "bt" or MAC != None):
+        elif config.OS == "android" and (portName == "bt" or MAC != None):
             self.portType = 2
             self.droid = android.Android()
             if self.droid:

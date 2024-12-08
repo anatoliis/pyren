@@ -5,7 +5,7 @@ from mod import config, mod_elm
 ############## change me ################
 
 ecu_functional_address = "7A"
-config.os = "android"
+config.OS = "android"
 config.opt_port = "bt"  # 'COM4'
 
 #########################################

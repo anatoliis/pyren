@@ -7,7 +7,7 @@ from operator import itemgetter
 
 from mod import config, db_manager
 
-if config.os != "android":
+if config.OS != "android":
     import serial
 
 try:

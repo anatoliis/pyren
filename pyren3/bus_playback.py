@@ -30,7 +30,7 @@ parser.add_argument("log", help="the log file name to be played back")
 
 options = parser.parse_args()
 
-if not options.port and config.os != "android":
+if not options.port and config.OS != "android":
     parser.print_help()
 
     try:

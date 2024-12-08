@@ -16,7 +16,7 @@ from mod.ddt_request import DecuRequests
 from mod.mod_elm import AllowedList
 from mod.utils import pyren_encode
 
-if config.os != "android":
+if config.OS != "android":
     import tkinter as tk
 
 

@@ -14,8 +14,6 @@ from mod.optfile import Optfile
 from mod.scan_ecus import ScanEcus, families as families, findTCOM as findTCOM
 from mod.utils import getVIN
 
-config.os = os.name
-
 
 def optParser():
     """Parsing of command line parameters. User should define at least com port name"""
@@ -129,7 +127,7 @@ def optParser():
 
     options = parser.parse_args()
 
-    if not options.port and config.os != "android":
+    if not options.port and config.OS != "android":
         parser.print_help()
         iterator = sorted(list(list_ports.comports()))
         print("")

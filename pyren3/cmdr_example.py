@@ -24,16 +24,16 @@ from mod.utils import clearScreen
 try:
     import androidhelper as android
 
-    config.os = "android"
+    config.OS = "android"
 except:
     try:
         import android
 
-        config.os = "android"
+        config.OS = "android"
     except:
         pass
 
-if config.os != "android":
+if config.OS != "android":
     try:
         import serial
         from serial.tools import list_ports

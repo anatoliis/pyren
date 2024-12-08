@@ -29,7 +29,7 @@ from mod.optfile import Optfile
 from mod.ply import Calc
 from mod.utils import Choice, ChoiceLong, KBHit, clearScreen, pyren_encode, show_doc
 
-if config.os != "android":
+if config.OS != "android":
     from mod.ddt import DDT
 
 from mod import config
@@ -234,7 +234,7 @@ class ECU:
 
         self.elm.start_session(self.ecudata["startDiagReq"])
 
-        if config.os == "android" or config.opt_csv:
+        if config.OS == "android" or config.opt_csv:
             if (
                 self.ecudata["pin"].lower() == "can"
                 and self.DataIds
@@ -1729,16 +1729,16 @@ def main():
     try:
         import androidhelper as android
 
-        config.os = "android"
+        config.OS = "android"
     except:
         try:
             import android
 
-            config.os = "android"
+            config.OS = "android"
         except:
             pass
 
-    if config.os == "android":
+    if config.OS == "android":
         ecuid = input("Enetr  ECU ID:")
         lanid = input("Language [RU]:")
         if len(lanid) < 2:
@@ -1869,7 +1869,7 @@ def main():
         filename = "PR_" + F2A[family] + "_" + eindex + "_" + sys.argv[2] + ".csv"
 
     ext_path = "/storage/emulated/0/.torque/extendedpids/"
-    if config.os == "android":
+    if config.OS == "android":
         if not os.path.exists(ext_path):
             os.makedirs(ext_path, exist_ok=True)
         filename = ext_path + filename
@@ -2031,7 +2031,7 @@ def main():
     # make profile for torque
     profilename = str(int(time.time())) + ".tdv"
     veh_path = "/storage/emulated/0/.torque/vehicles/"
-    if config.os == "android":
+    if config.OS == "android":
         if not os.path.exists(veh_path):
             os.makedirs(veh_path, exist_ok=True)
         profilename = veh_path + str(int(time.time())) + ".tdv"

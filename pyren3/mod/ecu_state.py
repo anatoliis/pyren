@@ -28,7 +28,7 @@ def get_state(st, mn, se, elm, calc, dataids={}):
     else:
         csv_val = str(st.value)
 
-    if config.os == "android":
+    if config.OS == "android":
         st.value = " " * (8 - len(st.value) // 2) + str(st.value)
         return "%-6s %-41s %-16s" % (st.codeMR, st.label, st.value), st.helps, csv_val
     else:

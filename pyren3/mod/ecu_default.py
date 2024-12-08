@@ -109,7 +109,7 @@ def get_default_std_a(df, mn, se, elm, calc, getDTCmnemo):
             interpretation = ""
 
         description = df[dtc].label
-        if config.os == "android":
+        if config.OS == "android":
             defstr = "%-6s(DTC%-6s) %-41s %-6s %-10s" % (
                 df[dtc].agcdRef,
                 dtc + status,
@@ -237,7 +237,7 @@ def get_default_std_b(df, mn, se, elm, calc, getDTCmnemo):
 
         description = df[dtc].label
 
-        if config.os == "android":
+        if config.OS == "android":
             defstr = "DTC%-6s (%s) %-41s %-6s %-10s" % (
                 dtc + dtcType,
                 df[dtc].agcdRef,
@@ -363,7 +363,7 @@ def get_default_failflag(df, mn, se, elm, calc):
                 interpretation = ""
 
         description = df[dtc].label
-        if config.os == "android":
+        if config.OS == "android":
             defstr = "%-6s %-41s %-6s %-10s" % (
                 df[dtc].agcdRef,
                 description,

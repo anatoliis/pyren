@@ -19,7 +19,7 @@ def find_DBs():
     clip_found = False
     ddt_found = False
 
-    if config.os == "android":
+    if config.OS == "android":
         db_dir_list = db_dir_list + android_dir_list
 
     for clip_dir in db_dir_list:
@@ -42,7 +42,7 @@ def find_DBs():
             clip_found = True
             break
 
-    if config.os == "android":
+    if config.OS == "android":
         if not clip_found:
             print("ERROR: CLIP DB not found")
             exit()
@@ -73,7 +73,7 @@ def find_DBs():
         print("CLIP DB :", config.cliproot)
     if ddt_found:
         print("DDT  DB :", config.ddtroot)
-        if config.os != "android":
+        if config.OS != "android":
             config.opt_ddt = True
 
     # check cache version
@@ -159,7 +159,7 @@ def get_file_from_clip(filename):
     else:
         mode = "r"
 
-    if config.os == "android" or config.clip_arc != "":
+    if config.OS == "android" or config.clip_arc != "":
         mode = "r"
 
     if config.clip_arc == "":

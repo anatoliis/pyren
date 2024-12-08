@@ -19,9 +19,7 @@ debug_mode = False
 
 key_pressed = ""
 
-config.os = os.name
-
-if config.os == "nt":
+if config.OS == "nt":
     import pip
 
     try:
@@ -46,16 +44,16 @@ else:
     try:
         import androidhelper as android
 
-        config.os = "android"
+        config.OS = "android"
     except:
         try:
             import android
 
-            config.os = "android"
+            config.OS = "android"
         except:
             pass
 
-if config.os != "android":
+if config.OS != "android":
     try:
         import serial
         from serial.tools import list_ports
@@ -273,7 +271,7 @@ def optParser():
 
     options = parser.parse_args()
 
-    if not options.port and config.os != "android":
+    if not options.port and config.OS != "android":
         parser.print_help()
         iterator = sorted(list(list_ports.comports()))
         print("")
@@ -420,16 +418,16 @@ class FileChooser:
         try:
             import androidhelper as android
 
-            config.os = "android"
+            config.OS = "android"
         except:
             try:
                 import android
 
-                config.os = "android"
+                config.OS = "android"
             except:
                 pass
 
-        if config.os != "android":
+        if config.OS != "android":
             try:
                 # Python2
                 import tkinter as tk

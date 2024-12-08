@@ -452,7 +452,7 @@ class ScanEcus:
 
         listecu = []
 
-        if config.os == "android":
+        if config.OS == "android":
             if config.opt_scan:
                 print(pyren_encode("\n     %-40s %s" % ("Name", "Warn")))
             else:

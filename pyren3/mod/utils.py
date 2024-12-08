@@ -270,7 +270,7 @@ def pyren_decode(inp):
 
 
 def pyren_decode_i(inp):
-    if config.os == "android":
+    if config.OS == "android":
         return inp.decode("utf-8", errors="ignore")
     else:
         return inp.decode(sys.stdout.encoding, errors="ignore")

@@ -41,7 +41,7 @@ def get_parameter(pr, mn, se, elm, calc, dataids={}):
         tmpmin = ""
         tmpmax = ""
 
-    if config.os == "android":
+    if config.OS == "android":
         return (
             "%-6s %-41s %8s %-5s" % (pr.codeMR, pr.label, pr.value, pr.unit),
             pr.helps,

@@ -1252,7 +1252,7 @@ class DDTScreen(tk.Frame):
             "ns1": "http://www-diag.renault.com/2002/screens",
         }
 
-        if config.os == "nt":
+        if config.OS == "nt":
             self.scf = 1.0  # scale font
         else:
             self.scf = 1.25  # scale font

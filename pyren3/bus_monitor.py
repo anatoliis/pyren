@@ -13,9 +13,7 @@ from mod.ddt_ecu import DDTECU
 from mod.mod_elm import ELM
 from mod.utils import ChoiceLong, KBHit, clearScreen, pyren_encode
 
-config.os = os.name
-
-if config.os == "nt":
+if config.OS == "nt":
     import pip
 
     try:
@@ -40,16 +38,16 @@ else:
     try:
         import androidhelper as android
 
-        config.os = "android"
+        config.OS = "android"
     except:
         try:
             import android
 
-            config.os = "android"
+            config.OS = "android"
         except:
             pass
 
-if config.os != "android":
+if config.OS != "android":
     try:
         import serial
         from serial.tools import list_ports
@@ -364,7 +362,7 @@ def optParser():
 
     options = parser.parse_args()
 
-    if options.outfile == "" and not options.port and config.os != "android":
+    if options.outfile == "" and not options.port and config.OS != "android":
         parser.print_help()
         iterator = sorted(list(list_ports.comports()))
         print("")

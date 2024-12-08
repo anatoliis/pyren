@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 
 opt_debug = False
 debug_file = None
@@ -63,7 +64,7 @@ ddtroot = (
 clip_arc = ""
 cliproot = ".."
 
-os = ""
+OS = os.name
 
 language_dict = {}
 
