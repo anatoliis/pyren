@@ -269,13 +269,6 @@ def pyren_decode(inp):
     #  return inp.decode(sys.stdout.encoding, errors='replace')
 
 
-def pyren_decode_i(inp):
-    if config.OS == "android":
-        return inp.decode("utf-8", errors="ignore")
-    else:
-        return inp.decode(sys.stdout.encoding, errors="ignore")
-
-
 def clearScreen():
     # https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
     # [2J   - clear entire screen
