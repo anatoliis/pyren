@@ -7,8 +7,6 @@ import gc
 import mod_db_manager
 from mod_utils import *
 
-# import traceback
-
 try:
     # Python2
     import tkinter as tk

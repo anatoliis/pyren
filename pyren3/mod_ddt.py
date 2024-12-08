@@ -68,8 +68,6 @@ if mod_globals.os != "android":
     try:
         import serial
         from serial.tools import list_ports
-
-        # import ply
     except ImportError:
         print("\n\n\n\tPleas install additional modules")
         print("\t\t>sudo easy_install pyserial")

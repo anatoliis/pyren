@@ -36,10 +36,7 @@ if os.name == "nt":
 else:
     import termios
 
-    # import atexit
     from select import select
-
-    # from decimal import *
 
 
 class KBHit:

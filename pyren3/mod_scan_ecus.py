@@ -28,7 +28,6 @@ import string
 import sys
 import xml.dom.minidom
 
-# from mod_elm     import ELM
 import mod_db_manager
 import mod_elm as m_elm
 import mod_globals

@@ -5,8 +5,6 @@ import sys
 
 import mod_globals
 
-# import serial
-
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 import mod_elm

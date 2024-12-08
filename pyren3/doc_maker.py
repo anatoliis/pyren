@@ -10,8 +10,6 @@ from mod_optfile import *
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
-# from   mod_acf_func     import ACE
-
 style = """
 div.zdiagnostic {
 	background-color	:	white;
@@ -103,8 +101,6 @@ if mod_globals.os != "android":
     try:
         import serial
         from serial.tools import list_ports
-
-        # import ply
     except ImportError:
         print("\n\n\n\tPleas install additional modules")
         print("\t\t>sudo easy_install pyserial")
