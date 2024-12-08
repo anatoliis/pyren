@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import string
 import sys
 import xml.dom.minidom

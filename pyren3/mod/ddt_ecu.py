@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import operator
 import os
 import queue

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from mod import config
 from mod.mtc import acf_MTC_compare
 from mod.utils import hex_VIN_plus_CRC, loadDumpToELM

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from mod import config, mod_elm
 
 ############## change me ################

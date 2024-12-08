@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import xml.dom.minidom
 
 from mod import config

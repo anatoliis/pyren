@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
    module contains class for working with ELM327
    version: 010922
