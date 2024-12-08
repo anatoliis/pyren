@@ -1,4 +1,7 @@
 import os
+import sys
+
+BASE_PATH = None
 
 opt_debug = False
 debug_file = None
@@ -65,8 +68,36 @@ cliproot = ".."
 
 OS = os.name
 
+try:
+    import androidhelper as android
+
+    OS = "android"
+except ImportError:
+    try:
+        import android
+
+        OS = "android"
+    except ImportError:
+        pass
+
+JNIUS_MODE = False
+if OS == "android":
+    try:
+        import jnius
+    except ImportError:
+        print("Missing dependency: pyjnius")
+        sys.exit(1)
+    except Exception:
+        pass
+    else:
+        JNIUS_MODE = True
+
+print(f"Detected OS: {OS}{' (jnius mode)' if JNIUS_MODE else ''}")
+
 language_dict = {}
 
 vin = ""
 
 doc_server_proc = None
+
+CSV_OPTIONS = ["csv", "csv_human", "csv_only"]
