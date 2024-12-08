@@ -17,41 +17,25 @@ from pyren3.mod import config, db_manager, scan_ecus, utils
 from pyren3.mod.ddt import ddt_utils
 from pyren3.mod.ddt.ddt_ecu import DDTECU, ecuSearch
 from pyren3.mod.ddt.ddt_screen import DDTScreen
-from pyren3.mod.elm import AllowedList
+from pyren3.mod.elm import AllowedList, ELM
+from pyren3.mod.utils import clearScreen
 
-if config.OS == "nt":
-    import pip
-
-    try:
-        from pyren3 import serial
-    except ImportError:
-        pip.main(["install", "pyserial"])
-
-else:
+if config.OS != "nt":
     # let's try android
     try:
         import androidhelper as android
 
         config.OS = "android"
-    except:
+    except Exception:
         try:
             import android
 
             config.OS = "android"
-        except:
+        except Exception:
             pass
 
 if config.OS != "android":
-    try:
-        from pyren3 import serial
-        from pyren3.serial.tools import list_ports
-    except ImportError:
-        print("\n\n\n\tPleas install additional modules")
-        print("\t\t>sudo easy_install pyserial")
-        sys.exit()
-
-from pyren3.mod.elm import ELM
-from pyren3.mod.utils import clearScreen
+    from serial.tools import list_ports
 
 
 class DDT:

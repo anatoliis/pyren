@@ -7,48 +7,24 @@ from pyren3.mod.optfile import Optfile
 from pyren3.mod.utils import clearScreen, getVIN
 
 if config.OS == "nt":
-    import pip
+    import colorama
 
-    try:
-        from pyren3 import serial
-    except ImportError:
-        pip.main(["install", "pyserial"])
-
-    try:
-        import colorama
-    except ImportError:
-        pip.main(["install", "colorama"])
-        try:
-            import colorama
-        except ImportError:
-            print(
-                "\n\n\n\t\t\tGive me access to the Internet for download modules\n\n\n"
-            )
-            sys.exit()
     colorama.init()
 else:
-    # let's try android
     try:
         import androidhelper as android
 
         config.OS = "android"
-    except:
+    except Exception:
         try:
             import android
 
             config.OS = "android"
-        except:
+        except Exception:
             pass
 
 if config.OS != "android":
-    try:
-        from pyren3 import serial
-        from pyren3.serial.tools import list_ports
-    except ImportError:
-        print("\n\n\n\tPleas install additional modules")
-        print("\t\t>sudo easy_install pyserial")
-        # print "\t\t>sudo easy_install ply"
-        sys.exit()
+    from serial.tools import list_ports
 
 from pyren3.mod import utils
 from pyren3.mod.ddt import ddt_utils

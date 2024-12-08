@@ -18,17 +18,17 @@ try:
     import androidhelper as android
 
     config.OS = "android"
-except:
+except Exception:
     try:
         import android
 
         config.OS = "android"
-    except:
+    except Exception:
         pass
 
 if config.OS != "android":
-    from pyren3 import serial  # sudo easy_install pyserial
-    from pyren3.serial.tools import list_ports
+    import serial
+    from serial.tools import list_ports
 
 # List of commands which may require to open another Developer session (option --dev)
 DevList = ["27", "28", "2E", "30", "31", "32", "34", "35", "36", "37", "3B", "3D"]

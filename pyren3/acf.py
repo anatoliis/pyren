@@ -1,7 +1,7 @@
 import os
 import pickle
 
-from pyren3.serial.tools import list_ports
+from serial.tools import list_ports
 
 from pyren3.mod import config, db_manager, utils
 from pyren3.mod.acf_func import acf_loadModules

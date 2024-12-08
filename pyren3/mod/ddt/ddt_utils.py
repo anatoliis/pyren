@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import pickle
 import xml.etree.ElementTree as et
 from copy import deepcopy
 from operator import itemgetter
@@ -8,12 +9,7 @@ from operator import itemgetter
 from pyren3.mod import config, db_manager
 
 if config.OS != "android":
-    from pyren3 import serial
-
-try:
-    import pickle as pickle
-except:
-    import pickle
+    from serial.tools import list_ports
 
 
 def searchddtroot():
@@ -112,7 +108,7 @@ def multikeysort(items, columns):
 
 def getPortList():
     ret = []
-    iterator = sorted(list(serial.tools.list_ports.comports()))
+    iterator = sorted(list(list_ports.comports()))
     for port, desc, hwid in iterator:
         try:
             de = str(desc.encode("ascii", "ignore"))

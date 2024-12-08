@@ -5,8 +5,11 @@ import xml.etree.ElementTree as et
 
 from pyren3.mod import config, db_manager, utils
 from pyren3.mod.dfg import ClassDfg
-from pyren3.mod.mtc import acf_MTC_compare_doc
+from pyren3.mod.elm import ELM
+from pyren3.mod.mtc import acf_MTC_compare_doc, acf_buildFull, acf_getMTC
 from pyren3.mod.optfile import Optfile
+from pyren3.mod.scan_ecus import ScanEcus
+from pyren3.mod.utils import getVIN
 
 style = """
 div.zdiagnostic {
@@ -79,36 +82,6 @@ if config.OS == "nt":
     import colorama
 
     colorama.init()
-else:
-    # let's try android
-    try:
-        import androidhelper as android
-
-        config.OS = "android"
-    except:
-        try:
-            import android
-
-            config.OS = "android"
-        except:
-            pass
-
-if config.OS != "android":
-    try:
-        from pyren3 import serial
-        from pyren3.serial.tools import list_ports
-    except ImportError:
-        print("\n\n\n\tPleas install additional modules")
-        print("\t\t>sudo easy_install pyserial")
-        sys.exit()
-
-from pyren3.mod.elm import ELM
-from pyren3.mod.scan_ecus import ScanEcus
-from pyren3.mod.utils import getVIN
-from pyren3.mod.mtc import acf_getMTC
-from pyren3.mod.mtc import acf_buildFull
-
-# global variables
 
 table_header = False
 dfg_ds = {}

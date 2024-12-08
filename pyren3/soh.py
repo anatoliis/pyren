@@ -30,7 +30,7 @@ import tkinter as tk
 import tkinter.messagebox
 import tkinter.ttk
 
-from pyren3.serial.tools import list_ports
+from serial.tools import list_ports
 
 from pyren3.mod import config
 from pyren3.mod.elm import ELM

@@ -43,23 +43,16 @@ for f in listdir("."):
         sys.path.append(os.path.join(currenPath, f))
         sys.path.append(os.path.join(currenPath, f, "serial"))
 
-if osname == "nt":
-    import pip
-
-    try:
-        from pyren3 import serial
-    except ImportError:
-        pip.main(["install", "pyserial"])
 try:
     import androidhelper as android
 
     osname = "android"
-except:
+except Exception:
     try:
         import android
 
         osname = "android"
-    except:
+    except Exception:
         pass
 
 jnius_mode = False
@@ -324,8 +317,8 @@ def run(s, cmd):
 
 if osname != "android":
     try:
-        from pyren3 import serial
-        from pyren3.serial.tools import list_ports
+        import serial
+        from serial.tools import list_ports
     except ImportError:
         print("\n\n\n\tPleas install additional modules")
         print("\t\t>sudo easy_install pyserial")

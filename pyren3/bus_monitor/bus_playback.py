@@ -32,11 +32,7 @@ options = parser.parse_args()
 if not options.port and config.OS != "android":
     parser.print_help()
 
-    try:
-        from pyren3.serial.tools import list_ports
-    except ImportError as e:
-        print("WARNING:", e, file=sys.stderr)
-        exit(-1)
+    from serial.tools import list_ports
 
     print("\nAvailable COM ports:")
     for port, desc, hwid in sorted(list(list_ports.comports())):

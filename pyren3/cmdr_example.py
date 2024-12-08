@@ -19,25 +19,6 @@ from pyren3.mod.optfile import Optfile
 from pyren3.mod.scan_ecus import ScanEcus
 from pyren3.mod.utils import clearScreen
 
-try:
-    import androidhelper as android
-
-    config.OS = "android"
-except:
-    try:
-        import android
-
-        config.OS = "android"
-    except:
-        pass
-
-if config.OS != "android":
-    try:
-        from pyren3 import serial
-        from pyren3.serial.tools import list_ports
-    except ImportError:
-        sys.exit()
-
 
 def prepareECU():
     """This function loads data for ECU"""

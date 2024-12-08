@@ -1,7 +1,6 @@
-import sys
-
 from pyren3 import pyren3
 from pyren3.mod import config
+from pyren3.mod.elm import ELM
 
 cmdb = """
 #v1.0 ;AC P; ATZ                   ; Z                  ; reset all
@@ -119,26 +118,6 @@ cmdb = """
 #v2.1 ;AC  ; ATCTM5                ; CTM5               ; set Timer Multiplier to 5
 #v2.1 ;ACH ; ATZ                   ; Z                  ; reset all
 """
-try:
-    import androidhelper as android
-
-    config.OS = "android"
-except:
-    try:
-        import android
-
-        config.OS = "android"
-    except:
-        pass
-
-if config.OS != "android":
-    try:
-        from pyren3 import serial
-        from pyren3.serial.tools import list_ports
-    except ImportError:
-        sys.exit()
-
-from pyren3.mod.elm import ELM
 
 
 def main():
@@ -185,7 +164,6 @@ def main():
                     vers = cm[0]
 
                 print("%5s %10s %6s" % (cm[0], cm[2], chre))
-                sys.stdout.flush
 
     if pycom > 0:
         res = "\n\n\nUncompatible adapter on ARM core \n pyren would not work with it \n\n\n"
