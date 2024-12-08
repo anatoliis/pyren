@@ -6,9 +6,9 @@ import sys
 import threading
 import time
 
-from mod import config, db_manager, ddt_utils, mod_elm, utils
+from mod import config, db_manager, ddt_utils, utils
 from mod.ddt_ecu import DDTECU
-from mod.mod_elm import ELM
+from mod.elm import ELM, pyren_time
 from mod.utils import ChoiceLong, KBHit, clearScreen
 
 if config.OS == "nt":
@@ -162,7 +162,7 @@ class DDT_MON:
             self.sendAllow.clear()
             return
 
-        ct = mod_elm.pyren_time()
+        ct = pyren_time()
 
         for f in buf.split("\n"):
             f = f.strip()
@@ -441,7 +441,7 @@ def main():
 
     kb = KBHit()
 
-    lt = ct = mod_elm.pyren_time()
+    lt = ct = pyren_time()
 
     show_loc = threading.Event()
 
@@ -475,7 +475,7 @@ def main():
                 # mon.framefilter = mon.framefilter + '<' + str(ord(c)) + '>'
 
         time.sleep(0.03)
-        ct = mod_elm.pyren_time()
+        ct = pyren_time()
         if (ct - lt) > 0.1:
             lt = ct
             show_loc.set()

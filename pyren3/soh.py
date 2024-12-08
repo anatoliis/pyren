@@ -33,7 +33,7 @@ import tkinter.ttk
 from serial.tools import list_ports
 
 from mod import config
-from mod.mod_elm import ELM
+from mod.elm import ELM
 
 
 def set_Tk_var():

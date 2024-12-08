@@ -102,7 +102,7 @@ if config.OS != "android":
         print("\t\t>sudo easy_install pyserial")
         sys.exit()
 
-from mod.mod_elm import ELM
+from mod.elm import ELM
 from mod.scan_ecus import ScanEcus
 from mod.utils import getVIN
 from mod.mtc import acf_getMTC

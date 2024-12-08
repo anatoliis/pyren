@@ -53,7 +53,7 @@ if config.OS != "android":
 from mod import utils
 from mod import ddt_utils
 
-from mod.mod_elm import ELM
+from mod.elm import ELM
 from mod.scan_ecus import ScanEcus
 from mod.ecu import ECU
 

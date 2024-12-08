@@ -27,7 +27,8 @@ import string
 import sys
 import xml.dom.minidom
 
-from mod import config, db_manager, mod_elm as m_elm
+from mod import config, db_manager
+from mod.elm import dnat, snat
 from mod.utils import Choice, ChoiceLong, DBG
 
 opt_demo = False
@@ -485,9 +486,9 @@ class ScanEcus:
             for row in self.detectedEcus:
                 if "idf" not in list(row.keys()):
                     row["idf"] = ""
-                if row["dst"] not in list(m_elm.dnat.keys()):
-                    m_elm.dnat[row["dst"]] = "000"
-                    m_elm.snat[row["dst"]] = "000"
+                if row["dst"] not in list(dnat.keys()):
+                    dnat[row["dst"]] = "000"
+                    snat[row["dst"]] = "000"
                 if row["idf"] in list(families.keys()) and families[row["idf"]] in list(
                     config.language_dict.keys()
                 ):
@@ -495,7 +496,7 @@ class ScanEcus:
                     if config.opt_scan:
                         line = "%-2s(%3s) %-6s %-5s %-40s %s" % (
                             row["dst"],
-                            m_elm.dnat[row["dst"]],
+                            dnat[row["dst"]],
                             row["idf"],
                             row["ecuname"],
                             fmlyn,
@@ -504,7 +505,7 @@ class ScanEcus:
                     else:
                         line = "%-2s(%3s) %-6s %-5s %-40s %s" % (
                             row["dst"],
-                            m_elm.dnat[row["dst"]],
+                            dnat[row["dst"]],
                             row["idf"],
                             row["ecuname"],
                             fmlyn,
@@ -514,7 +515,7 @@ class ScanEcus:
                     if config.opt_scan:
                         line = "%-2s(%3s) %-6s %-5s %-40s %s" % (
                             row["dst"],
-                            m_elm.dnat[row["dst"]],
+                            dnat[row["dst"]],
                             row["idf"],
                             row["ecuname"],
                             row["doc"].strip(),
@@ -523,7 +524,7 @@ class ScanEcus:
                     else:
                         line = "%-2s(%3s) %-6s %-5s %-40s %s" % (
                             row["dst"],
-                            m_elm.dnat[row["dst"]],
+                            dnat[row["dst"]],
                             row["idf"],
                             row["ecuname"],
                             row["doc"].strip(),

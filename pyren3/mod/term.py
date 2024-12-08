@@ -4,7 +4,8 @@ import string
 import sys
 import time
 
-from mod import config, mod_elm, utils
+from mod import config, utils
+from mod.elm import ELM, dnat, pyren_time, snat
 
 macro = {}
 var = {}
@@ -719,10 +720,10 @@ def bit_cmd(l, elm, fnc="set_bits"):
 def wait_kb(ttw):
     global key_pressed
 
-    st = mod_elm.pyren_time()
+    st = pyren_time()
     kb = utils.KBHit()
 
-    while mod_elm.pyren_time() < (st + ttw):
+    while pyren_time() < (st + ttw):
         if kb.kbhit():
             key_pressed = kb.getch()
         time.sleep(0.1)
@@ -792,9 +793,9 @@ def proc_line(l, elm):
         rl = r.split("=")
         var[rl[0]] = rl[1]
         if rl[0] == "$addr":
-            if var["$addr"].upper() in list(mod_elm.dnat.keys()):
-                var["$txa"] = mod_elm.dnat[var["$addr"].upper()]
-                var["$rxa"] = mod_elm.snat[var["$addr"].upper()]
+            if var["$addr"].upper() in list(dnat.keys()):
+                var["$txa"] = dnat[var["$addr"].upper()]
+                var["$rxa"] = snat[var["$addr"].upper()]
                 elm.currentaddress = var["$addr"].upper()
         return
 
@@ -886,7 +887,7 @@ def main():
     optParser()
 
     print("Opening ELM")
-    elm = mod_elm.ELM(config.opt_port, config.opt_speed, True)
+    elm = ELM(config.opt_port, config.opt_speed, True)
 
     # change serial port baud rate
     if not config.opt_demo and elm.port and elm.port.portType == 0:

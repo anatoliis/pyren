@@ -11,7 +11,7 @@ from datetime import datetime
 from mod import config, db_manager, ddt_utils
 from mod.ddt_data import DecuDatas
 from mod.ddt_request import DecuRequests
-from mod.mod_elm import AllowedList
+from mod.elm import AllowedList
 
 if config.OS != "android":
     import tkinter as tk

@@ -1,4 +1,5 @@
-from mod import config, mod_elm
+from mod import config
+from mod.elm import ELM, dnat, snat
 
 ############## change me ################
 
@@ -14,13 +15,13 @@ config.opt_speed = 38400
 config.opt_log = "10742-rep.txt"
 
 print("Opening ELM")
-elm = mod_elm.ELM(config.opt_port, config.opt_speed, True)
+elm = ELM(config.opt_port, config.opt_speed, True)
 
 print("Init    ELM")
 elm.init_can()
 
-TXa = mod_elm.dnat[ecu_functional_address]
-RXa = mod_elm.snat[ecu_functional_address]
+TXa = dnat[ecu_functional_address]
+RXa = snat[ecu_functional_address]
 
 print(elm.cmd("at sh " + TXa))
 print(elm.cmd("at cra " + RXa))

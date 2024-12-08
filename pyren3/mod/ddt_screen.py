@@ -24,9 +24,9 @@ except ImportError:
     import tkinter.filedialog
 
 from mod import config
-from mod.mod_elm import AllowedList
-from mod.mod_elm import dnat
-from mod.mod_elm import pyren_time
+from mod.elm import AllowedList
+from mod.elm import dnat
+from mod.elm import pyren_time
 
 
 class screenSettings:  # for future use.

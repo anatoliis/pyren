@@ -6,7 +6,7 @@ from serial.tools import list_ports
 from mod import config, db_manager, utils
 from mod.acf_func import acf_loadModules
 from mod.acf_proc import acf_MTC_generateDefaults, acf_MTC_optionsExplorer
-from mod.mod_elm import ELM
+from mod.elm import ELM
 from mod.mtc import acf_getMTC
 from mod.optfile import Optfile
 from mod.scan_ecus import ScanEcus, families as families, findTCOM as findTCOM

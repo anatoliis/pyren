@@ -13,9 +13,10 @@ import tkinter.ttk as ttk
 import xml.etree.ElementTree as et
 from shutil import copyfile
 
-from mod import config, db_manager, ddt_ecu, ddt_utils, mod_elm, scan_ecus, utils
+from mod import config, db_manager, ddt_ecu, ddt_utils, scan_ecus, utils
 from mod.ddt_ecu import DDTECU
 from mod.ddt_screen import DDTScreen
+from mod.elm import AllowedList
 
 if config.OS == "nt":
     import pip
@@ -48,7 +49,7 @@ if config.OS != "android":
         print("\t\t>sudo easy_install pyserial")
         sys.exit()
 
-from mod.mod_elm import ELM
+from mod.elm import ELM
 from mod.utils import clearScreen
 
 
@@ -1066,7 +1067,7 @@ class DDTLauncher:
             progress["value"] = progressValue
             progress.update()
             sys.stdout.flush()
-            if request.SentBytes[:2] in mod_elm.AllowedList + ["17", "19"]:
+            if request.SentBytes[:2] in AllowedList + ["17", "19"]:
                 if request.SentBytes[:2] == "19" and request.SentBytes[:2] != "1902":
                     continue
                 if request.SentBytes[:2] == "22" and len(request.SentBytes) < 6:

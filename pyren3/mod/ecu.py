@@ -22,7 +22,7 @@ from mod.ecu_parameter import EcuParameters, get_parameter
 from mod.ecu_screen import EcuOwnScreen, EcuScreen, EcuScreens
 from mod.ecu_service import EcuServices, parseComplexResponse, prepareComplexRequest
 from mod.ecu_state import EcuStates, get_state
-from mod.mod_elm import AllowedList, dnat, pyren_time, snat
+from mod.elm import AllowedList, dnat, pyren_time, snat
 from mod.optfile import Optfile
 from mod.ply import Calc
 from mod.utils import Choice, ChoiceLong, KBHit, clearScreen, show_doc

@@ -1,4 +1,5 @@
-from mod import config, mod_elm
+from mod import config
+from mod.elm import ELM
 
 ############## change me ################
 
@@ -14,7 +15,7 @@ config.opt_speed = 38400
 config.opt_log = "simpl.txt"
 
 print("Opening ELM")
-elm = mod_elm.ELM(config.opt_port, config.opt_speed, True)
+elm = ELM(config.opt_port, config.opt_speed, True)
 
 print("Init    ELM")
 print(elm.cmd("at z"))

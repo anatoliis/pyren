@@ -138,7 +138,7 @@ if config.OS != "android":
     except ImportError:
         sys.exit()
 
-from mod.mod_elm import ELM
+from mod.elm import ELM
 
 
 def main():

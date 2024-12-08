@@ -1,7 +1,8 @@
 import argparse
 import sys
 
-from mod import config, mod_elm
+from mod import config
+from mod.elm import ELM
 
 parser = argparse.ArgumentParser(
     version="bus_playback Version 0.1",
@@ -55,7 +56,7 @@ except IOError as e:
     exit(2)
 
 print("Opening ELM")
-elm = mod_elm.ELM(config.opt_port, config.opt_speed, config.opt_log)
+elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
 
 if config.opt_speed < config.opt_rate:
     elm.port.soft_boudrate(config.opt_rate)
