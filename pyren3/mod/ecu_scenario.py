@@ -3,9 +3,8 @@
 import os
 import re
 
-import mod_db_manager
-import mod_globals
-from mod_utils import pyren_encode
+from mod import config, db_manager
+from mod.utils import pyren_encode
 
 
 def playScenario(command, ecu, elm):
@@ -30,7 +29,7 @@ def playScenario(command, ecu, elm):
 
     if os.path.isfile("./" + scenarioName + ".py"):
         scen = __import__(scenarioName)
-        if mod_globals.clip_arc:
+        if config.clip_arc:
             scen.run(elm, ecu, command, "../" + path + scenarioData)
         else:
             scen.run(elm, ecu, command, "./" + path + scenarioData)
@@ -45,12 +44,10 @@ def playScenario(command, ecu, elm):
     if "show" not in ch.lower():
         return
 
-    if not mod_db_manager.file_in_clip(os.path.join(path, scenarioData)):
+    if not db_manager.file_in_clip(os.path.join(path, scenarioData)):
         return
 
-    scenFile = mod_db_manager.get_file_from_clip(
-        os.path.join(path, scenarioData)
-    ).read()
+    scenFile = db_manager.get_file_from_clip(os.path.join(path, scenarioData)).read()
     if isinstance(scenFile, (bytes, bytearray)):
         scenFile = scenFile.decode("utf-8", errors="ignore")
     lines = scenFile.split("\n")
@@ -63,8 +60,8 @@ def playScenario(command, ecu, elm):
             p_name = ma.group(1)
             p_value = ma.group(2)
 
-            if p_value.isdigit() and p_value in list(mod_globals.language_dict.keys()):
-                p_value = mod_globals.language_dict[p_value]
+            if p_value.isdigit() and p_value in list(config.language_dict.keys()):
+                p_value = config.language_dict[p_value]
 
             print(pyren_encode("  %-20s : %s" % (p_name, p_value)))
 

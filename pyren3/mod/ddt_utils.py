@@ -5,10 +5,9 @@ import xml.etree.ElementTree as et
 from copy import deepcopy
 from operator import itemgetter
 
-import mod_db_manager
-import mod_globals
+from mod import config, db_manager
 
-if mod_globals.os != "android":
+if config.os != "android":
     import serial
 
 try:
@@ -19,9 +18,9 @@ except:
 
 def searchddtroot():
     if not os.path.exists("../DDT2000data/ecus"):
-        mod_globals.ddtroot = ".."
+        config.ddtroot = ".."
     else:
-        mod_globals.ddtroot = "../DDT2000data"
+        config.ddtroot = "../DDT2000data"
     return
 
 
@@ -128,7 +127,7 @@ def getPortList():
 def loadECUlist():
     # make or load eculist
     print("Loading eculist")
-    eculistcache = os.path.join(mod_globals.cache_dir, "ddt_eculist.p")
+    eculistcache = os.path.join(config.cache_dir, "ddt_eculist.p")
 
     if os.path.isfile(eculistcache):  # if cache exists
         eculist = pickle.load(open(eculistcache, "rb"))  # load it #dbaccess
@@ -137,7 +136,7 @@ def loadECUlist():
         # open xml
         eculistfilename = "ecus/eculist.xml"
         # if not os.path.isfile(eculistfilename):
-        if not mod_db_manager.file_in_ddt(eculistfilename):
+        if not db_manager.file_in_ddt(eculistfilename):
             print("No such file: " + eculistfilename)
             return None
 
@@ -146,7 +145,7 @@ def loadECUlist():
             "ns1": "http://www-diag.renault.com/2002/screens",
         }
 
-        tree = et.parse(mod_db_manager.get_file_from_ddt(eculistfilename))
+        tree = et.parse(db_manager.get_file_from_ddt(eculistfilename))
         root = tree.getroot()
 
         eculist = {}
@@ -209,10 +208,10 @@ class ddtProjects:
 
         self.plist = []
 
-        if not mod_db_manager.file_in_ddt(self.proj_path):
+        if not db_manager.file_in_ddt(self.proj_path):
             return
 
-        tree = et.parse(mod_db_manager.get_file_from_ddt(self.proj_path))
+        tree = et.parse(db_manager.get_file_from_ddt(self.proj_path))
         root = tree.getroot()
 
         DefaultAddressing = root.findall("DefaultAddressing")
@@ -268,10 +267,10 @@ class ddtAddressing:
 
         self.alist = []
 
-        if not mod_db_manager.file_in_ddt(self.addr_path):
+        if not db_manager.file_in_ddt(self.addr_path):
             return
 
-        tree = et.parse(mod_db_manager.get_file_from_ddt(self.addr_path))
+        tree = et.parse(db_manager.get_file_from_ddt(self.addr_path))
         root = tree.getroot()
 
         ns = {

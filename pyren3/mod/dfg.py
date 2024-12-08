@@ -2,9 +2,8 @@
 
 import xml.dom.minidom
 
-import mod_db_manager
-import mod_globals
-from mod_utils import ChoiceFromDict, ChoiceLong, clearScreen, pyren_encode
+from mod import config, db_manager
+from mod.utils import ChoiceFromDict, ChoiceLong, clearScreen, pyren_encode
 
 
 class ClassDfg:
@@ -41,7 +40,7 @@ class ClassDfg:
     def __init__(self, platform):
         # find TCOM by platform
         if platform != "":
-            file_list = mod_db_manager.get_file_list_from_clip("Vehicles/TCOM_*.[Xx]ml")
+            file_list = db_manager.get_file_list_from_clip("Vehicles/TCOM_*.[Xx]ml")
             for file in file_list:
                 try:
                     model_n = int(file[17:20])
@@ -49,7 +48,7 @@ class ClassDfg:
                         continue
                 except ValueError:
                     pass
-                DOMTree = xml.dom.minidom.parse(mod_db_manager.get_file_from_clip(file))
+                DOMTree = xml.dom.minidom.parse(db_manager.get_file_from_clip(file))
                 vh = DOMTree.documentElement
                 if vh.hasAttribute("defaultText"):
                     TCOM = vh.getAttribute("TCOM")
@@ -60,11 +59,9 @@ class ClassDfg:
             self.dfgFile = "Vehicles/DFG/DFG_" + self.tcom + ".Xml"
         else:
             vhcls = []
-            file_list = mod_db_manager.get_file_list_from_clip(
-                "Vehicles/DFG/DFG_*.[Xx]ml"
-            )
+            file_list = db_manager.get_file_list_from_clip("Vehicles/DFG/DFG_*.[Xx]ml")
             for file in file_list:
-                DOMTree = xml.dom.minidom.parse(mod_db_manager.get_file_from_clip(file))
+                DOMTree = xml.dom.minidom.parse(db_manager.get_file_from_clip(file))
                 vh = DOMTree.documentElement
                 if vh.hasAttribute("defaultText"):
                     TCOM = vh.getAttribute("TCOM")
@@ -87,9 +84,7 @@ class ClassDfg:
 
     def loadDFG(self):
         try:
-            DOMTree = xml.dom.minidom.parse(
-                mod_db_manager.get_file_from_clip(self.dfgFile)
-            )
+            DOMTree = xml.dom.minidom.parse(db_manager.get_file_from_clip(self.dfgFile))
         except:
             print("ERROR loading dfg-file")
             # if 'DFG_135' in self.dfgFile:
@@ -192,11 +187,9 @@ class ClassDfg:
             print(header)
             menu = {}
             for dk in list(self.domain.keys()):
-                if self.domain[dk]["codetext"] in list(
-                    mod_globals.language_dict.keys()
-                ):
+                if self.domain[dk]["codetext"] in list(config.language_dict.keys()):
                     menu[dk] = pyren_encode(
-                        mod_globals.language_dict[self.domain[dk]["codetext"]]
+                        config.language_dict[self.domain[dk]["codetext"]]
                     )
                 else:
                     menu[dk] = pyren_encode(self.domain[dk]["defaultText"])
@@ -207,7 +200,7 @@ class ClassDfg:
                 return
             dk = choice[0]
 
-            path = path + mod_globals.language_dict[self.domain[dk]["codetext"]]
+            path = path + config.language_dict[self.domain[dk]["codetext"]]
             while True:
                 clearScreen()
                 header = self.tcom + " : " + self.defaultText + "\n"
@@ -216,10 +209,10 @@ class ClassDfg:
                 menu = {}
                 for fk in list(self.domain[dk]["function"].keys()):
                     if self.domain[dk]["function"][fk]["codetext"] in list(
-                        mod_globals.language_dict.keys()
+                        config.language_dict.keys()
                     ):
                         menu[fk] = pyren_encode(
-                            mod_globals.language_dict[
+                            config.language_dict[
                                 self.domain[dk]["function"][fk]["codetext"]
                             ]
                         )
@@ -237,9 +230,7 @@ class ClassDfg:
                 path = (
                     path
                     + "/"
-                    + mod_globals.language_dict[
-                        self.domain[dk]["function"][fk]["codetext"]
-                    ]
+                    + config.language_dict[self.domain[dk]["function"][fk]["codetext"]]
                 )
                 while True:
                     clearScreen()
@@ -255,9 +246,9 @@ class ClassDfg:
                     for ek in list(self.domain[dk]["function"][fk]["feature"].keys()):
                         if self.domain[dk]["function"][fk]["feature"][ek][
                             "codetext"
-                        ] in list(mod_globals.language_dict.keys()):
+                        ] in list(config.language_dict.keys()):
                             menu[ek] = pyren_encode(
-                                mod_globals.language_dict[
+                                config.language_dict[
                                     self.domain[dk]["function"][fk]["feature"][ek][
                                         "codetext"
                                     ]

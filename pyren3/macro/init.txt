@@ -1,6 +1,6 @@
 #
 #
-#       Initialisation macros for mod_term
+#       Initialisation macros for term
 #
 #
 

@@ -134,9 +134,9 @@ https://www.youtube.com/watch?v=DazsvlnLCoA
 ## Included tools
 * **doc_maker.py** - build diagnostic documentation for your car (require BVMEXTRACTION folder and extracted DocDB_xx.7ze)
 * **bus_monitor.py** - catch, parse and shows the content of system frames on your CAN bus.
-* **mod_optfile.py** - for exploring CLIP database
-* **mod_term.py** - simple terminal
-* **mod_ecu.py** - shows list of all parameters, commands and DTCs. Build "PID" CSV file for "Torque PRO" 
+* **mod.optfile.py** - for exploring CLIP database
+* **mod.term.py** - simple terminal
+* **mod.ecu.py** - shows list of all parameters, commands and DTCs. Build "PID" CSV file for "Torque PRO" 
 * **acf.py** - build default dump file and autoconfiguration macro (require BVMEXTRACTION folder and *.acf db)
 
 # Installation

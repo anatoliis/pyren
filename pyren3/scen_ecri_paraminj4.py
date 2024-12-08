@@ -15,10 +15,9 @@ import xml.dom.minidom
 import xml.etree.cElementTree as et
 from collections import OrderedDict
 
-import mod_db_manager
-import mod_globals
-from mod_ply import Calc
-from mod_utils import Choice, clearScreen, isHex, pyren_encode
+from mod import config, db_manager
+from mod.ply import Calc
+from mod.utils import Choice, clearScreen, isHex, pyren_encode
 
 
 def run(elm, ecu, command, data):
@@ -43,28 +42,28 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(mod_globals.language_dict.keys()):
+        if value.isdigit() and value in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(mod_globals.language_dict[value])
+                value = pyren_encode(config.language_dict[value])
             else:
-                value = mod_globals.language_dict[value]
+                value = config.language_dict[value]
         return value
 
     def get_message_by_id(id, encode=True):
-        if id.isdigit() and id in list(mod_globals.language_dict.keys()):
+        if id.isdigit() and id in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(mod_globals.language_dict[id])
+                value = pyren_encode(config.language_dict[id])
             else:
-                value = mod_globals.language_dict[id]
+                value = config.language_dict[id]
         return value
 
     #
     #      Data file parsing
     #
-    DOMTree = xml.dom.minidom.parse(mod_db_manager.get_file_from_clip(data))
+    DOMTree = xml.dom.minidom.parse(db_manager.get_file_from_clip(data))
     ScmRoom = DOMTree.documentElement
 
-    root = et.parse(mod_db_manager.get_file_from_clip(data)).getroot()
+    root = et.parse(db_manager.get_file_from_clip(data)).getroot()
 
     ScmParams = ScmRoom.getElementsByTagName("ScmParam")
 
@@ -123,7 +122,7 @@ def run(elm, ecu, command, data):
             fileRoot.insert(1, el)
 
         tree = et.ElementTree(fileRoot)
-        tree.write(mod_globals.dumps_dir + ScmParam["FileName"])
+        tree.write(config.dumps_dir + ScmParam["FileName"])
 
     def loadDump():
         dumpScmParam = {}
@@ -131,7 +130,7 @@ def run(elm, ecu, command, data):
         clearScreen()
 
         try:
-            dumpData = open(mod_globals.dumps_dir + ScmParam["FileName"], "r")
+            dumpData = open(config.dumps_dir + ScmParam["FileName"], "r")
         except:
             print(get_message_by_id("2194"))
             print()
@@ -200,7 +199,7 @@ def run(elm, ecu, command, data):
         clearScreen()
 
         print(inProgressMessage)
-        if not mod_globals.opt_demo:
+        if not config.opt_demo:
             makeDump()
 
         responses = ""

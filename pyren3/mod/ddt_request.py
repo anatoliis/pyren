@@ -2,7 +2,7 @@
 
 import operator
 
-from mod_utils import pyren_decode, pyren_encode
+from mod.utils import pyren_decode, pyren_encode
 
 
 class DataItem:

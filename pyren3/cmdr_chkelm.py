@@ -2,8 +2,8 @@
 
 import sys
 
-import mod_globals
 import pyren3
+from mod import config
 
 cmdb = """
 #v1.0 ;AC P; ATZ                   ; Z                  ; reset all
@@ -124,23 +124,23 @@ cmdb = """
 try:
     import androidhelper as android
 
-    mod_globals.os = "android"
+    config.os = "android"
 except:
     try:
         import android
 
-        mod_globals.os = "android"
+        config.os = "android"
     except:
         pass
 
-if mod_globals.os != "android":
+if config.os != "android":
     try:
         import serial
         from serial.tools import list_ports
     except ImportError:
         sys.exit()
 
-from mod_elm import ELM
+from mod.mod_elm import ELM
 
 
 def main():
@@ -153,16 +153,16 @@ def main():
     res = ""
 
     print("Opening ELM")
-    elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
+    elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
     elm.portTimeout = 5
 
     for st in cmdb.split("#"):
         cm = st.split(";")
 
         if len(cm) > 1:
-            if mod_globals.os == "android" and "A" not in cm[1].upper():
+            if config.os == "android" and "A" not in cm[1].upper():
                 continue
-            if mod_globals.os != "android" and "C" not in cm[1].upper():
+            if config.os != "android" and "C" not in cm[1].upper():
                 continue
 
             if len(cm[2].strip()):

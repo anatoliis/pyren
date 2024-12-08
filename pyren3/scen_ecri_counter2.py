@@ -13,10 +13,8 @@ URL  -  scm:scen_ecri_calinj1#scen_ecri_calinj1_xxxxx.xml
 import re
 import xml.dom.minidom
 
-import mod_db_manager
-import mod_ecu_mnemonic
-import mod_globals
-from mod_utils import clearScreen, pyren_encode
+from mod import config, db_manager, ecu_mnemonic
+from mod.utils import clearScreen, pyren_encode
 
 
 def run(elm, ecu, command, data):
@@ -41,25 +39,25 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(mod_globals.language_dict.keys()):
+        if value.isdigit() and value in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(mod_globals.language_dict[value])
+                value = pyren_encode(config.language_dict[value])
             else:
-                value = mod_globals.language_dict[value]
+                value = config.language_dict[value]
         return value
 
     def get_message_by_id(id, encode=1):
-        if id.isdigit() and id in list(mod_globals.language_dict.keys()):
+        if id.isdigit() and id in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(mod_globals.language_dict[id])
+                value = pyren_encode(config.language_dict[id])
             else:
-                value = mod_globals.language_dict[id]
+                value = config.language_dict[id]
         return value
 
     #
     #      Data file parsing
     #
-    DOMTree = xml.dom.minidom.parse(mod_db_manager.get_file_from_clip(data))
+    DOMTree = xml.dom.minidom.parse(db_manager.get_file_from_clip(data))
     ScmRoom = DOMTree.documentElement
 
     ScmParams = ScmRoom.getElementsByTagName("ScmParam")
@@ -74,7 +72,7 @@ def run(elm, ecu, command, data):
 
     for Set in ScmSets:
         if len(Set.attributes) != 1:
-            setname = pyren_encode(mod_globals.language_dict[Set.getAttribute("name")])
+            setname = pyren_encode(config.language_dict[Set.getAttribute("name")])
             ScmParams = Set.getElementsByTagName("ScmParam")
 
             for Param in ScmParams:
@@ -106,17 +104,13 @@ def run(elm, ecu, command, data):
     resetBytes = byteCount * "00"
     params_to_send_length = int(mnemo2[-2:])
 
-    mnemo1Data = mod_ecu_mnemonic.get_mnemonic(
-        ecu.Mnemonics[mnemo1], ecu.Services, elm, 1
-    )
-    mnemo2Data = mod_ecu_mnemonic.get_mnemonic(
-        ecu.Mnemonics[mnemo2], ecu.Services, elm, 1
-    )
+    mnemo1Data = ecu_mnemonic.get_mnemonic(ecu.Mnemonics[mnemo1], ecu.Services, elm, 1)
+    mnemo2Data = ecu_mnemonic.get_mnemonic(ecu.Mnemonics[mnemo2], ecu.Services, elm, 1)
 
     paramsToSend = mnemo1Data + resetBytes + mnemo2Data
 
     fap_command_sids = ecu.get_ref_cmd(ScmParam["Cmde1"]).serviceID
-    if len(fap_command_sids) and not mod_globals.opt_demo:
+    if len(fap_command_sids) and not config.opt_demo:
         for sid in fap_command_sids:
             if len(ecu.Services[sid].params):
                 if (

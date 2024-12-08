@@ -6,7 +6,7 @@ import re
 import shutil
 import zipfile
 
-import mod_globals
+from mod import config
 
 db_dir_list = [".", ".."]
 android_dir_list = ["/mnt/sdcard/pyren"]
@@ -19,7 +19,7 @@ def find_DBs():
     clip_found = False
     ddt_found = False
 
-    if mod_globals.os == "android":
+    if config.os == "android":
         db_dir_list = db_dir_list + android_dir_list
 
     for clip_dir in db_dir_list:
@@ -28,8 +28,8 @@ def find_DBs():
             and os.path.exists(os.path.join(clip_dir, "Location"))
             and os.path.exists(os.path.join(clip_dir, "EcuRenault"))
         ):
-            mod_globals.clip_arc = ""
-            mod_globals.cliproot = clip_dir
+            config.clip_arc = ""
+            config.cliproot = clip_dir
             clip_found = True
             break
         arh_list = sorted(
@@ -37,12 +37,12 @@ def find_DBs():
         )
 
         if len(arh_list):
-            mod_globals.clip_arc = zipfile.ZipFile(arh_list[0])
-            mod_globals.cliproot = arh_list[0]
+            config.clip_arc = zipfile.ZipFile(arh_list[0])
+            config.cliproot = arh_list[0]
             clip_found = True
             break
 
-    if mod_globals.os == "android":
+    if config.os == "android":
         if not clip_found:
             print("ERROR: CLIP DB not found")
             exit()
@@ -51,30 +51,30 @@ def find_DBs():
 
     for ddt_dir in db_dir_list:
         if os.path.exists(os.path.join(ddt_dir, "DDT2000data", "ecus")):
-            mod_globals.ddt_arc = ""
-            mod_globals.ddtroot = os.path.join(ddt_dir, "DDT2000data")
+            config.ddt_arc = ""
+            config.ddtroot = os.path.join(ddt_dir, "DDT2000data")
             ddt_found = True
             break
         arh_list = sorted(
             glob.glob(os.path.join(ddt_dir, "DDT2000data*.zip")), reverse=True
         )
         if len(arh_list):
-            mod_globals.ddt_arc = zipfile.ZipFile(arh_list[0])
-            mod_globals.ddtroot = arh_list[0]
+            config.ddt_arc = zipfile.ZipFile(arh_list[0])
+            config.ddtroot = arh_list[0]
             ddt_found = True
             break
         if os.path.exists(os.path.join(ddt_dir, "ecus")):
-            mod_globals.ddt_arc = ""
-            mod_globals.ddtroot = ddt_dir
+            config.ddt_arc = ""
+            config.ddtroot = ddt_dir
             ddt_found = True
             break
 
     if clip_found:
-        print("CLIP DB :", mod_globals.cliproot)
+        print("CLIP DB :", config.cliproot)
     if ddt_found:
-        print("DDT  DB :", mod_globals.ddtroot)
-        if mod_globals.os != "android":
-            mod_globals.opt_ddt = True
+        print("DDT  DB :", config.ddtroot)
+        if config.os != "android":
+            config.opt_ddt = True
 
     # check cache version
     verfilename = "./cache/version3.txt"
@@ -93,7 +93,7 @@ def find_DBs():
     else:
         verfile = open(verfilename, "rt")
         verline = verfile.readline().strip().split(":")
-        if verline[0] != mod_globals.cliproot:
+        if verline[0] != config.cliproot:
             saveDBver(verfilename)
             # if the cache has old version then we should clear it
             for root, dirs, files in os.walk("./cache"):
@@ -105,7 +105,7 @@ def find_DBs():
                     ):
                         full_path = os.path.join("./cache", sfile)
                         os.remove(full_path)
-        if verline[1] != mod_globals.ddtroot:
+        if verline[1] != config.ddtroot:
             saveDBver(verfilename)
             # if the cache has old version then we should clear it
             for root, dirs, files in os.walk("./cache"):
@@ -124,7 +124,7 @@ def find_DBs():
 def saveDBver(verfilename):
     # create new version file
     verfile = open(verfilename, "w")
-    verfile.write(":".join([mod_globals.cliproot, mod_globals.ddtroot]) + "\n")
+    verfile.write(":".join([config.cliproot, config.ddtroot]) + "\n")
     verfile.write("Do not remove me if you have v0.9.q or above.\n")
     verfile.close()
 
@@ -133,12 +133,12 @@ def saveDBver(verfilename):
 
 
 def get_file_list_from_clip(pattern):
-    if mod_globals.clip_arc == "":
-        fl = glob.glob(os.path.join(mod_globals.cliproot, pattern))
+    if config.clip_arc == "":
+        fl = glob.glob(os.path.join(config.cliproot, pattern))
     else:
         if "*" in pattern:
             pattern = pattern.replace("*", r"\d{3}")
-        file_list = mod_globals.clip_arc.namelist()
+        file_list = config.clip_arc.namelist()
         regex = re.compile(pattern)
         fl = list(filter(regex.search, file_list))
     res = []
@@ -159,12 +159,12 @@ def get_file_from_clip(filename):
     else:
         mode = "r"
 
-    if mod_globals.os == "android" or mod_globals.clip_arc != "":
+    if config.os == "android" or config.clip_arc != "":
         mode = "r"
 
-    if mod_globals.clip_arc == "":
+    if config.clip_arc == "":
         # check encoding
-        file = open(os.path.join(mod_globals.cliproot, filename), "rb")
+        file = open(os.path.join(config.cliproot, filename), "rb")
         bom = ord(file.read(1))
         if bom == 0xFF:
             encoding = "utf-16-le"
@@ -173,35 +173,35 @@ def get_file_from_clip(filename):
         else:
             encoding = "utf-8"
         if mode == "rb":
-            return open(os.path.join(mod_globals.cliproot, filename), mode)
+            return open(os.path.join(config.cliproot, filename), mode)
         else:
             return open(
-                os.path.join(mod_globals.cliproot, filename), mode, encoding=encoding
+                os.path.join(config.cliproot, filename), mode, encoding=encoding
             )
     else:
         if filename.startswith("../"):
             filename = filename[3:]
         try:
-            for an in mod_globals.clip_arc.NameToInfo:
+            for an in config.clip_arc.NameToInfo:
                 if filename.lower() == an.lower():
                     filename = an
                     break
-            f = mod_globals.clip_arc.open(filename, mode)
+            f = config.clip_arc.open(filename, mode)
             return f
         except Exception as e:
             # print(e)
             fn = filename.split("/")[-1]
             lfn = fn.lower()
             filename = filename.replace(fn, lfn)
-            return mod_globals.clip_arc.open(filename, mode)
+            return config.clip_arc.open(filename, mode)
 
 
 def file_in_clip(pattern):
-    if mod_globals.clip_arc == "":
-        pattern = os.path.join(mod_globals.cliproot, pattern)
+    if config.clip_arc == "":
+        pattern = os.path.join(config.cliproot, pattern)
         return pattern in glob.glob(pattern)
     else:
-        file_list = mod_globals.clip_arc.namelist()
+        file_list = config.clip_arc.namelist()
         for l in file_list:
             if pattern.lower() == l.lower():
                 return l
@@ -209,13 +209,11 @@ def file_in_clip(pattern):
 
 
 def extract_from_clip_to_cache(filename):
-    if mod_globals.clip_arc == "":
+    if config.clip_arc == "":
         print("Error in extract_from_clip_to_cache")
     else:
-        source = mod_globals.clip_arc.open(filename)
-        target = open(
-            os.path.join(mod_globals.cache_dir, os.path.basename(filename)), "wb"
-        )
+        source = config.clip_arc.open(filename)
+        target = open(os.path.join(config.cache_dir, os.path.basename(filename)), "wb")
         with source, target:
             shutil.copyfileobj(source, target)
 
@@ -224,19 +222,19 @@ def extract_from_clip_to_cache(filename):
 
 
 def get_file_list_from_ddt(pattern):
-    if mod_globals.ddt_arc == "":
-        return glob.glob(os.path.join(mod_globals.ddtroot, pattern))
+    if config.ddt_arc == "":
+        return glob.glob(os.path.join(config.ddtroot, pattern))
     else:
-        file_list = mod_globals.ddt_arc.namelist()
+        file_list = config.ddt_arc.namelist()
         regex = re.compile(pattern)
         return list(filter(regex.search, file_list))
 
 
 def file_in_ddt(pattern):
-    if mod_globals.ddt_arc == "":
-        li = glob.glob(os.path.join(mod_globals.ddtroot, pattern))
+    if config.ddt_arc == "":
+        li = glob.glob(os.path.join(config.ddtroot, pattern))
     else:
-        file_list = mod_globals.ddt_arc.namelist()
+        file_list = config.ddt_arc.namelist()
         if "(" in pattern:
             pattern = pattern.replace("(", r"\(")
         if ")" in pattern:
@@ -247,10 +245,10 @@ def file_in_ddt(pattern):
 
 
 def path_in_ddt(pattern):
-    if mod_globals.ddt_arc == "":
-        li = glob.glob(os.path.join(mod_globals.ddtroot, pattern))
+    if config.ddt_arc == "":
+        li = glob.glob(os.path.join(config.ddtroot, pattern))
     else:
-        file_list = mod_globals.ddt_arc.namelist()
+        file_list = config.ddt_arc.namelist()
         regex = re.compile(pattern)
         li = list(filter(regex.search, file_list))
     if len(li) > 0:
@@ -260,19 +258,19 @@ def path_in_ddt(pattern):
 
 
 def get_file_from_ddt(filename):
-    if mod_globals.ddt_arc == "":
-        return open(os.path.join(mod_globals.ddtroot, filename), "rb")
+    if config.ddt_arc == "":
+        return open(os.path.join(config.ddtroot, filename), "rb")
     else:
-        return mod_globals.ddt_arc.open(filename, "r")
+        return config.ddt_arc.open(filename, "r")
 
 
 def extract_from_ddt_to_cache(filename):
-    targ_file = os.path.join(mod_globals.cache_dir, filename)
+    targ_file = os.path.join(config.cache_dir, filename)
     try:
-        if mod_globals.ddt_arc == "":
-            source = open(os.path.join(mod_globals.ddtroot, filename))
+        if config.ddt_arc == "":
+            source = open(os.path.join(config.ddtroot, filename))
         else:
-            source = mod_globals.ddt_arc.open(filename)
+            source = config.ddt_arc.open(filename)
 
         if not os.path.exists(os.path.dirname(targ_file)):
             os.makedirs(os.path.dirname(targ_file))

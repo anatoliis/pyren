@@ -2,9 +2,9 @@
 
 import xml.dom.minidom
 
-import mod_globals
-from mod_ecu_mnemonic import get_SnapShotMnemonic, get_mnemonic
-from mod_utils import pyren_encode
+from mod import config
+from mod.ecu_mnemonic import get_SnapShotMnemonic, get_mnemonic
+from mod.utils import pyren_encode
 
 
 def get_parameter(pr, mn, se, elm, calc, dataids={}):
@@ -41,7 +41,7 @@ def get_parameter(pr, mn, se, elm, calc, dataids={}):
         tmpmin = ""
         tmpmax = ""
 
-    if mod_globals.os == "android":
+    if config.os == "android":
         return (
             "%-6s %-41s %8s %-5s" % (pr.codeMR, pr.label, pr.value, pr.unit),
             pr.helps,

@@ -279,11 +279,11 @@ def run(s, cmd):
     elif cmd == "mon":
         cmdr = __import__("bus_monitor")
     elif cmd == "ddt":
-        cmdr = __import__("mod_ddt")
+        cmdr = __import__("mod.ddt")
     elif cmd == "term":
-        cmdr = __import__("mod_term")
+        cmdr = __import__("mod.term")
     elif cmd == "pids":
-        cmdr = __import__("mod_ecu")
+        cmdr = __import__("mod.ecu")
 
     if s.port.upper() == "BT" or s.port == "":
         s.port = "bt"

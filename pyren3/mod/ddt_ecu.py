@@ -10,15 +10,13 @@ import time
 import xml.etree.ElementTree as et
 from datetime import datetime
 
-import mod_db_manager
-import mod_ddt_utils
-import mod_globals
-from mod_ddt_data import DecuDatas
-from mod_ddt_request import DecuRequests
-from mod_elm import AllowedList
-from mod_utils import pyren_encode
+from mod import config, db_manager, ddt_utils
+from mod.ddt_data import DecuDatas
+from mod.ddt_request import DecuRequests
+from mod.mod_elm import AllowedList
+from mod.utils import pyren_encode
 
-if mod_globals.os != "android":
+if config.os != "android":
     import tkinter as tk
 
 
@@ -156,7 +154,7 @@ class DDTECU:
                         self.sentRequests.append(req)
 
                 else:
-                    if mod_globals.opt_demo:
+                    if config.opt_demo:
                         time.sleep(0.1)
 
         # print "Update thread terminated"
@@ -283,13 +281,13 @@ class DDTECU:
             % (Address, DiagVersion, Supplier, Soft, Version)
         )
 
-        eculist = mod_ddt_utils.loadECUlist()
+        eculist = ddt_utils.loadECUlist()
 
-        # mod_ddt_utils.searchddtroot()
+        # ddt_utils.searchddtroot()
 
-        if len(mod_globals.opt_ddtxml) > 0:
-            fname = mod_globals.opt_ddtxml
-            self.ecufname = mod_globals.ddtroot + "/ecus/" + fname
+        if len(config.opt_ddtxml) > 0:
+            fname = config.opt_ddtxml
+            self.ecufname = config.ddtroot + "/ecus/" + fname
         else:
             problist = ecuSearch(
                 vehTypeCode, Address, DiagVersion, Supplier, Soft, Version, eculist
@@ -307,7 +305,7 @@ class DDTECU:
                 fname = fname.strip()
                 if len(fname):
                     self.ecufname = "ecus/" + fname
-                    if mod_db_manager.file_in_ddt(self.ecufname):
+                    if db_manager.file_in_ddt(self.ecufname):
                         break
                     else:
                         print("No such file :", self.ecufname)
@@ -321,12 +319,12 @@ class DDTECU:
         if len(xmlfile):
             self.ecufname = xmlfile
 
-        if not mod_db_manager.file_in_ddt(self.ecufname):
+        if not db_manager.file_in_ddt(self.ecufname):
             print("No such file:", self.ecufname)
             return
 
         # Load XML
-        tree = et.parse(mod_db_manager.get_file_from_ddt(self.ecufname))
+        tree = et.parse(db_manager.get_file_from_ddt(self.ecufname))
         root = tree.getroot()
 
         ns = {
@@ -425,7 +423,7 @@ class DDTECU:
         # debug
         print("Dump name:", dumpname)
 
-        mod_globals.dumpName = dumpname
+        config.dumpName = dumpname
         df = open(dumpname, "rt")
         lines = df.readlines()
         df.close()
@@ -478,8 +476,8 @@ class DDTECU:
         # first get hex value
         hv = self.getHex(data, auto, request, response)
 
-        if hv == mod_globals.none_val:
-            return mod_globals.none_val
+        if hv == config.none_val:
+            return config.none_val
 
         # get data instance
         if data in list(self.datas.keys()):
@@ -548,7 +546,7 @@ class DDTECU:
             if data not in list(
                 self.requests.keys()
             ):  # special case when no DataName in Display
-                return mod_globals.none_val
+                return config.none_val
 
         # find appropriate request r
         if request == None:
@@ -562,7 +560,7 @@ class DDTECU:
                 ):  # special case when no DataName in Display
                     r = self.requests[data]
                 else:
-                    return mod_globals.none_val
+                    return config.none_val
         else:
             r = request
 
@@ -572,15 +570,15 @@ class DDTECU:
             and (r.ManuelSend or len(list(r.SentDI.keys())) > 0)
             and data not in list(r.SentDI.keys())
         ):
-            return mod_globals.none_val
+            return config.none_val
 
         # protect not expert mode
         if (
             (r.SentBytes[:2] not in AllowedList)
-            and not mod_globals.opt_exp
+            and not config.opt_exp
             and data not in list(r.SentDI.keys())
         ):
-            return mod_globals.none_val
+            return config.none_val
 
         # if response not defined as an argument
         if response == None:
@@ -619,7 +617,7 @@ class DDTECU:
 
         # check length of response
         if (sb * 3 + bytes * 3 - 1) > (len(resp)):
-            return mod_globals.none_val
+            return config.none_val
 
         # extract hex
         hexval = resp[sb * 3 : (sb + bytes) * 3 - 1]
@@ -972,7 +970,7 @@ class DDTECU:
             res = self.getValue(d, request=self.requests[rcmd])
         else:
             gh = self.getHex(d, request=self.requests[rcmd])
-            if gh != mod_globals.none_val:
+            if gh != config.none_val:
                 res = "0x" + gh
             else:
                 res = gh
@@ -994,12 +992,12 @@ class DDTECU:
             res = self.getValue(d, request=self.requests[rcmd])
         else:
             gh = self.getHex(d, request=self.requests[rcmd])
-            if gh != mod_globals.none_val:
+            if gh != config.none_val:
                 res = "0x" + gh
             else:
                 res = gh
 
-        if res == mod_globals.none_val:  # try to find second command
+        if res == config.none_val:  # try to find second command
             res = self.getValueForConfig_second_cmd(d, rcmd)
 
         return res
@@ -1098,7 +1096,7 @@ class DDTECU:
                 sentValues[d].set(val)
                 conf_v[d] = val
 
-                if annotate:  # and mod_globals.opt_verbose:
+                if annotate:  # and config.opt_verbose:
                     val_ann = self.getValue(d)
                     config_ann.append("##     " + d + " = " + val_ann)
 

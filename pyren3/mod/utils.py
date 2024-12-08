@@ -20,7 +20,7 @@ import subprocess
 import sys
 import webbrowser
 
-import mod_globals
+from mod import config
 
 # Snippet from http://home.wlu.edu/~levys/software/kbhit.py
 
@@ -149,7 +149,7 @@ def Choice(list, question):
         if ch == "q":
             ch = "Q"
         if ch == "cmd":
-            mod_globals.opt_cmd = True
+            config.opt_cmd = True
         if ch in d.keys():
             return [d[ch], ch]
 
@@ -216,7 +216,7 @@ def ChoiceLong(list, question, header=""):
                 break
 
             if ch == "cmd":
-                mod_globals.opt_cmd = True
+                config.opt_cmd = True
             if ch in d.keys():
                 return [d[ch], ch]
 
@@ -255,7 +255,7 @@ def ChoiceFromDict(dict, question, showId=True):
 
 def pyren_encode(inp):
     return inp
-    # if mod_globals.os == 'android':
+    # if config.os == 'android':
     #  return inp.encode('utf-8', errors='replace')
     # else:
     #  return inp.encode(sys.stdout.encoding, errors='replace')
@@ -263,14 +263,14 @@ def pyren_encode(inp):
 
 def pyren_decode(inp):
     return inp
-    # if mod_globals.os == 'android':
+    # if config.os == 'android':
     #  return inp.decode('utf-8', errors='replace')
     # else:
     #  return inp.decode(sys.stdout.encoding, errors='replace')
 
 
 def pyren_decode_i(inp):
-    if mod_globals.os == "android":
+    if config.os == "android":
         return inp.decode("utf-8", errors="ignore")
     else:
         return inp.decode(sys.stdout.encoding, errors="ignore")
@@ -423,7 +423,7 @@ def getVIN(de, elm, getFirst=False):
     for e in de:
 
         # init elm
-        if mod_globals.opt_demo:  # try to load dump
+        if config.opt_demo:  # try to load dump
             loadDumpToELM(e["ecuname"], elm)
         else:
             if e["pin"].lower() == "can":
@@ -484,9 +484,9 @@ def getVIN(de, elm, getFirst=False):
 
 
 def DBG(tag, s):
-    if mod_globals.opt_debug and mod_globals.debug_file != None:
-        mod_globals.debug_file.write("### " + tag + "\n")
-        mod_globals.debug_file.write('"' + s + '"\n')
+    if config.opt_debug and config.debug_file != None:
+        config.debug_file.write("### " + tag + "\n")
+        config.debug_file.write('"' + s + '"\n')
 
 
 def isHex(s):
@@ -494,24 +494,24 @@ def isHex(s):
 
 
 def kill_server():
-    if mod_globals.doc_server_proc is None:
+    if config.doc_server_proc is None:
         pass
     else:
-        os.kill(mod_globals.doc_server_proc.pid, signal.SIGTERM)
+        os.kill(config.doc_server_proc.pid, signal.SIGTERM)
 
 
 def show_doc(addr, id):
-    if mod_globals.vin == "" and not mod_globals.opt_sd:
+    if config.vin == "" and not config.opt_sd:
         return
 
-    if mod_globals.doc_server_proc == None:
-        mod_globals.doc_server_proc = subprocess.Popen(
+    if config.doc_server_proc == None:
+        config.doc_server_proc = subprocess.Popen(
             ["python3", "-m", "http.server", "59152"]
         )
         atexit.register(kill_server)
 
-    if mod_globals.opt_sd and id != "":
+    if config.opt_sd and id != "":
         url = "http://127.0.0.1:59152/doc/" + id[1:] + ".htm"
     else:
-        url = "http://127.0.0.1:59152/doc/" + mod_globals.vin + ".htm" + id
+        url = "http://127.0.0.1:59152/doc/" + config.vin + ".htm" + id
     webbrowser.open(url, new=0)

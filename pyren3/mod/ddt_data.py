@@ -2,7 +2,7 @@
 
 import math
 
-from mod_utils import pyren_encode
+from mod.utils import pyren_encode
 
 
 class DecuData:

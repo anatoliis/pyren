@@ -15,19 +15,13 @@ import tkinter.ttk as ttk
 import xml.etree.ElementTree as et
 from shutil import copyfile
 
-import mod_db_manager
-import mod_ddt_ecu
-import mod_ddt_utils
-import mod_elm
-import mod_globals
-import mod_scan_ecus
-import mod_utils
-from mod_ddt_ecu import DDTECU
-from mod_ddt_screen import DDTScreen
+from mod import config, db_manager, ddt_ecu, ddt_utils, mod_elm, scan_ecus, utils
+from mod.ddt_ecu import DDTECU
+from mod.ddt_screen import DDTScreen
 
-mod_globals.os = os.name
+config.os = os.name
 
-if mod_globals.os == "nt":
+if config.os == "nt":
     import pip
 
     try:
@@ -40,16 +34,16 @@ else:
     try:
         import androidhelper as android
 
-        mod_globals.os = "android"
+        config.os = "android"
     except:
         try:
             import android
 
-            mod_globals.os = "android"
+            config.os = "android"
         except:
             pass
 
-if mod_globals.os != "android":
+if config.os != "android":
     try:
         import serial
         from serial.tools import list_ports
@@ -58,8 +52,8 @@ if mod_globals.os != "android":
         print("\t\t>sudo easy_install pyserial")
         sys.exit()
 
-from mod_elm import ELM
-from mod_utils import clearScreen
+from mod.mod_elm import ELM
+from mod.utils import clearScreen
 
 
 class DDT:
@@ -77,7 +71,7 @@ class DDT:
         decucashfile = "./cache/ddt_" + cecu["ModelId"] + ".p"
 
         if (
-            os.path.isfile(decucashfile) and mod_globals.opt_ddtxml == ""
+            os.path.isfile(decucashfile) and config.opt_ddtxml == ""
         ):  # if cache exists and no xml defined
             self.decu = pickle.load(open(decucashfile, "rb"))  # load it
         else:  # else
@@ -106,24 +100,24 @@ class DDT:
                     dumpIs = True
                     break
 
-        if not mod_globals.opt_demo and not dumpIs and not mod_globals.opt_dump:
+        if not config.opt_demo and not dumpIs and not config.opt_dump:
             answer = input("Save dump ? [y/n] : ")
             if "N" in answer.upper():
                 dumpIs = True
 
-        if mod_globals.opt_demo:
+        if config.opt_demo:
             print("Loading dump")
             self.decu.loadDump()
-        elif mod_globals.opt_dump or not dumpIs:
+        elif config.opt_dump or not dumpIs:
             print("Saving dump")
             self.decu.saveDump()
 
         # Load XML
-        if not self.decu.ecufname.startswith(mod_globals.ddtroot):
+        if not self.decu.ecufname.startswith(config.ddtroot):
             tmp_f_name = self.decu.ecufname.split("/")[-1]
             self.decu.ecufname = "ecus/" + tmp_f_name
 
-        if not mod_db_manager.file_in_ddt(self.decu.ecufname):
+        if not db_manager.file_in_ddt(self.decu.ecufname):
             print("No such file: ", self.decu.ecufname)
             return None
 
@@ -132,7 +126,7 @@ class DDT:
             "ns1": "http://www-diag.renault.com/2002/screens",
         }
 
-        tree = et.parse(mod_db_manager.get_file_from_ddt(self.decu.ecufname))
+        tree = et.parse(db_manager.get_file_from_ddt(self.decu.ecufname))
         xdoc = tree.getroot()
 
         # Show screen
@@ -234,7 +228,7 @@ def optParser():
 
     options = parser.parse_args()
 
-    if not options.port and mod_globals.os != "android":
+    if not options.port and config.os != "android":
         parser.print_help()
         iterator = sorted(list(list_ports.comports()))
         print("")
@@ -247,32 +241,32 @@ def optParser():
         print("")
         exit(2)
     else:
-        mod_globals.opt_port = options.port
-        mod_globals.opt_ecuAddr = options.ecuAddr.upper()
-        mod_globals.opt_rate = int(options.rate)
-        mod_globals.opt_lang = options.lang
-        mod_globals.opt_log = options.logfile
-        mod_globals.opt_demo = options.demo
-        mod_globals.opt_dump = options.dump
-        mod_globals.opt_exp = options.exp
-        mod_globals.opt_cfc0 = options.cfc
-        mod_globals.opt_n1c = options.n1c
-        mod_globals.opt_ddtxml = options.ddtxml
+        config.opt_port = options.port
+        config.opt_ecuAddr = options.ecuAddr.upper()
+        config.opt_rate = int(options.rate)
+        config.opt_lang = options.lang
+        config.opt_log = options.logfile
+        config.opt_demo = options.demo
+        config.opt_dump = options.dump
+        config.opt_exp = options.exp
+        config.opt_cfc0 = options.cfc
+        config.opt_n1c = options.n1c
+        config.opt_ddtxml = options.ddtxml
         if "S" in options.protocol.upper():
-            mod_globals.opt_protocol = "S"
+            config.opt_protocol = "S"
         elif "F" in options.protocol.upper():
-            mod_globals.opt_protocol = "F"
+            config.opt_protocol = "F"
         elif "250" in options.protocol:
-            mod_globals.opt_protocol = "250"
+            config.opt_protocol = "250"
         elif "500" in options.protocol:
-            mod_globals.opt_protocol = "500"
+            config.opt_protocol = "500"
         else:
-            mod_globals.opt_protocol = "500"
+            config.opt_protocol = "500"
 
 
 class DDTLauncher:
     def __init__(self):
-        self.eculist = mod_ddt_utils.loadECUlist()
+        self.eculist = ddt_utils.loadECUlist()
         self.carecus = []
 
         self.root = tk.Tk()
@@ -294,7 +288,7 @@ class DDTLauncher:
         self.var_logName = tk.StringVar()
 
         self.elm = None
-        self.save = mod_ddt_utils.settings()
+        self.save = ddt_utils.settings()
         self.loadSettings()
 
         self.currentEcu = None
@@ -382,7 +376,7 @@ class DDTLauncher:
 
         self.l_db = tk.Label(self.mf, text="DB root:", background="#d9d9d9")
         self.l_db.grid(row=0, column=0, **optsGrid_e)
-        self.l_db2 = tk.Label(self.mf, text=mod_globals.ddtroot, background="#d9d9d9")
+        self.l_db2 = tk.Label(self.mf, text=config.ddtroot, background="#d9d9d9")
         self.l_db2.grid(row=0, column=1, **optsGrid_w)
 
         self.l_pr = tk.Label(self.mf, text="Project:", background="#d9d9d9")
@@ -564,7 +558,7 @@ class DDTLauncher:
         self.ecutree.column("#7", minwidth=300, width=300, stretch=True)
         self.ecutree.column("#8", minwidth=150, width=150, stretch=True)
 
-        self.pl = mod_ddt_utils.ddtProjects()
+        self.pl = ddt_utils.ddtProjects()
         self.fltBtnClick()  # show tree with apply clear filter
 
         self.LoadCarFile("./savedCAR_prev.csv")
@@ -589,10 +583,8 @@ class DDTLauncher:
         self.applySettings()
 
         try:
-            mod_globals.opt_demo = False
-            self.elm = ELM(
-                mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log
-            )
+            config.opt_demo = False
+            self.elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
         except:
             result = tkinter.messagebox.askquestion(
                 "Warning",
@@ -600,20 +592,18 @@ class DDTLauncher:
                 icon="warning",
             )
             if result == "yes":
-                mod_globals.opt_demo = True
-                self.elm = ELM(
-                    mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log
-                )
-                if mod_globals.opt_obdlink == True:
+                config.opt_demo = True
+                self.elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
+                if config.opt_obdlink == True:
                     self.elm.ATCFC0 = False
-                    mod_globals.opt_cfc0 = False
+                    config.opt_cfc0 = False
             else:
                 raise Exception("elm is not connected")
                 return
 
         # change serial port baud rate
-        if mod_globals.opt_speed < mod_globals.opt_rate and not mod_globals.opt_demo:
-            self.elm.port.soft_boudrate(mod_globals.opt_rate)
+        if config.opt_speed < config.opt_rate and not config.opt_demo:
+            self.elm.port.soft_boudrate(config.opt_rate)
 
     def LoadCarFile(self, filename):
         if not os.path.isfile(filename):
@@ -717,17 +707,17 @@ class DDTLauncher:
                 ecudata["protocol"] = "KWP_Fast"
                 ecudata["fastInit"] = ce["addr"]
                 ecudata["slowInit"] = ""
-                mod_globals.opt_si = False
+                config.opt_si = False
             elif ce["prot"] == "ISO8" and ce["iso8"] != "":
                 ecudata["protocol"] = "KWP_Slow"
                 ecudata["fastInit"] = ""
                 ecudata["slowInit"] = ce["iso8"]
-                mod_globals.opt_si = True
+                config.opt_si = True
             else:
                 ecudata["protocol"] = "KWP_Slow"
                 ecudata["fastInit"] = ""
                 ecudata["slowInit"] = ce["addr"]
-                mod_globals.opt_si = True
+                config.opt_si = True
 
             ecudata["pin"] = "iso"
             self.elm.set_iso_addr(ce["addr"], ecudata)
@@ -771,7 +761,7 @@ class DDTLauncher:
 
                     # get ID
                     (StartSession, DiagVersion, Supplier, Version, Soft, Std, VIN) = (
-                        mod_scan_ecus.readECUIds(self.elm)
+                        scan_ecus.readECUIds(self.elm)
                     )
 
                     if (
@@ -783,7 +773,7 @@ class DDTLauncher:
                     ):
                         continue
 
-                    candlist = mod_ddt_ecu.ecuSearch(
+                    candlist = ddt_ecu.ecuSearch(
                         self.v_proj.get(),
                         ce["addr"],
                         DiagVersion,
@@ -864,14 +854,14 @@ class DDTLauncher:
 
         # get ID
         (StartSession, DiagVersion, Supplier, Version, Soft, Std, VIN) = (
-            mod_scan_ecus.readECUIds(self.elm)
+            scan_ecus.readECUIds(self.elm)
         )
 
         if DiagVersion == "" and Supplier == "" and Version == "" and Soft == "":
             tkinter.messagebox.showinfo("INFO", "no response from this ECU")
             return
 
-        candlist = mod_ddt_ecu.ecuSearch(
+        candlist = ddt_ecu.ecuSearch(
             self.v_proj.get(),
             ce["addr"],
             DiagVersion,
@@ -897,7 +887,7 @@ class DDTLauncher:
             )
             return None
 
-        mod_globals.opt_demo = False
+        config.opt_demo = False
 
         self.OpenECUScreens(ecu)
 
@@ -932,8 +922,8 @@ class DDTLauncher:
         except:
             return
 
-        if not mod_globals.opt_demo and self.var_dump.get():
-            mod_globals.opt_dump = True
+        if not config.opt_demo and self.var_dump.get():
+            config.opt_dump = True
 
         ce = self.getSelectedECU()
 
@@ -990,18 +980,18 @@ class DDTLauncher:
                     dumpIs = True
                     break
 
-        # if not mod_globals.opt_demo and not dumpIs and not mod_globals.opt_dump:
+        # if not config.opt_demo and not dumpIs and not config.opt_dump:
         #    answer = raw_input('Save dump ? [y/n] : ')
         #    if 'N' in answer.upper():
         #        dumpIs = True
 
-        if mod_globals.opt_demo:
+        if config.opt_demo:
             print("Loading dump")
             if len(ce["dump"]) == 0:
                 decu.loadDump()
             else:
                 decu.loadDump("./dumps/" + ce["dump"])
-        elif mod_globals.opt_dump:
+        elif config.opt_dump:
             ce["dump"] = self.guiSaveDump(decu)
             for ec in self.carecus:
                 if ce["xml"][:-4] in ec["xml"]:
@@ -1010,7 +1000,7 @@ class DDTLauncher:
             self.SaveBtnClick()
 
         # Load XML
-        if not mod_db_manager.file_in_ddt(decu.ecufname):
+        if not db_manager.file_in_ddt(decu.ecufname):
             print("No such file: ", decu.ecufname)
             return None
 
@@ -1019,7 +1009,7 @@ class DDTLauncher:
             "ns1": "http://www-diag.renault.com/2002/screens",
         }
 
-        tree = et.parse(mod_db_manager.get_file_from_ddt(decu.ecufname))
+        tree = et.parse(db_manager.get_file_from_ddt(decu.ecufname))
         xdoc = tree.getroot()
 
         # Show screen
@@ -1107,7 +1097,7 @@ class DDTLauncher:
             )
             return None
 
-        mod_globals.opt_demo = True
+        config.opt_demo = True
 
         self.OpenECUScreens(ecu)
 
@@ -1145,7 +1135,7 @@ class DDTLauncher:
         try:
             item = self.ptree.selection()[0]
             line = self.ptree.item(item)["values"]
-            self.addr = mod_ddt_utils.ddtAddressing(line[2])
+            self.addr = ddt_utils.ddtAddressing(line[2])
             self.v_proj.set(item)
             self.v_addr.set(line[2])
             self.v_vin.set("")
@@ -1348,7 +1338,7 @@ class DDTLauncher:
         # b_xml.grid(row=8, column=2, **optsGrid)
 
         allxmllist = []
-        for l in sorted(mod_db_manager.get_file_list_from_ddt("ecus/*")):
+        for l in sorted(db_manager.get_file_list_from_ddt("ecus/*")):
             allxmllist.append(os.path.basename(l))
         l2_xml = tk.Label(self.ecudlg, text="ALL XML:", background="#d9d9d9")
         l2_xml.grid(row=9, column=0, **optsGrid_e)
@@ -1385,7 +1375,7 @@ class DDTLauncher:
 
     def renewEcuList(self):
         self.ecutree.delete(*self.ecutree.get_children())
-        for ecu in mod_ddt_utils.multikeysort(self.carecus, ["undef", "addr"]):
+        for ecu in ddt_utils.multikeysort(self.carecus, ["undef", "addr"]):
             columns = (
                 ecu["iso8"],
                 ecu["xid"],
@@ -1407,18 +1397,18 @@ class DDTLauncher:
         self.ecutree.update()
 
     def applySettings(self):
-        mod_globals.opt_port = self.var_port.get().split(";")[0]
-        mod_globals.opt_rate = int(self.var_speed.get())
-        mod_globals.opt_can2 = self.var_can2.get()
+        config.opt_port = self.var_port.get().split(";")[0]
+        config.opt_rate = int(self.var_speed.get())
+        config.opt_can2 = self.var_can2.get()
         if self.var_log.get():
-            mod_globals.opt_log = self.var_logName.get()
+            config.opt_log = self.var_logName.get()
         else:
-            mod_globals.opt_log = ""
-        mod_globals.opt_cfc0 = True
+            config.opt_log = ""
+        config.opt_cfc0 = True
 
     def xmlBtnClick(self):
         filename = tkinter.filedialog.askopenfilename(
-            initialdir=mod_globals.ddtroot + "/ecus/",
+            initialdir=config.ddtroot + "/ecus/",
             title="Select file",
             filetypes=[("xml files", "*.xml")],
         )
@@ -1525,7 +1515,7 @@ class DDTLauncher:
             "1000000",
             "2000000",
         ]
-        self.var_portList = mod_ddt_utils.getPortList()
+        self.var_portList = ddt_utils.getPortList()
 
         if len(self.var_port.get()) == 0:
             for p in self.var_portList:
@@ -1537,8 +1527,8 @@ class DDTLauncher:
 def main():
     """Main function"""
 
-    mod_utils.chkDirTree()
-    mod_db_manager.find_DBs()
+    utils.chkDirTree()
+    db_manager.find_DBs()
 
     lau = DDTLauncher()
 

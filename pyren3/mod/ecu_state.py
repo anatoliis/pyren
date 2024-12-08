@@ -2,9 +2,9 @@
 
 import xml.dom.minidom
 
-import mod_globals
-from mod_ecu_mnemonic import get_SnapShotMnemonic, get_mnemonic
-from mod_utils import pyren_encode
+from mod import config
+from mod.ecu_mnemonic import get_SnapShotMnemonic, get_mnemonic
+from mod.utils import pyren_encode
 
 
 def get_state(st, mn, se, elm, calc, dataids={}):
@@ -23,12 +23,12 @@ def get_state(st, mn, se, elm, calc, dataids={}):
     else:
         st.value = str(tmp_val)
 
-    if mod_globals.opt_csv and mod_globals.opt_csv_only:
+    if config.opt_csv and config.opt_csv_only:
         csv_val = str(tmp_val)
     else:
         csv_val = str(st.value)
 
-    if mod_globals.os == "android":
+    if config.os == "android":
         st.value = " " * (8 - len(st.value) // 2) + str(st.value)
         return "%-6s %-41s %-16s" % (st.codeMR, st.label, st.value), st.helps, csv_val
     else:

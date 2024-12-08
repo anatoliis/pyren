@@ -7,7 +7,7 @@ Name of this script should be exactly the same as in scenaruim URL but with '.py
 URL  -  scm:scen_ecri_calinj1#scen_ecri_calinj1_xxxxx.xml
 
 'run' procedure will be executed by pyren script
- 
+
 """
 
 import string
@@ -15,9 +15,8 @@ import time
 import xml.dom.minidom
 from collections import OrderedDict
 
-import mod_db_manager
-import mod_globals
-from mod_utils import Choice, KBHit, clearScreen, pyren_encode
+from mod import config, db_manager
+from mod.utils import Choice, KBHit, clearScreen, pyren_encode
 
 
 def run(elm, ecu, command, data):
@@ -42,25 +41,25 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(mod_globals.language_dict.keys()):
+        if value.isdigit() and value in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(mod_globals.language_dict[value])
+                value = pyren_encode(config.language_dict[value])
             else:
-                value = mod_globals.language_dict[value]
+                value = config.language_dict[value]
         return value
 
     def get_message_by_id(id, encode=True):
-        if id.isdigit() and id in list(mod_globals.language_dict.keys()):
+        if id.isdigit() and id in list(config.language_dict.keys()):
             if encode:
-                value = pyren_encode(mod_globals.language_dict[id])
+                value = pyren_encode(config.language_dict[id])
             else:
-                value = mod_globals.language_dict[id]
+                value = config.language_dict[id]
         return value
 
     #
     #      Data file parsing
     #
-    DOMTree = xml.dom.minidom.parse(mod_db_manager.get_file_from_clip(data))
+    DOMTree = xml.dom.minidom.parse(db_manager.get_file_from_clip(data))
     ScmRoom = DOMTree.documentElement
 
     ScmParams = ScmRoom.getElementsByTagName("ScmParam")
@@ -75,7 +74,7 @@ def run(elm, ecu, command, data):
 
     for Set in ScmSets:
         if len(Set.attributes) != 1:
-            setname = pyren_encode(mod_globals.language_dict[Set.getAttribute("name")])
+            setname = pyren_encode(config.language_dict[Set.getAttribute("name")])
             ScmParams = Set.getElementsByTagName("ScmParam")
 
             for Param in ScmParams:
@@ -198,7 +197,7 @@ def run(elm, ecu, command, data):
     def sendTrainingCmd():
         resp = ecu.run_cmd(ScmParam["CmndRoutineTraining"])
         clearScreen()
-        if tariningCmdResp not in resp and not mod_globals.opt_demo:
+        if tariningCmdResp not in resp and not config.opt_demo:
             nrCode = resp[resp.find("NR") - 3 : resp.find("NR")]
             print()
             if "NR" in resp:
@@ -360,7 +359,7 @@ def run(elm, ecu, command, data):
 
             if (
                 pyren_encode(value2)
-                == pyren_encode(mod_globals.language_dict[ScmParam["StateNO"]])
+                == pyren_encode(config.language_dict[ScmParam["StateNO"]])
                 and len(readCodes) < 4
             ):
                 print("%-50s %-20s" % (readCodeMessage, pyren_encode(readCode)))
@@ -368,7 +367,7 @@ def run(elm, ecu, command, data):
                 print("No codes read")
             elif (
                 pyren_encode(value2)
-                == pyren_encode(mod_globals.language_dict[ScmParam["StateYES"]])
+                == pyren_encode(config.language_dict[ScmParam["StateYES"]])
                 and len(readCodes) < 4
             ):
                 print("%-50s %-20s" % (readCodeMessage, pyren_encode(readCode)))

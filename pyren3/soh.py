@@ -32,8 +32,8 @@ import tkinter.ttk
 
 from serial.tools import list_ports
 
-import mod_globals
-from mod_elm import ELM
+from mod import config
+from mod.mod_elm import ELM
 
 
 def set_Tk_var():
@@ -152,10 +152,10 @@ class Tl:
 
         # start ELM
         try:
-            mod_globals.opt_speed = 38400
-            mod_globals.opt_rate = 230400
-            self.elm = ELM(p_name, mod_globals.opt_speed, "")
-            self.elm.port.soft_boudrate(mod_globals.opt_rate)
+            config.opt_speed = 38400
+            config.opt_rate = 230400
+            self.elm = ELM(p_name, config.opt_speed, "")
+            self.elm.port.soft_boudrate(config.opt_rate)
         except:
             tkinter.messagebox.showinfo(
                 "INFO", "ELM is not connected or incompatible. "

@@ -14,14 +14,13 @@ import time
 import xml.dom.minidom
 from copy import deepcopy
 
-import mod_db_manager
-import mod_globals
-from mod_utils import KBHit, clearScreen, pyren_encode
+from mod import config, db_manager
+from mod.utils import KBHit, clearScreen, pyren_encode
 
 
 # def get_message( value ):
-#  if value.isdigit() and value in mod_globals.language_dict.keys():
-#    value = pyren_encode( mod_globals.language_dict[value] )
+#  if value.isdigit() and value in config.language_dict.keys():
+#    value = pyren_encode( config.language_dict[value] )
 #  print value
 
 
@@ -49,19 +48,19 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(mod_globals.language_dict.keys()):
-            value = pyren_encode(mod_globals.language_dict[value])
+        if value.isdigit() and value in list(config.language_dict.keys()):
+            value = pyren_encode(config.language_dict[value])
         return value
 
     def get_message_by_id(id):
-        if id.isdigit() and id in list(mod_globals.language_dict.keys()):
-            value = pyren_encode(mod_globals.language_dict[id])
+        if id.isdigit() and id in list(config.language_dict.keys()):
+            value = pyren_encode(config.language_dict[id])
         return value
 
     #
     #      Data file parsing
     #
-    DOMTree = xml.dom.minidom.parse(mod_db_manager.get_file_from_clip(data))
+    DOMTree = xml.dom.minidom.parse(db_manager.get_file_from_clip(data))
     ScmRoom = DOMTree.documentElement
 
     # read parameters
@@ -129,9 +128,9 @@ def run(elm, ecu, command, data):
         state_ref = ecu.get_ref_st(etat["Index"])
         value1, datastr1 = ecu.get_st(etat["Index"])
         print((pyren_encode(datastr1)))
-        if pyren_encode(value1) != mod_globals.language_dict[etat["RefOK"]]:
+        if pyren_encode(value1) != config.language_dict[etat["RefOK"]]:
             value2, datastr2 = ecu.get_st(etat["Donne1"])
-            print(pyren_encode(mod_globals.language_dict[etat["TexteSortie"]]))
+            print(pyren_encode(config.language_dict[etat["TexteSortie"]]))
             print((pyren_encode(datastr2)))
             print("*" * 80)
             ch = input("Press ENTER to exit")
@@ -171,8 +170,8 @@ def run(elm, ecu, command, data):
         rescode = pyren_encode(value1)
         result = rescode
         for m in ScmList_Messages:
-            if rescode in pyren_encode(mod_globals.language_dict[m["Valeur"]]):
-                result = pyren_encode(mod_globals.language_dict[m["Texte"]])
+            if rescode in pyren_encode(config.language_dict[m["Valeur"]]):
+                result = pyren_encode(config.language_dict[m["Texte"]])
 
         current_time = time.time()
         elapsed = int(current_time - begin_time)

@@ -3,8 +3,7 @@
 import argparse
 import sys
 
-import mod_elm
-import mod_globals
+from mod import config, mod_elm
 
 parser = argparse.ArgumentParser(
     version="bus_playback Version 0.1",
@@ -31,7 +30,7 @@ parser.add_argument("log", help="the log file name to be played back")
 
 options = parser.parse_args()
 
-if not options.port and mod_globals.os != "android":
+if not options.port and config.os != "android":
     parser.print_help()
 
     try:
@@ -47,9 +46,9 @@ if not options.port and mod_globals.os != "android":
 
     exit(2)
 
-mod_globals.opt_port = options.port
-mod_globals.opt_rate = int(options.rate)
-mod_globals.opt_log = options.logfile
+config.opt_port = options.port
+config.opt_rate = int(options.rate)
+config.opt_log = options.logfile
 
 try:
     playbackfile = open(options.log)
@@ -58,10 +57,10 @@ except IOError as e:
     exit(2)
 
 print("Opening ELM")
-elm = mod_elm.ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
+elm = mod_elm.ELM(config.opt_port, config.opt_speed, config.opt_log)
 
-if mod_globals.opt_speed < mod_globals.opt_rate:
-    elm.port.soft_boudrate(mod_globals.opt_rate)
+if config.opt_speed < config.opt_rate:
+    elm.port.soft_boudrate(config.opt_rate)
 
 print("Init    ELM")
 print(elm.cmd("at z"))

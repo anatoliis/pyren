@@ -4,13 +4,13 @@ import string
 import sys
 import xml.dom.minidom
 
-from mod_ecu_identification import get_identification
-from mod_ecu_parameter import get_parameter
-from mod_ecu_scenario import playScenario
-from mod_ecu_screen import EcuScreenDataRef
-from mod_ecu_service import executeService
-from mod_ecu_state import get_state
-from mod_utils import (
+from mod.ecu_identification import get_identification
+from mod.ecu_parameter import get_parameter
+from mod.ecu_scenario import playScenario
+from mod.ecu_screen import EcuScreenDataRef
+from mod.ecu_service import executeService
+from mod.ecu_state import get_state
+from mod.utils import (
     ASCIITOHEX,
     ChoiceFromDict,
     StringToIntToHex,

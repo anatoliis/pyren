@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from mod_ecu_service import EcuMnemoLocation
-from mod_utils import pyren_encode
+from mod.ecu_service import EcuMnemoLocation
+from mod.utils import pyren_encode
 
 
 class EcuDataId:

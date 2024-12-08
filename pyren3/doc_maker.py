@@ -5,12 +5,10 @@ import os
 import sys
 import xml.etree.ElementTree as et
 
-import mod_db_manager
-import mod_globals
-import mod_utils
-from mod_dfg import ClassDfg
-from mod_mtc import acf_MTC_compare_doc
-from mod_optfile import Optfile
+from mod import config, db_manager, utils
+from mod.dfg import ClassDfg
+from mod.mtc import acf_MTC_compare_doc
+from mod.optfile import Optfile
 
 style = """
 div.zdiagnostic {
@@ -79,9 +77,9 @@ td.row_d {
 
 """
 
-mod_globals.os = os.name
+config.os = os.name
 
-if mod_globals.os == "nt":
+if config.os == "nt":
     import colorama
 
     colorama.init()
@@ -90,16 +88,16 @@ else:
     try:
         import androidhelper as android
 
-        mod_globals.os = "android"
+        config.os = "android"
     except:
         try:
             import android
 
-            mod_globals.os = "android"
+            config.os = "android"
         except:
             pass
 
-if mod_globals.os != "android":
+if config.os != "android":
     try:
         import serial
         from serial.tools import list_ports
@@ -108,11 +106,11 @@ if mod_globals.os != "android":
         print("\t\t>sudo easy_install pyserial")
         sys.exit()
 
-from mod_elm import ELM
-from mod_scan_ecus import ScanEcus
-from mod_utils import getVIN
-from mod_mtc import acf_getMTC
-from mod_mtc import acf_buildFull
+from mod.mod_elm import ELM
+from mod.scan_ecus import ScanEcus
+from mod.utils import getVIN
+from mod.mtc import acf_getMTC
+from mod.mtc import acf_buildFull
 
 # global variables
 
@@ -490,7 +488,7 @@ def processXML(path, l, ff):
 
     convertXML(root, nel, fns, ff, lid)
 
-    if dtcId_106 != "" and mod_globals.opt_sd:
+    if dtcId_106 != "" and config.opt_sd:
         saveToSeparateFile(nel, dtcId_106)
 
     return nel, lid, title
@@ -529,8 +527,8 @@ def f_features(dfg_fun, ff, of, pref, funname, path):
     fun_t = et.Element("div")  # text
 
     for ek in list(dfg_fun["feature"].keys()):
-        if dfg_fun["feature"][ek]["codetext"] in list(mod_globals.language_dict.keys()):
-            fetname = mod_globals.language_dict[dfg_fun["feature"][ek]["codetext"]]
+        if dfg_fun["feature"][ek]["codetext"] in list(config.language_dict.keys()):
+            fetname = config.language_dict[dfg_fun["feature"][ek]["codetext"]]
         else:
             fetname = dfg_fun["feature"][ek]["codetext"]
         pref = dfg_fun["feature"][ek]["id_ppc"]
@@ -585,10 +583,8 @@ def f_functions(dfg_dom, ff, of, pref, domname, path):
     et.SubElement(cop, "a", href="#" + pref + "_par").text = "Parameters"
 
     for fk in list(dfg_dom["function"].keys()):
-        if dfg_dom["function"][fk]["codetext"] in list(
-            mod_globals.language_dict.keys()
-        ):
-            funname = mod_globals.language_dict[dfg_dom["function"][fk]["codetext"]]
+        if dfg_dom["function"][fk]["codetext"] in list(config.language_dict.keys()):
+            funname = config.language_dict[dfg_dom["function"][fk]["codetext"]]
         else:
             funname = dfg_dom["function"][fk]["codetext"]
         pref = dfg_dom["function"][fk]["id_ppc"]
@@ -665,8 +661,8 @@ def generateHTML(path, mtc, vin, dfg, date_madc):
         )
         sys.stdout.flush()
 
-        if dfg.domain[dk]["codetext"] in list(mod_globals.language_dict.keys()):
-            domname = mod_globals.language_dict[dfg.domain[dk]["codetext"]]
+        if dfg.domain[dk]["codetext"] in list(config.language_dict.keys()):
+            domname = config.language_dict[dfg.domain[dk]["codetext"]]
         else:
             domname = dfg.domain[dk]["defaultText"]
         pref = dfg.domain[dk]["id_ppc"]
@@ -790,7 +786,7 @@ def optParser():
 
     options = parser.parse_args()
 
-    # if not options.port and mod_globals.os != 'android':
+    # if not options.port and config.os != 'android':
     #  parser.print_help()
     #  iterator = sorted(list(list_ports.comports()))
     #  print ""
@@ -800,16 +796,16 @@ def optParser():
     #  print ""
     #  exit(2)
     # else:
-    mod_globals.opt_port = options.port
-    mod_globals.opt_speed = int(options.speed)
-    mod_globals.opt_rate = int(options.rate)
-    mod_globals.opt_lang = options.lang
-    mod_globals.opt_log = options.logfile
-    mod_globals.opt_demo = options.demo
-    mod_globals.opt_scan = options.scan
-    mod_globals.opt_si = options.si
-    mod_globals.opt_cfc0 = options.cfc
-    mod_globals.opt_sd = options.sd
+    config.opt_port = options.port
+    config.opt_speed = int(options.speed)
+    config.opt_rate = int(options.rate)
+    config.opt_lang = options.lang
+    config.opt_log = options.logfile
+    config.opt_demo = options.demo
+    config.opt_scan = options.scan
+    config.opt_si = options.si
+    config.opt_cfc0 = options.cfc
+    config.opt_sd = options.sd
     vin_opt = options.vinnum
     allvin = options.allvin
 
@@ -817,7 +813,7 @@ def optParser():
 def main():
     """Main function
 
-    1) if ../BVMEXTRACTION doesn't exist then  mod_globals.opt_demo=True which means that we would not guide with MTC
+    1) if ../BVMEXTRACTION doesn't exist then  config.opt_demo=True which means that we would not guide with MTC
        and will show all options
     2) if not demo mode and savedVIN.txt exists and not scan then check savedVIN.txt
        else getVIN
@@ -830,8 +826,8 @@ def main():
 
     optParser()
 
-    mod_utils.chkDirTree()
-    mod_db_manager.find_DBs()
+    utils.chkDirTree()
+    db_manager.find_DBs()
 
     if allvin != "":
         acf_buildFull(allvin)
@@ -839,18 +835,18 @@ def main():
 
     """If MTC database does not exists then demo mode"""
     if not os.path.exists("../BVMEXTRACTION"):
-        mod_globals.opt_demo = True
+        config.opt_demo = True
 
     print("Loading language ")
     sys.stdout.flush()
 
     # loading language data
-    lang = Optfile("Location/DiagOnCAN_" + mod_globals.opt_lang + ".bqm", True)
-    mod_globals.language_dict = lang.dict
+    lang = Optfile("Location/DiagOnCAN_" + config.opt_lang + ".bqm", True)
+    config.language_dict = lang.dict
     print("Done")
 
     # finding zip
-    # zipf = "../DocDB_"+mod_globals.opt_lang+".7ze"
+    # zipf = "../DocDB_"+config.opt_lang+".7ze"
     # if not os.path.exists(zipf):
     #  zipf = "../DocDB_GB.7ze"
     #  if not os.path.exists(zipf):
@@ -862,26 +858,25 @@ def main():
 
     VIN = ""
     if vin_opt == "" and (
-        not mod_globals.opt_demo
-        and (mod_globals.opt_scan or not os.path.exists("savedVIN.txt"))
+        not config.opt_demo and (config.opt_scan or not os.path.exists("savedVIN.txt"))
     ):
         print("Opening ELM")
-        elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
+        elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
 
         # change serial port baud rate
-        if mod_globals.opt_speed < mod_globals.opt_rate and not mod_globals.opt_demo:
-            elm.port.soft_boudrate(mod_globals.opt_rate)
+        if config.opt_speed < config.opt_rate and not config.opt_demo:
+            elm.port.soft_boudrate(config.opt_rate)
 
         print("Loading ECUs list")
         se = ScanEcus(elm)  # Prepare list of all ecus
 
         SEFname = "savedEcus.p"
 
-        if mod_globals.opt_demo and len(mod_globals.opt_ecuid) > 0:
+        if config.opt_demo and len(config.opt_ecuid) > 0:
             # demo mode with predefined ecu list
             se.read_Uces_file(all=True)
             se.detectedEcus = []
-            for i in mod_globals.opt_ecuid.split(","):
+            for i in config.opt_ecuid.split(","):
                 if i in list(se.allecus.keys()):
                     se.allecus[i]["ecuname"] = i
                     se.allecus[i]["idf"] = se.allecus[i]["ModelId"][2:4]
@@ -890,10 +885,10 @@ def main():
                     se.allecus[i]["pin"] = "can"
                     se.detectedEcus.append(se.allecus[i])
         else:
-            if not os.path.isfile(SEFname) or mod_globals.opt_scan:
+            if not os.path.isfile(SEFname) or config.opt_scan:
                 # choosing model
                 se.chooseModel(
-                    mod_globals.opt_car
+                    config.opt_car
                 )  # choose model of car for doing full scan
 
             # Do this check every time
@@ -921,7 +916,7 @@ def main():
 
     if len(VIN) != 17:
         print("Can't find any valid VIN. Switch to demo")
-        mod_globals.opt_demo = True
+        config.opt_demo = True
     else:
         print("\tVIN     :", VIN)
 
@@ -936,7 +931,7 @@ def main():
 
         if vindata == "" or mtcdata == "" or refdata == "":
             print("ERROR!!! Can't find MTC data in database")
-            mod_globals.opt_demo = True
+            config.opt_demo = True
 
         print("\tPlatform:", platform)
         # print "\tvindata:",vindata
@@ -979,7 +974,7 @@ def main():
     # try:
     # if dfg.tcom == '135' : dfg.tcom = '147'
     generateHTML(
-        "../DocDB_" + mod_globals.opt_lang + "/DocDb" + dfg.tcom + "/SIE/",
+        "../DocDB_" + config.opt_lang + "/DocDb" + dfg.tcom + "/SIE/",
         mtcdata.split(";"),
         VIN,
         dfg,

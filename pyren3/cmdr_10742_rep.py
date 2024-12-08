@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
 
-import mod_elm
-import mod_globals
+from mod import config, mod_elm
 
 ############## change me ################
 
 ecu_functional_address = "7A"
-mod_globals.os = "android"
-mod_globals.opt_port = "bt"  # 'COM4'
+config.os = "android"
+config.opt_port = "bt"  # 'COM4'
 
 #########################################
 
-# mod_globals.opt_demo    = True
-mod_globals.opt_cfc0 = True
-mod_globals.opt_speed = 38400
-mod_globals.opt_log = "10742-rep.txt"
+# config.opt_demo    = True
+config.opt_cfc0 = True
+config.opt_speed = 38400
+config.opt_log = "10742-rep.txt"
 
 print("Opening ELM")
-elm = mod_elm.ELM(mod_globals.opt_port, mod_globals.opt_speed, True)
+elm = mod_elm.ELM(config.opt_port, config.opt_speed, True)
 
 print("Init    ELM")
 elm.init_can()

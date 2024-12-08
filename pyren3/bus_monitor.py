@@ -8,18 +8,14 @@ import sys
 import threading
 import time
 
-import mod_db_manager
-import mod_ddt_utils
-import mod_elm
-import mod_globals
-import mod_utils
-from mod_ddt_ecu import DDTECU
-from mod_elm import ELM
-from mod_utils import ChoiceLong, KBHit, clearScreen, pyren_encode
+from mod import config, db_manager, ddt_utils, mod_elm, utils
+from mod.ddt_ecu import DDTECU
+from mod.mod_elm import ELM
+from mod.utils import ChoiceLong, KBHit, clearScreen, pyren_encode
 
-mod_globals.os = os.name
+config.os = os.name
 
-if mod_globals.os == "nt":
+if config.os == "nt":
     import pip
 
     try:
@@ -44,16 +40,16 @@ else:
     try:
         import androidhelper as android
 
-        mod_globals.os = "android"
+        config.os = "android"
     except:
         try:
             import android
 
-            mod_globals.os = "android"
+            config.os = "android"
         except:
             pass
 
-if mod_globals.os != "android":
+if config.os != "android":
     try:
         import serial
         from serial.tools import list_ports
@@ -83,7 +79,7 @@ class DDT_MON:
         clearScreen()
         print("Starting DDT process")
 
-        mod_ddt_utils.searchddtroot()
+        ddt_utils.searchddtroot()
 
         # make or load ddt ecu
         decucashfile = "./cache/ddt_" + xmlfile + ".p"
@@ -125,7 +121,7 @@ class DDT_MON:
 
         # addr = "7A"
 
-        if "250" in mod_globals.opt_protocol or self.decu.BaudRate == "250000":
+        if "250" in config.opt_protocol or self.decu.BaudRate == "250000":
             # CAN 250
             elm.init_can()
             elm.cmd("at sp 8")
@@ -292,7 +288,7 @@ class DDT_MON:
                             d, False, self.f2r[fid], self.frames[fid]["data"]
                         )
                     else:
-                        val = mod_globals.none_val
+                        val = config.none_val
                     self.datas[d] = val
 
             clearScreen()
@@ -368,7 +364,7 @@ def optParser():
 
     options = parser.parse_args()
 
-    if options.outfile == "" and not options.port and mod_globals.os != "android":
+    if options.outfile == "" and not options.port and config.os != "android":
         parser.print_help()
         iterator = sorted(list(list_ports.comports()))
         print("")
@@ -378,21 +374,21 @@ def optParser():
         print("")
         exit(2)
     else:
-        mod_globals.opt_port = options.port
-        mod_globals.opt_rate = int(options.rate)
-        mod_globals.opt_log = options.logfile
-        mod_globals.opt_ecuAddr = options.ecuAddr.upper()
-        mod_globals.opt_demo = options.demo
+        config.opt_port = options.port
+        config.opt_rate = int(options.rate)
+        config.opt_log = options.logfile
+        config.opt_ecuAddr = options.ecuAddr.upper()
+        config.opt_demo = options.demo
         if "250" in options.protocol:
-            mod_globals.opt_protocol = "250"
+            config.opt_protocol = "250"
         elif "500" in options.protocol:
-            mod_globals.opt_protocol = "500"
+            config.opt_protocol = "500"
         else:
-            mod_globals.opt_protocol = "UnDef"
+            config.opt_protocol = "UnDef"
         candef = options.xmlfile
         outfile = options.outfile
         infile = options.infile
-        mod_globals.opt_exp = True
+        config.opt_exp = True
 
 
 def chooseXml():
@@ -435,8 +431,8 @@ def main():
 
     optParser()
 
-    mod_utils.chkDirTree()
-    mod_db_manager.find_DBs()
+    utils.chkDirTree()
+    db_manager.find_DBs()
 
     if len(candef) == 0:
         candef = chooseXml()
@@ -444,11 +440,11 @@ def main():
     elm = None
     if len(outfile) == 0:
         print("Opening ELM")
-        elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
+        elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
 
     # change serial port baud rate
-    if mod_globals.opt_speed < mod_globals.opt_rate and not mod_globals.opt_demo:
-        elm.port.soft_boudrate(mod_globals.opt_rate)
+    if config.opt_speed < config.opt_rate and not config.opt_demo:
+        elm.port.soft_boudrate(config.opt_rate)
 
     print(candef)
     mon = DDT_MON(elm, candef, outfile, infile)
@@ -459,8 +455,8 @@ def main():
 
     show_loc = threading.Event()
 
-    if mod_globals.opt_ecuAddr != "":
-        mon.framefilter = mod_globals.opt_ecuAddr
+    if config.opt_ecuAddr != "":
+        mon.framefilter = config.opt_ecuAddr
         mon.setFilter(mon.framefilter)
 
     while 1:

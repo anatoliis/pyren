@@ -2,8 +2,8 @@
 
 import xml.dom.minidom
 
-import mod_globals
-from mod_ecu_mnemonic import get_mnemonic
+from mod import config
+from mod.ecu_mnemonic import get_mnemonic
 
 
 def get_identification(id, mn, se, elm, calc, raw=False):
@@ -19,7 +19,7 @@ def get_identification(id, mn, se, elm, calc, raw=False):
     if id.type == "CSTRING" and type(id.value) is str:
         id.value = id.value  # .decode('ascii', 'ignore')
     ######
-    if mod_globals.os == "android":
+    if config.os == "android":
         return "%-6s %-40s %-20s" % (id.codeMR, id.label, id.value), id.helps, id.value
     else:
         return "%-6s %-50s %-20s" % (id.codeMR, id.label, id.value), id.helps, id.value

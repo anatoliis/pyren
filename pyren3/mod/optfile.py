@@ -6,8 +6,7 @@ import struct
 import sys
 from xml.dom.minidom import parseString
 
-import mod_db_manager
-import mod_globals
+from mod import config, db_manager
 
 
 class Optfile:
@@ -19,19 +18,17 @@ class Optfile:
         self.dict = {}
 
         # check in cache folder
-        cachename = mod_globals.cache_dir + os.path.basename(filename)[:-4] + ".p"
+        cachename = config.cache_dir + os.path.basename(filename)[:-4] + ".p"
         if os.path.isfile(cachename):
             self.dict = pickle.load(open(cachename, "rb"))
             return
 
-        if mod_globals.clip_arc != "" and mod_db_manager.file_in_clip(
-            filename[:-4] + ".p"
-        ):
-            mod_db_manager.extract_from_clip_to_cache(filename[:-4] + ".p")
+        if config.clip_arc != "" and db_manager.file_in_clip(filename[:-4] + ".p"):
+            db_manager.extract_from_clip_to_cache(filename[:-4] + ".p")
             self.dict = pickle.load(open(cachename, "rb"))
             return
 
-        lf = mod_db_manager.get_file_from_clip(filename)
+        lf = db_manager.get_file_from_clip(filename)
 
         if lf:
             self.get_dict(lf, progress)
@@ -127,12 +124,12 @@ class Optfile:
 if __name__ == "__main__":
 
     if len(sys.argv) == 1:
-        print("Usage: mod_optfile.py <filename> [key]")
-        print("       mod_optfile.py ALLSG")
-        print("       mod_optfile.py HEX <infile> <outfile>")
+        print("Usage: optfile.py <filename> [key]")
+        print("       optfile.py ALLSG")
+        print("       optfile.py HEX <infile> <outfile>")
         print("Example:")
-        print("   mod_optfile.py ../Location/DiagOnCan_RU.bqm")
-        print("   mod_optfile.py ../EcuRenault/Sessions/SG0110016.XML P001")
+        print("   optfile.py ../Location/DiagOnCan_RU.bqm")
+        print("   optfile.py ../EcuRenault/Sessions/SG0110016.XML P001")
         sys.exit(0)
 
     if sys.argv[1] == "ALLSG":

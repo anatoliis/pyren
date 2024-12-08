@@ -5,7 +5,7 @@ import pickle
 import time
 import zipfile
 
-import mod_globals
+from mod import config
 
 errone = {}
 acfFile = ""
@@ -34,14 +34,14 @@ class ACE:
 
 def get_alternative_refs(platform):
     # finds more frequent use of ref1 from --ref otion in REF.DAT
-    if mod_globals.opt_ref == "":
+    if config.opt_ref == "":
         return {}
 
     start_time = time.time()
 
     res = {}
     alt = {}
-    for aref in mod_globals.opt_ref.split(";"):
+    for aref in config.opt_ref.split(";"):
         aref = aref.strip()
         if (len(aref) == 23 or len(aref) == 24) and " " in aref:
             # ref pair defined compleatle
@@ -158,7 +158,7 @@ def acf_loadModules(de, refdata, platform):
 
     module_list = []
 
-    # first check mod_globals.opt_ref for alternatives
+    # first check config.opt_ref for alternatives
     alt = get_alternative_refs(platform)
 
     for r in refdata.split(";"):

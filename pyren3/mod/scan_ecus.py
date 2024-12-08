@@ -5,21 +5,21 @@
 
 # allecus contains such dictionaries
 #
-#'dst': '7A'
-#'src': 'F1'
-#'OptimizerId': 'SG0110577.XML'
-#'ModelId': 'FG0110577.XML'}
-#'stdType': 'STD_A'
-#'doc': 'DCM1.2_L4DB_58_ X61_A'
-#'idf': '1'
-#'pin': 'can'
-#'pin1': '6'
-#'pin2': '14'
-#'startDiagReq': '10C0'
-#'startDiagRsp': '50C0'
-#'stopDiagReq': '1081'
-#'stopDiagRsp': '5081'
-#'ids': ['2180','6180','0','6','FF','58','2180','6180','0','16','FF','4D']
+# 'dst': '7A'
+# 'src': 'F1'
+# 'OptimizerId': 'SG0110577.XML'
+# 'ModelId': 'FG0110577.XML'}
+# 'stdType': 'STD_A'
+# 'doc': 'DCM1.2_L4DB_58_ X61_A'
+# 'idf': '1'
+# 'pin': 'can'
+# 'pin1': '6'
+# 'pin2': '14'
+# 'startDiagReq': '10C0'
+# 'startDiagRsp': '50C0'
+# 'stopDiagReq': '1081'
+# 'stopDiagRsp': '5081'
+# 'ids': ['2180','6180','0','6','FF','58','2180','6180','0','16','FF','4D']
 
 
 import os
@@ -28,10 +28,8 @@ import string
 import sys
 import xml.dom.minidom
 
-import mod_db_manager
-import mod_elm as m_elm
-import mod_globals
-from mod_utils import Choice, ChoiceLong, DBG, pyren_encode
+from mod import config, db_manager, mod_elm as m_elm
+from mod.utils import Choice, ChoiceLong, DBG, pyren_encode
 
 opt_demo = False
 
@@ -152,7 +150,7 @@ class ScanEcus:
         ####### Get list car models from vehicles directory #######
         self.vhcls = []
 
-        file_list = mod_db_manager.get_file_list_from_clip("Vehicles/TCOM_*.[Xx]ml")
+        file_list = db_manager.get_file_list_from_clip("Vehicles/TCOM_*.[Xx]ml")
         for file in file_list:
             try:
                 model_n = file[-7:-4]
@@ -176,9 +174,9 @@ class ScanEcus:
             except ValueError:
                 pass
 
-            xmlf = mod_db_manager.get_file_from_clip(file)
+            xmlf = db_manager.get_file_from_clip(file)
 
-            DOMTree = xml.dom.minidom.parse(mod_db_manager.get_file_from_clip(file))
+            DOMTree = xml.dom.minidom.parse(db_manager.get_file_from_clip(file))
             vh = DOMTree.documentElement
             if vh.hasAttribute("defaultText"):
                 vehiclename = vh.getAttribute("defaultText").strip()
@@ -193,11 +191,11 @@ class ScanEcus:
         """scan all ecus. If savedEcus.p exists then load it and return"""
 
         SEFname = "savedEcus.p"
-        if mod_globals.opt_can2:
+        if config.opt_can2:
             SEFname = "savedEcus2.p"
 
         # check if savedEcus exists
-        if os.path.isfile(SEFname) and not mod_globals.opt_scan:
+        if os.path.isfile(SEFname) and not config.opt_scan:
 
             # load it
             self.detectedEcus = pickle.load(open(SEFname, "rb"))
@@ -245,9 +243,9 @@ class ScanEcus:
                     pickle.dump(self.detectedEcus, open(SEFname, "wb"))
             return
         else:
-            mod_globals.opt_scan = True
+            config.opt_scan = True
 
-        mod_globals.state_scan = True
+        config.state_scan = True
 
         self.reqres = []
         self.errres = []
@@ -270,7 +268,7 @@ class ScanEcus:
 
         canH = "6"
         canL = "14"
-        if mod_globals.opt_can2:
+        if config.opt_can2:
             canH = "13"
             canL = "12"
 
@@ -307,7 +305,7 @@ class ScanEcus:
         self.elm.close_protocol()
 
         # scan KWP ecus
-        if not mod_globals.opt_can2:
+        if not config.opt_can2:
             self.elm.init_iso()  # actually it executed every time the address is changed
             for ecu, row in sorted(
                 iter(self.allecus.items()),
@@ -347,7 +345,7 @@ class ScanEcus:
             + str(len(self.detectedEcus))
         )
 
-        mod_globals.state_scan = False
+        config.state_scan = False
 
         # sort list of detected ECUs
         self.detectedEcus = sorted(self.detectedEcus, key=lambda k: int(k["idf"]))
@@ -358,7 +356,7 @@ class ScanEcus:
     def reScanErrors(self):
         """scan only detectedEcus for re-check errors"""
 
-        mod_globals.opt_scan = True
+        config.opt_scan = True
 
         self.reqres = []
         self.errres = []
@@ -378,7 +376,7 @@ class ScanEcus:
         # scan CAN ecus
         canH = "6"
         canL = "14"
-        if mod_globals.opt_can2:
+        if config.opt_can2:
             canH = "13"
             canL = "12"
 
@@ -404,7 +402,7 @@ class ScanEcus:
         self.elm.close_protocol()
 
         # scan KWP ecud
-        if not mod_globals.opt_can2:
+        if not config.opt_can2:
             self.elm.init_iso()
             for row in sorted(self.detectedEcus, key=lambda k: int(k["idf"])):
                 if row["pin"] == "iso" and row["pin1"] == "7" and row["pin2"] == "15":
@@ -454,27 +452,27 @@ class ScanEcus:
 
         listecu = []
 
-        if mod_globals.os == "android":
-            if mod_globals.opt_scan:
+        if config.os == "android":
+            if config.opt_scan:
                 print(pyren_encode("\n     %-40s %s" % ("Name", "Warn")))
             else:
                 print(pyren_encode("\n     %-40s %s" % ("Name", "Type")))
 
             for row in self.detectedEcus:
-                if families[row["idf"]] in list(mod_globals.language_dict.keys()):
-                    fmlyn = mod_globals.language_dict[families[row["idf"]]]
-                    if mod_globals.opt_scan:
+                if families[row["idf"]] in list(config.language_dict.keys()):
+                    fmlyn = config.language_dict[families[row["idf"]]]
+                    if config.opt_scan:
                         line = "%-40s %s" % (fmlyn, row["rerr"])
                     else:
                         line = "%-40s %s" % (fmlyn, row["stdType"])
                 else:
-                    if mod_globals.opt_scan:
+                    if config.opt_scan:
                         line = "%-40s %s" % (row["doc"].strip(), row["rerr"])
                     else:
                         line = "%-40s %s" % (row["doc"].strip(), row["stdType"])
                 listecu.append(line)
         else:
-            if mod_globals.opt_scan:
+            if config.opt_scan:
                 print(
                     pyren_encode(
                         "\n     %-7s %-6s %-5s %-40s %s"
@@ -496,10 +494,10 @@ class ScanEcus:
                     m_elm.dnat[row["dst"]] = "000"
                     m_elm.snat[row["dst"]] = "000"
                 if row["idf"] in list(families.keys()) and families[row["idf"]] in list(
-                    mod_globals.language_dict.keys()
+                    config.language_dict.keys()
                 ):
-                    fmlyn = mod_globals.language_dict[families[row["idf"]]]
-                    if mod_globals.opt_scan:
+                    fmlyn = config.language_dict[families[row["idf"]]]
+                    if config.opt_scan:
                         line = "%-2s(%3s) %-6s %-5s %-40s %s" % (
                             row["dst"],
                             m_elm.dnat[row["dst"]],
@@ -518,7 +516,7 @@ class ScanEcus:
                             row["stdType"],
                         )
                 else:
-                    if mod_globals.opt_scan:
+                    if config.opt_scan:
                         line = "%-2s(%3s) %-6s %-5s %-40s %s" % (
                             row["dst"],
                             m_elm.dnat[row["dst"]],
@@ -561,7 +559,7 @@ class ScanEcus:
 
         ecuname = ""
 
-        DOMTree = xml.dom.minidom.parse(mod_db_manager.get_file_from_clip(file))
+        DOMTree = xml.dom.minidom.parse(db_manager.get_file_from_clip(file))
         vh = DOMTree.documentElement
 
         if vh.hasAttribute("vehTypeCode"):
@@ -639,7 +637,7 @@ class ScanEcus:
     def read_Uces_file(self, all=False):
         # Finding them in Uces.xml and loading
         DOMTree = xml.dom.minidom.parse(
-            mod_db_manager.get_file_from_clip("EcuRenault/Uces.xml")
+            db_manager.get_file_from_clip("EcuRenault/Uces.xml")
         )
         Ecus = DOMTree.documentElement
         EcuDatas = Ecus.getElementsByTagName("EcuData")
@@ -1352,7 +1350,7 @@ def findTCOM(addr, cmd, rsp, pl_id=False):
     se.read_Uces_file(True)
 
     print("Read models")
-    file_list = mod_db_manager.get_file_list_from_clip("Vehicles/TCOM_*.[Xx]ml")
+    file_list = db_manager.get_file_list_from_clip("Vehicles/TCOM_*.[Xx]ml")
     for file in file_list:
         vehicle = ""
 
@@ -1360,7 +1358,7 @@ def findTCOM(addr, cmd, rsp, pl_id=False):
         if "087" in file:
             continue
 
-        DOMTree = xml.dom.minidom.parse(mod_db_manager.get_file_from_clip(file))
+        DOMTree = xml.dom.minidom.parse(db_manager.get_file_from_clip(file))
         vh = DOMTree.documentElement
         if vh.hasAttribute("defaultText"):
             vehiclename = vh.getAttribute("defaultText")
@@ -1489,7 +1487,7 @@ def generateSavedEcus(eculist, fileName):
 
 if __name__ == "__main__":
 
-    mod_db_manager.find_DBs()
+    db_manager.find_DBs()
 
     # findTCOM( '', '', '', pl_id=True)
 
