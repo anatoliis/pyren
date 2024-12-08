@@ -15,8 +15,11 @@ import time
 
 import mod_globals
 import pyren3
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
+from mod_ecu import ECU
+from mod_elm import ELM
+from mod_optfile import Optfile
+from mod_scan_ecus import ScanEcus
+from mod_utils import clearScreen
 
 try:
     import androidhelper as android
@@ -36,12 +39,6 @@ if mod_globals.os != "android":
         from serial.tools import list_ports
     except ImportError:
         sys.exit()
-
-from mod_elm import ELM
-from mod_scan_ecus import ScanEcus
-from mod_ecu import ECU
-from mod_optfile import Optfile
-from mod_utils import clearScreen
 
 
 def prepareECU():

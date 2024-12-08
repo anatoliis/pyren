@@ -7,40 +7,23 @@ import os
 import pickle
 import sys
 import time
+import tkinter as tk
+import tkinter.filedialog
+import tkinter.font
+import tkinter.messagebox
+import tkinter.ttk as ttk
+import xml.etree.ElementTree as et
 from shutil import copyfile
 
 import mod_db_manager
+import mod_ddt_ecu
 import mod_ddt_utils
-import mod_utils
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
+import mod_elm
 import mod_globals
 import mod_scan_ecus
-import mod_ddt_ecu
-import mod_elm
-
-try:
-    # Python2
-    import tkinter as tk
-    import tkinter.ttk
-    import tkinter.font
-    import tkinter.messagebox
-    import tkinter.filedialog
-    import tkinter.simpledialog
-
-except ImportError:
-    # Python3
-    import tkinter as tk
-    import tkinter.ttk as ttk
-    import tkinter.font
-    import tkinter.messagebox
-    import tkinter.filedialog
-
+import mod_utils
 from mod_ddt_ecu import DDTECU
 from mod_ddt_screen import DDTScreen
-
-import xml.etree.ElementTree as et
 
 mod_globals.os = os.name
 

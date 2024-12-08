@@ -1,28 +1,22 @@
 #!/usr/bin/env python3
 
 import os
-import sys
+import pickle
+
+from serial.tools import list_ports
 
 import mod_db_manager
 import mod_globals
 import mod_utils
-from mod_optfile import Optfile
-from mod_scan_ecus import families as families, findTCOM as findTCOM
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
-import pickle
-
-mod_globals.os = os.name
-
-from serial.tools import list_ports
-
-from mod_elm import ELM
-from mod_scan_ecus import ScanEcus
-from mod_utils import getVIN
-from mod_mtc import acf_getMTC
 from mod_acf_func import acf_loadModules
 from mod_acf_proc import acf_MTC_generateDefaults, acf_MTC_optionsExplorer
+from mod_elm import ELM
+from mod_mtc import acf_getMTC
+from mod_optfile import Optfile
+from mod_scan_ecus import ScanEcus, families as families, findTCOM as findTCOM
+from mod_utils import getVIN
+
+mod_globals.os = os.name
 
 
 def optParser():

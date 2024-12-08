@@ -269,7 +269,6 @@ class Settings:
 
 def run(s, cmd):
     fullpath = os.path.dirname(os.path.realpath(sys.argv[0])) + s.path[1:]
-    os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
     sys.path.insert(0, fullpath)
 
@@ -918,7 +917,6 @@ if osname != "android":
         gui = DesktopGui()
 
     if __name__ == "__main__":
-        os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
         if len(sys.argv) > 1 and sys.argv[1] == "update":
             res = update_from_gitlab()
             if res == 0:
@@ -1440,5 +1438,4 @@ else:
 
     if __name__ == "__main__":
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        # os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
         main()

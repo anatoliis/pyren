@@ -12,8 +12,6 @@ from mod_dfg import ClassDfg
 from mod_mtc import acf_MTC_compare_doc
 from mod_optfile import Optfile
 
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
 style = """
 div.zdiagnostic {
 	background-color	:	white;

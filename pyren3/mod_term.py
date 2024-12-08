@@ -10,13 +10,6 @@ import mod_elm
 import mod_globals
 import mod_utils
 
-try:
-    import readline
-except:
-    pass
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
 macro = {}
 var = {}
 cmd_delay = 0

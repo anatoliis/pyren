@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
-from mod_utils import pyren_encode, pyren_decode
+from mod_utils import pyren_decode, pyren_encode
 
 
 class Option:

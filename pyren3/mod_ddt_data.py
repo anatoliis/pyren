@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 
 import math
-import os
-import sys
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 from mod_utils import pyren_encode
 

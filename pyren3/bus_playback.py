@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 
 import argparse
-import os
 import sys
 
-import mod_globals
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
 import mod_elm
+import mod_globals
 
 parser = argparse.ArgumentParser(
     version="bus_playback Version 0.1",

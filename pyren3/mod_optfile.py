@@ -126,8 +126,6 @@ class Optfile:
 
 if __name__ == "__main__":
 
-    os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
     if len(sys.argv) == 1:
         print("Usage: mod_optfile.py <filename> [key]")
         print("       mod_optfile.py ALLSG")

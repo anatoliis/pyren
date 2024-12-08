@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 import sys
 
 import mod_globals
@@ -122,8 +121,6 @@ cmdb = """
 #v2.1 ;AC  ; ATCTM5                ; CTM5               ; set Timer Multiplier to 5
 #v2.1 ;ACH ; ATZ                   ; Z                  ; reset all
 """
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
 try:
     import androidhelper as android
 

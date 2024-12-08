@@ -10,34 +10,22 @@ import time
 import xml.etree.ElementTree as et
 from datetime import datetime
 
+import mod_db_manager
+import mod_ddt_utils
+import mod_globals
+from mod_ddt_data import DecuDatas
+from mod_ddt_request import DecuRequests
+from mod_elm import AllowedList
+from mod_utils import pyren_encode
+
+if mod_globals.os != "android":
+    import tkinter as tk
+
 
 def trim(st):
     res = "".join(char for char in st if char in string.printable)
     return res.strip()
 
-
-import mod_ddt_utils
-import mod_db_manager
-from mod_ddt_request import DecuRequests
-from mod_ddt_data import DecuDatas
-
-from mod_utils import pyren_encode
-from mod_elm import AllowedList
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
-import mod_globals
-
-if mod_globals.os != "android":
-
-    try:
-        # Python2
-        import tkinter as tk
-        import tkinter.ttk
-    except ImportError:
-        # Python3
-        import tkinter as tk
-        import tkinter.ttk as ttk
 
 eculist = None
 ecudump = {}  # {'request':'response'}

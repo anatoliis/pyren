@@ -8,19 +8,14 @@ import sys
 import threading
 import time
 
-import mod_ddt_utils
-import mod_utils
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
-import mod_globals
 import mod_db_manager
+import mod_ddt_utils
 import mod_elm
-
-from mod_elm import ELM
-
+import mod_globals
+import mod_utils
 from mod_ddt_ecu import DDTECU
-from mod_utils import ChoiceLong, KBHit, pyren_encode, clearScreen
+from mod_elm import ELM
+from mod_utils import ChoiceLong, KBHit, clearScreen, pyren_encode
 
 mod_globals.os = os.name
 

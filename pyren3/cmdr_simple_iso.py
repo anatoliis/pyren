@@ -1,14 +1,7 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-
-import mod_globals
-
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
 import mod_elm
-
+import mod_globals
 
 ############## change me ################
 
@@ -22,7 +15,6 @@ mod_globals.opt_port = "/dev/cu.usbserial-AH01J4BS"
 # mod_globals.opt_demo    = True
 mod_globals.opt_speed = 38400
 mod_globals.opt_log = "simpl.txt"
-
 
 print("Opening ELM")
 elm = mod_elm.ELM(mod_globals.opt_port, mod_globals.opt_speed, True)
@@ -47,7 +39,6 @@ print(elm.cmd("at fi"))
 print(elm.cmd("at at 1"))
 print(elm.cmd("at al"))
 print(elm.cmd("at h1"))
-
 
 print(elm.cmd("10C0"))
 print(elm.cmd("2180"))

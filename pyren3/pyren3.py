@@ -11,8 +11,6 @@ from mod_utils import clearScreen, getVIN
 
 mod_globals.os = os.name
 
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
 if mod_globals.os == "nt":
     import pip
 

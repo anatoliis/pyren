@@ -35,10 +35,6 @@ if mod_globals.os != "android":
 import mod_globals
 import mod_db_manager
 
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-
-# sys.setdefaultencoding('utf-8')
-
 F2A = {
     "01": "7A",
     "02": "01",
