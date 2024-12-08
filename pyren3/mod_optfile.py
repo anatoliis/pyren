@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
 
 import os
+import pickle
 import struct
 import sys
+from xml.dom.minidom import parseString
 
 import mod_db_manager
 import mod_globals
-
-try:
-    import pickle as pickle
-except:
-    import pickle
-
-from xml.dom.minidom import parseString
 
 
 class Optfile:

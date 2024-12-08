@@ -2,7 +2,9 @@
 
 import xml.dom.minidom
 
-from mod_ecu_mnemonic import *
+import mod_globals
+from mod_ecu_mnemonic import get_SnapShotMnemonic, get_mnemonic
+from mod_utils import pyren_encode
 
 
 def get_state(st, mn, se, elm, calc, dataids={}):

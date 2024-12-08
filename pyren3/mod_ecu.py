@@ -1,32 +1,39 @@
 #!/usr/bin/env python3
 
-from mod_ecu_command import *
-from mod_ecu_dataids import *
-from mod_ecu_default import *
-from mod_ecu_identification import *
-from mod_ecu_parameter import *
-from mod_ecu_state import *
+import os
+import re
+import sys
+import time
+import xml.dom.minidom
+from collections import OrderedDict
+from datetime import datetime
+
+import mod_globals
+from mod_ecu_command import EcuCommands, executeCommand, runCommand
+from mod_ecu_dataids import EcuDataIds
+from mod_ecu_default import (
+    EcuDefaults,
+    EcuScreenDataRef,
+    get_default_failflag,
+    get_default_std_a,
+    get_default_std_b,
+)
+from mod_ecu_identification import EcuIdentifications, get_identification
+from mod_ecu_mnemonic import EcuMnemonics
+from mod_ecu_parameter import EcuParameters, get_parameter
+from mod_ecu_screen import EcuOwnScreen, EcuScreen, EcuScreens
+from mod_ecu_service import EcuServices, parseComplexResponse, prepareComplexRequest
+from mod_ecu_state import EcuStates, get_state
 from mod_elm import AllowedList, dnat, pyren_time, snat
-from mod_optfile import *
-from mod_ply import *
-from mod_utils import *
+from mod_optfile import Optfile
+from mod_ply import Calc
+from mod_utils import Choice, ChoiceLong, KBHit, clearScreen, pyren_encode, show_doc
 
 if mod_globals.os != "android":
     from mod_ddt import DDT
 
 import mod_globals
 import mod_db_manager
-
-from xml.dom.minidom import parse
-from datetime import datetime
-from collections import OrderedDict
-from mod_utils import show_doc
-import xml.dom.minidom
-
-import sys
-import os
-import time
-import re
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 

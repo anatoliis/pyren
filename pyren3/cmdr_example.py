@@ -9,10 +9,12 @@
 #
 
 import os
+import pickle
 import sys
 import time
 
 import mod_globals
+import pyren3
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
@@ -38,8 +40,8 @@ if mod_globals.os != "android":
 from mod_elm import ELM
 from mod_scan_ecus import ScanEcus
 from mod_ecu import ECU
-from mod_optfile import *
-from mod_utils import *
+from mod_optfile import Optfile
+from mod_utils import clearScreen
 
 
 def prepareECU():
@@ -48,7 +50,7 @@ def prepareECU():
     global elm
     global ecu
 
-    pyren.optParser()
+    pyren3.optParser()
 
     if len(mod_globals.opt_log) == 0:
         mod_globals.opt_log = "commander_log.txt"

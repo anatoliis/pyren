@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 
 import os
+import pickle
 import sys
 
+import mod_db_manager
 import mod_globals
+from mod_optfile import Optfile
+from mod_utils import clearScreen, getVIN
 
 mod_globals.os = os.name
 
@@ -59,8 +63,6 @@ import mod_ddt_utils
 from mod_elm import ELM
 from mod_scan_ecus import ScanEcus
 from mod_ecu import ECU
-from mod_optfile import *
-from mod_utils import *
 
 
 def optParser():

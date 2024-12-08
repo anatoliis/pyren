@@ -2,7 +2,8 @@
 
 import xml.dom.minidom
 
-from mod_ecu_mnemonic import *
+import mod_globals
+from mod_ecu_mnemonic import get_mnemonic
 
 
 def get_identification(id, mn, se, elm, calc, raw=False):

@@ -2,6 +2,7 @@
 
 import codecs
 import os
+import pickle
 import string
 import sys
 import threading
@@ -12,8 +13,6 @@ import mod_utils
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
-import pickle
-
 import mod_globals
 import mod_db_manager
 import mod_elm
@@ -21,10 +20,7 @@ import mod_elm
 from mod_elm import ELM
 
 from mod_ddt_ecu import DDTECU
-from mod_utils import clearScreen
-from mod_utils import ChoiceLong
-from mod_utils import KBHit
-from mod_utils import pyren_encode
+from mod_utils import ChoiceLong, KBHit, pyren_encode, clearScreen
 
 mod_globals.os = os.name
 

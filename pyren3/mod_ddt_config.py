@@ -5,7 +5,7 @@ import sys
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
-from mod_utils import *
+from mod_utils import pyren_encode, pyren_decode
 
 
 class Option:

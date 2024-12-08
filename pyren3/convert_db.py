@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
 import glob
+import os
+import pickle
+import sys
 import zipfile
 from io import BytesIO
 
-from mod_optfile import *
+import mod_db_manager
+from mod_optfile import Optfile
 
 if __name__ == "__main__":
     zipoutput = BytesIO()

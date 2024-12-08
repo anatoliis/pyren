@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 import string
+import sys
 import xml.dom.minidom
 
 from mod_ecu_identification import get_identification
 from mod_ecu_parameter import get_parameter
 from mod_ecu_scenario import playScenario
-from mod_ecu_screen import *
-from mod_ecu_service import *
+from mod_ecu_screen import EcuScreenDataRef
+from mod_ecu_service import executeService
 from mod_ecu_state import get_state
 from mod_utils import (
     ASCIITOHEX,
@@ -15,6 +16,7 @@ from mod_utils import (
     StringToIntToHex,
     clearScreen,
     hex_VIN_plus_CRC,
+    pyren_encode,
 )
 
 

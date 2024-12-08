@@ -3,7 +3,9 @@
 import string
 import xml.dom.minidom
 
-from mod_ecu_service import *
+import mod_globals
+from mod_ecu_service import executeService
+from mod_utils import pyren_encode
 
 
 def get_mnemonicDTC(m, resp):

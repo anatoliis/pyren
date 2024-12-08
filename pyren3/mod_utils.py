@@ -18,13 +18,9 @@ import signal
 import string
 import subprocess
 import sys
+import webbrowser
 
 import mod_globals
-
-try:
-    import webbrowser
-except:
-    pass
 
 # Snippet from http://home.wlu.edu/~levys/software/kbhit.py
 

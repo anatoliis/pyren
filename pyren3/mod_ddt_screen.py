@@ -3,9 +3,10 @@
 import copy
 import datetime
 import gc
+import os
 
 import mod_db_manager
-from mod_utils import *
+from mod_utils import clearScreen
 
 try:
     # Python2

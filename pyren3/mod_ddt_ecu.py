@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
 
+import operator
+import os
 import queue
+import string
+import sys
 import threading
 import time
+import xml.etree.ElementTree as et
 from datetime import datetime
-from string import printable
 
 
 def trim(st):
-    res = "".join(char for char in st if char in printable)
+    res = "".join(char for char in st if char in string.printable)
     return res.strip()
 
 
 import mod_ddt_utils
 import mod_db_manager
-from mod_ddt_request import *
-from mod_ddt_data import *
-from mod_utils import *
+from mod_ddt_request import DecuRequests
+from mod_ddt_data import DecuDatas
+
+from mod_utils import pyren_encode
 from mod_elm import AllowedList
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
@@ -347,7 +352,7 @@ class DDTECU:
             funcs = root.findall("ns0:Target/ns0:Function", ns)
             if funcs:
                 for fun in funcs:
-                    self.Addr = can.attrib["Address"]
+                    self.Addr = fun.attrib["Address"]
                     if len(self.Addr):
                         self.Addr = hex(int(self.Addr))[2:]
         except:

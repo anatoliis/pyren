@@ -10,13 +10,14 @@ URL  -  scm:scen_ecri_calinj1#scen_ecri_calinj1_xxxxx.xml
  
 """
 
+import re
 import xml.dom.minidom
 import xml.etree.cElementTree as et
 from collections import OrderedDict
 
 import mod_db_manager
 import mod_globals
-from mod_ply import *
+from mod_ply import Calc
 from mod_utils import Choice, clearScreen, isHex, pyren_encode
 
 

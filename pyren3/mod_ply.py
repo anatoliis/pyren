@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
+import re
 import sys
+import time
 
 sys.path.insert(0, "../..")
 sys.path.insert(0, "./ply")
 
 import ply.lex as lex
 import ply.yacc as yacc
-import time
-import re
 
 
 class Parser:

@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 
 import copy
+import os
+import sys
 import xml.etree.ElementTree as et
 
+import mod_db_manager
+import mod_globals
 import mod_utils
 from mod_dfg import ClassDfg
 from mod_mtc import acf_MTC_compare_doc
-from mod_optfile import *
+from mod_optfile import Optfile
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
@@ -108,7 +112,7 @@ if mod_globals.os != "android":
 
 from mod_elm import ELM
 from mod_scan_ecus import ScanEcus
-from mod_utils import *
+from mod_utils import getVIN
 from mod_mtc import acf_getMTC
 from mod_mtc import acf_buildFull
 

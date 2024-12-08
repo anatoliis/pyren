@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
 import os
+import pickle
 import sys
 
+import mod_db_manager
 import mod_globals
 import mod_utils
+import pyren3
 
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
@@ -30,8 +33,8 @@ if mod_globals.os != "android":
 from mod_elm import ELM
 from mod_scan_ecus import ScanEcus
 from mod_ecu import ECU
-from mod_optfile import *
-from mod_utils import *
+from mod_optfile import Optfile
+from mod_utils import pyren_encode
 
 
 def prepareECUs():
@@ -42,7 +45,7 @@ def prepareECUs():
     global se
     global lang
 
-    pyren.optParser()
+    pyren3.optParser()
 
     mod_utils.chkDirTree()
     mod_db_manager.find_DBs()

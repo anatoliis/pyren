@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
+import string
 import xml.dom.minidom
 
-from mod_ecu_mnemonic import *
-from mod_ecu_screen import *
-from mod_ecu_service import *
+import mod_globals
+from mod_ecu_mnemonic import get_mnemonic, get_mnemonicDTC
+from mod_ecu_screen import EcuScreenDataRef
+from mod_ecu_service import executeService
 
 
 def get_default_std_a(df, mn, se, elm, calc, getDTCmnemo):

@@ -4,10 +4,12 @@ import ast
 import gc
 import operator
 import os
+import pickle
 import sys
 import time
 from shutil import copyfile
 
+import mod_db_manager
 import mod_ddt_utils
 import mod_utils
 
@@ -74,8 +76,7 @@ if mod_globals.os != "android":
         sys.exit()
 
 from mod_elm import ELM
-from mod_optfile import *
-from mod_utils import *
+from mod_utils import clearScreen
 
 
 class DDT:

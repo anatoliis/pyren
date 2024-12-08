@@ -26,32 +26,14 @@ SOH < 0 The battery is bad
 import datetime
 import sys
 import time
+import tkinter as tk
+import tkinter.messagebox
+import tkinter.ttk
 
-try:
-    import tkinter as tk
-    import tkinter.messagebox
-except ImportError:
-    import tkinter as tk
-    import tkinter.messagebox
+from serial.tools import list_ports
 
-try:
-    import tkinter.ttk
-
-    py3 = False
-except ImportError:
-    import tkinter.ttk as ttk
-
-    py3 = True
-
-try:
-    import serial
-    from serial.tools import list_ports
-except ImportError:
-    print("\n\n\n\tPlease install pyserial module")
-    sys.exit()
-
-from mod_elm import ELM
 import mod_globals
+from mod_elm import ELM
 
 
 def set_Tk_var():
