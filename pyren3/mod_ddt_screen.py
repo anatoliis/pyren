@@ -406,7 +406,7 @@ class DDTScreen(tk.Frame):
                     val = self.decu.getValue(
                         d,
                         request=self.decu.requests[cmd],
-                        responce=self.decu.requests[cmd].SentBytes,
+                        response=self.decu.requests[cmd].SentBytes,
                     )
                     if (
                         len(self.decu.datas[d].List)
@@ -418,7 +418,7 @@ class DDTScreen(tk.Frame):
                         val = self.decu.getHex(
                             d,
                             request=self.decu.requests[cmd],
-                            responce=self.decu.requests[cmd].SentBytes,
+                            response=self.decu.requests[cmd].SentBytes,
                         )
                         if val != mod_globals.none_val:
                             val = "0x" + val

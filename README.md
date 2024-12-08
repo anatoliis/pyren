@@ -288,7 +288,7 @@ optional arguments:
   --log LOGFILE      log file name
   --scan             scan ECUs even if savedEcus.p file exists
   --demo             for debuging purpose. Work without car and ELM
-  --dump             dump responces from all 21xx and 22xxxx requests
+  --dump             dump responses from all 21xx and 22xxxx requests
   --dev DEV          swith to Development Session for commands from DevList,
                      you should define alternative command for opening the
                      session, like a 1086

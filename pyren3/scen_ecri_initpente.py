@@ -65,9 +65,9 @@ def run(elm, ecu, command, data):
     cmd = ecu.get_ref_cmd(get_message("Commande1"))
     resVal = ScmParam["ParametreCommande1"]
     print("*" * 80)
-    responce = ecu.run_cmd(ScmParam["Commande1"], resVal)
+    response = ecu.run_cmd(ScmParam["Commande1"], resVal)
     print("*" * 80)
-    if "NR" in responce:
+    if "NR" in response:
         print(get_message("TexteProcedureInterompue"))
     else:
         print(get_message("TexteInitialisationEffectuee"))

@@ -199,7 +199,7 @@ def optParser():
 
     parser.add_argument(
         "--dump",
-        help="dump responces from all 21xx and 22xxxx requests",
+        help="dump responses from all 21xx and 22xxxx requests",
         dest="dump",
         default=False,
         action="store_true",

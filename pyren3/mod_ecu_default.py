@@ -18,7 +18,7 @@ def get_default_std_a(df, mn, se, elm, calc, getDTCmnemo):
             resp = executeService(service, elm, [], "", False)
     # resp = elm.request( mn[getDTCmnemo].request, mn[getDTCmnemo].positive, True, mn[getDTCmnemo].delay )
     elm.cmd("at at 1")
-    # print "Request:"+mn[getDTCmnemo].request+" Positive:"+mn[getDTCmnemo].positive+" Responce:"+resp+'\n'
+    # print "Request:"+mn[getDTCmnemo].request+" Positive:"+mn[getDTCmnemo].positive+" Response:"+resp+'\n'
 
     resp = resp.strip().replace(" ", "")
     if not all(c in string.hexdigits for c in resp):
@@ -149,7 +149,7 @@ def get_default_std_b(df, mn, se, elm, calc, getDTCmnemo):
             resp = executeService(service, elm, [], "", False)
     # resp = elm.request( mn[getDTCmnemo].request, mn[getDTCmnemo].positive, True, mn[getDTCmnemo].delay )
     elm.cmd("at at 1")
-    # print "Request:"+mn[getDTCmnemo].request+" Positive:"+mn[getDTCmnemo].positive+" Responce:"+resp+'\n'
+    # print "Request:"+mn[getDTCmnemo].request+" Positive:"+mn[getDTCmnemo].positive+" Response:"+resp+'\n'
 
     resp = resp.strip().replace(" ", "")
     if not all(c in string.hexdigits for c in resp):

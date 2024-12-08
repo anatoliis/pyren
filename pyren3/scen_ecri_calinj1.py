@@ -224,7 +224,7 @@ def run(elm, ecu, command, data):
     clearScreen()
     cmd = ecu.get_ref_cmd(get_message("EcritureCodeInjecteur"))
     print("*" * 80)
-    responce = ecu.run_cmd(ScmParam["EcritureCodeInjecteur"], inj_code)
+    response = ecu.run_cmd(ScmParam["EcritureCodeInjecteur"], inj_code)
     value5, datastr5 = ecu.get_id(ScmParam["Injecteur1"])
     value6, datastr6 = ecu.get_id(ScmParam["Injecteur2"])
     value7, datastr7 = ecu.get_id(ScmParam["Injecteur3"])

@@ -245,7 +245,7 @@ class ECU:
         ecudump = {}
 
     def saveDump(self):
-        """save responces from all 21xx, 22xxxx commands"""
+        """save responses from all 21xx, 22xxxx commands"""
 
         dumpname = (
             "./dumps/" + str(int(time.time())) + "_" + self.ecudata["ecuname"] + ".txt"

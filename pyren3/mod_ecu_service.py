@@ -103,28 +103,28 @@ def executeService(service, elm, status=[], param="", cache=False):
     # print "simpleRsp	", service.simpleRsp
     # print "startNextDelay	", service.startNextDelay
     # print "repeatNextDelay	", service.repeatNextDelay
-    # print "responces	", service.responces
-    # print "responcesRepeat	", service.responcesRepeat
+    # print "responses	", service.responses
+    # print "responsesRepeat	", service.responsesRepeat
     # print "startRepeatInProgres	", service.startRepeatInProgres
     # print "repeatRepeatInProgres 	", service.repeatRepeatInProgres
     # print "params ", service.params
 
     # te = time.time()   #end time
 
-    # check for simple responce
+    # check for simple response
     if len(service.simpleRsp) and rsp.startswith(service.simpleRsp):
         return first_rsp
 
-    # if rsp in service.responces.keys():
-    for rspk in list(service.responces.keys()):
+    # if rsp in service.responses.keys():
+    for rspk in list(service.responses.keys()):
         if rsp.startswith(rspk):
-            if rsp in list(service.responces.keys()) and service.responces[
+            if rsp in list(service.responses.keys()) and service.responses[
                 rsp
             ].status in list(status.keys()):
-                # print '\r',' '*80,"\rStatus:",pyren_encode(status[service.responces[rsp].status]),
+                # print '\r',' '*80,"\rStatus:",pyren_encode(status[service.responses[rsp].status]),
                 print(
                     "\nStatus:",
-                    pyren_encode(status[service.responces[rsp].status]),
+                    pyren_encode(status[service.responses[rsp].status]),
                     end=" ",
                 )
             sys.stdout.flush()
@@ -151,16 +151,16 @@ def executeService(service, elm, status=[], param="", cache=False):
         rsp = elm.request(commandToSend, "", cache, localDelay)
         rsp = rspStrip(rsp, commandToSend)
 
-        # if rsp in service.responces.keys():
-        for rspk in list(service.responces.keys()):
+        # if rsp in service.responses.keys():
+        for rspk in list(service.responses.keys()):
             if rsp.startswith(rspk):
-                if rsp in list(service.responces.keys()) and service.responces[
+                if rsp in list(service.responses.keys()) and service.responses[
                     rsp
                 ].status in list(status.keys()):
-                    # print '\r',' '*80,"\rStatus:",pyren_encode(status[service.responces[rsp].status]), count,
+                    # print '\r',' '*80,"\rStatus:",pyren_encode(status[service.responses[rsp].status]), count,
                     print(
                         "\nStatus:",
-                        pyren_encode(status[service.responces[rsp].status]),
+                        pyren_encode(status[service.responses[rsp].status]),
                         end=" ",
                     )
                 sys.stdout.flush()
@@ -229,8 +229,8 @@ class EcuService:
     simpleRsp = ""
     startNextDelay = 0
     repeatNextDelay = 0
-    responces = {}
-    responcesRepeat = {}
+    responses = {}
+    responsesRepeat = {}
     startRepeatInProgres = {}
     repeatRepeatInProgres = {}
     params = []
@@ -240,8 +240,8 @@ class EcuService:
         self.delay = sv.getAttribute("delay")
         self.mode = sv.getAttribute("mode")
 
-        self.responces = {}
-        self.responcesRepeat = {}
+        self.responses = {}
+        self.responsesRepeat = {}
         self.startRepeatInProgres = {}
         self.repeatRepeatInProgres = {}
         self.params = []
@@ -275,20 +275,20 @@ class EcuService:
                 Simple = st.getElementsByTagName("Simple").item(0)
                 if Simple:
                     resp = EcuServiceResponse(Simple)
-                    self.responces[resp.val] = resp
+                    self.responses[resp.val] = resp
                     self.simpleRsp = resp.val
 
                 RepeatInProgress = st.getElementsByTagName("RepeatInProgress").item(0)
                 if RepeatInProgress:
                     resp = EcuServiceResponse(RepeatInProgress)
-                    self.responces[resp.val] = resp
+                    self.responses[resp.val] = resp
                     self.startRepeatInProgres[resp.val] = resp
 
                 Resp = st.getElementsByTagName("Resp")
                 if Resp:
                     for rsp in Resp:
                         resp = EcuServiceResponse(rsp)
-                        self.responces[resp.val] = resp
+                        self.responses[resp.val] = resp
 
         Repeat = sv.getElementsByTagName("Repeat")
         if Repeat:
@@ -301,19 +301,19 @@ class EcuService:
                 Simple = rep.getElementsByTagName("Simple").item(0)
                 if Simple:
                     resp = EcuServiceResponse(Simple)
-                    self.responces[resp.val] = resp
+                    self.responses[resp.val] = resp
 
                 RepeatInProgress = rep.getElementsByTagName("RepeatInProgress").item(0)
                 if RepeatInProgress:
                     resp = EcuServiceResponse(RepeatInProgress)
-                    self.responcesRepeat[resp.val] = resp
+                    self.responsesRepeat[resp.val] = resp
                     self.repeatRepeatInProgres[resp.val] = resp
 
                 Resp = rep.getElementsByTagName("Resp")
                 if Resp:
                     for rsp in Resp:
                         resp = EcuServiceResponse(rsp)
-                        self.responcesRepeat[resp.val] = resp
+                        self.responsesRepeat[resp.val] = resp
 
 
 class EcuServices:

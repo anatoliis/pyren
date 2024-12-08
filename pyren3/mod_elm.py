@@ -751,7 +751,7 @@ class ELM:
 
     currentScreenDataIds = []  # dataids displayed on current screen
     rsp_cache = OrderedDict()  # cashes responses for current screen
-    l1_cache = {}  # save number of frames in responces
+    l1_cache = {}  # save number of frames in responses
     tmpNotSupportedCommands = (
         {}
     )  # temporary list for requests that were positive and became negative for no reason
@@ -1262,7 +1262,7 @@ class ELM:
         """Check if request is saved in L2 cache.
         If not then
           - make real request
-          - convert responce to one line
+          - convert response to one line
           - save in L2 cache
         returns response without consistency check
         """
@@ -1276,7 +1276,7 @@ class ELM:
         # send cmd
         rsp = self.cmd(req, int(serviceDelay))
 
-        # parse responce
+        # parse response
         res = ""
         if self.currentprotocol != "can":
             # Trivially reject first line (echo)
@@ -1288,7 +1288,7 @@ class ELM:
             for s in rsp.split("\n"):
                 if ":" in s:
                     res += s[2:].strip() + " "
-                else:  # responce consists only from one frame
+                else:  # response consists only from one frame
                     if s.replace(" ", "").startswith(positive.replace(" ", "")):
                         res += s.strip() + " "
 
@@ -2083,7 +2083,7 @@ class ELM:
 
         # now we are going to receive data. st or ff should be in responses[0]
         if len(responses) != 1:
-            # print "Something went wrong. len responces != 1"
+            # print "Something went wrong. len responses != 1"
             return "WRONG RESPONSE"
 
         result = ""
@@ -2193,7 +2193,7 @@ class ELM:
         if not mod_globals.opt_demo:
             self.port.write(str(command + "\r").encode("utf-8"))  # send command
 
-        # receive and parse responce
+        # receive and parse response
         while True:
             tc = pyren_time()
             if mod_globals.opt_demo:
@@ -2232,7 +2232,7 @@ class ELM:
         if command[0].isdigit() or command.startswith("STPX"):
             self.response_time = ((self.response_time * 9) + roundtrip) / 10
 
-        # save responce to log
+        # save response to log
         if self.lf != 0:
             self.lf.write("<[" + str(round(roundtrip, 3)) + "]" + self.buff + "\n")
             self.lf.flush()

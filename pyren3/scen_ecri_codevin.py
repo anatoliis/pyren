@@ -122,7 +122,7 @@ def run(elm, ecu, command, data):
     #
     #     Change VIN
     #
-    responce = ecu.run_cmd(ScmParam["ConfigurationName"], vin_crc)
+    response = ecu.run_cmd(ScmParam["ConfigurationName"], vin_crc)
     value1, datastr1 = ecu.get_id(ScmParam["identVIN"])
     print()
     print("*" * 80)

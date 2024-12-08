@@ -39,13 +39,13 @@ def get_mnemonic(m, se, elm, raw=False):
             ):
                 m.startByte = (
                     se[sid]
-                    .responces[list(se[sid].responces.keys())[0]]
+                    .responses[list(se[sid].responses.keys())[0]]
                     .mnemolocations[m.name]
                     .startByte
                 )
                 m.startBit = (
                     se[sid]
-                    .responces[list(se[sid].responces.keys())[0]]
+                    .responses[list(se[sid].responses.keys())[0]]
                     .mnemolocations[m.name]
                     .startBit
                 )
@@ -53,7 +53,7 @@ def get_mnemonic(m, se, elm, raw=False):
                 m.positive = se[sid].simpleRsp
                 m.delay = "100"  # don't know how much it should be
 
-    # get responce
+    # get response
     if len(m.sids) > 0:
         for sid in m.sids:
             service = se[sid]
@@ -61,7 +61,7 @@ def get_mnemonic(m, se, elm, raw=False):
     else:
         resp = elm.request(m.request, m.positive, True, m.delay)
 
-    # format responce
+    # format response
     resp = resp.strip().replace(" ", "")
     if not all(c in string.hexdigits for c in resp):
         resp = ""
@@ -174,7 +174,7 @@ def getHexVal(m, startByte, startBit, resp, raw=False):
     bytes = int((bits + sbit - 1) // 8 + 1)
     rshift = ((bytes + 1) * 8 - (bits + sbit)) % 8
 
-    # check length of responce
+    # check length of response
     if (sb * 3 + bytes * 3 - 1) > (len(resp)):
         return "00"
 

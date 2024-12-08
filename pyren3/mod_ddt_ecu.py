@@ -374,7 +374,7 @@ class DDTECU:
                     self.cmd4data[di.Name] = r.Name
 
     def saveDump(self):
-        """save responces from all 21xx, 22xxxx commands"""
+        """save responses from all 21xx, 22xxxx commands"""
 
         xmlname = self.ecufname.split("/")[-1]
         if xmlname.upper().endswith(".XML"):
@@ -476,14 +476,14 @@ class DDTECU:
 
         return rsp
 
-    def getValue(self, data, auto=True, request=None, responce=None):
+    def getValue(self, data, auto=True, request=None, response=None):
         """extract and format value"""
 
         # debug
-        # print 'getValue entry point : ', '\n\tdata:', data, '\n\tauto:',  auto, '\n\treq:', request, '\n\tres:', responce
+        # print 'getValue entry point : ', '\n\tdata:', data, '\n\tauto:',  auto, '\n\treq:', request, '\n\tres:', response
 
         # first get hex value
-        hv = self.getHex(data, auto, request, responce)
+        hv = self.getHex(data, auto, request, response)
 
         if hv == mod_globals.none_val:
             return mod_globals.none_val
@@ -542,11 +542,11 @@ class DDTECU:
 
         return hv
 
-    def getHex(self, data, auto=True, request=None, responce=None):
+    def getHex(self, data, auto=True, request=None, response=None):
         """extract hex value from response"""
 
         # debug
-        # print 'getHex entry point : ', '\n\tdata:', data, '\n\tauto:',  auto, '\n\treq:', request, '\n\tres:', responce
+        # print 'getHex entry point : ', '\n\tdata:', data, '\n\tauto:',  auto, '\n\treq:', request, '\n\tres:', response
 
         # d will be a data instace
         if data in list(self.datas.keys()):
@@ -590,11 +590,11 @@ class DDTECU:
             return mod_globals.none_val
 
         # if response not defined as an argument
-        if responce == None:
+        if response == None:
             # send new request or get response from cache
             resp = self.elmRequest(r.SentBytes)
         else:
-            resp = responce
+            resp = response
 
         if data not in list(
             self.datas.keys()
@@ -624,7 +624,7 @@ class DDTECU:
         else:
             rshift = ((bytes + 1) * 8 - (bits + sbit)) % 8
 
-        # check length of responce
+        # check length of response
         if (sb * 3 + bytes * 3 - 1) > (len(resp)):
             return mod_globals.none_val
 

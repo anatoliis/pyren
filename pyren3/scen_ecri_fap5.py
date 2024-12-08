@@ -179,7 +179,7 @@ def run(elm, ecu, command, data):
     #
     #     Start regeneration
     #
-    responce = ecu.run_cmd(ScmParam["Cmde1"])
+    response = ecu.run_cmd(ScmParam["Cmde1"])
 
     #
     #     Main cycle
@@ -270,7 +270,7 @@ def run(elm, ecu, command, data):
                 continue
             if c == "q" or c == "Q":
                 kb.set_normal_term()
-                responce = ecu.run_cmd(ScmParam["Cmde2"])
+                response = ecu.run_cmd(ScmParam["Cmde2"])
                 break
         time.sleep(0.2)
 

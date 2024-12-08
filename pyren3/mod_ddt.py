@@ -236,7 +236,7 @@ def optParser():
 
     parser.add_argument(
         "--dump",
-        help="dump responces from all 21xx and 22xxxx requests",
+        help="dump responses from all 21xx and 22xxxx requests",
         dest="dump",
         default=True,
         action="store_true",
@@ -1048,7 +1048,7 @@ class DDTLauncher:
         del decu
 
     def guiSaveDump(self, decu):
-        """save responces from all 21xx, 22xxxx commands"""
+        """save responses from all 21xx, 22xxxx commands"""
 
         self.pdlg = tk.Toplevel()
         self.pdlg.option_add("*Dialog.msg.font", r"Courier\ New 12")

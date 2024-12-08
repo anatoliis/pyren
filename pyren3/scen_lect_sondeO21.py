@@ -153,7 +153,7 @@ def run(elm, ecu, command, data):
     #
     #     Start test
     #
-    responce = ecu.run_cmd(ScmParam["CommandeTestSonde"])
+    response = ecu.run_cmd(ScmParam["CommandeTestSonde"])
 
     #
     #     Main cycle
