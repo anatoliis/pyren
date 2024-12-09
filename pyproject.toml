@@ -12,6 +12,9 @@ pyjnius = "^1.6.1"
 pyserial = "^3.5"
 colorama = "^0.4.6"
 
+[tool.poetry.dev-dependencies]
+pip-tools = "^7.4.1"
+
 [tool.black]
 line-length = 88
 
