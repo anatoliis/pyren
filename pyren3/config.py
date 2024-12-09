@@ -53,7 +53,7 @@ ext_cur_DTC = "000000"
 
 none_val = "None"
 
-mtcdir = "../MTCSAVE/VIN"
+mtcdir = "./MTCSAVE/VIN"
 user_data_dir = "./"
 cache_dir = "./cache/"
 log_dir = "./logs/"
