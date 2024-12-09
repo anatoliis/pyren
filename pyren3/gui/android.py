@@ -1,10 +1,10 @@
 import re
 
 from pyren3 import config
+from pyren3.runner_base import get_runner
 from pyren3.enums import Command
 from pyren3.settings import Settings
 from pyren3.utils import (
-    get_executable,
     get_lang_list,
     get_path_list,
     update_from_gitlab,
@@ -28,8 +28,8 @@ class AndroidGui:
     def cmd(self, command: Command):
         self.save_settings()
         self.droid.fullDismiss()
-        executable = get_executable(self.settings.path)
-        executable(self.settings, command)
+        runner = get_runner(self.settings.path)
+        runner.run(self.settings, command)
 
     def cmd_mon(self):
         self.cmd(Command.MON)

@@ -6,10 +6,10 @@ import tkinter.messagebox
 import tkinter.ttk as ttk
 
 from pyren3 import config
+from pyren3.runner_base import get_runner
 from pyren3.enums import Command
 from pyren3.settings import Settings
 from pyren3.utils import (
-    get_executable,
     get_lang_list,
     get_path_list,
     get_port_list,
@@ -29,8 +29,8 @@ class DesktopGui(tk.Frame):
     def cmd(self, command: Command):
         self.save_settings()
         self.gui_destroy()
-        executable = get_executable(self.settings.path)
-        executable(self.settings, command)
+        runner = get_runner(self.settings.path)
+        runner.run(self.settings, command)
 
     def cmd_mon(self):
         self.cmd(Command.MON)
@@ -183,7 +183,7 @@ class DesktopGui(tk.Frame):
         )
         self.label_path_selector.configure(relief=tk.GROOVE)
         self.label_path_selector.configure(foreground="black")
-        self.label_path_selector.configure(text="""Version""")
+        self.label_path_selector.configure(text="""Runner""")
         self.label_path_selector.configure(background="#d9d9d9")
         self.label_path_selector.configure(highlightbackground="#d9d9d9")
         self.label_path_selector.configure(highlightcolor="black")

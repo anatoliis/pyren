@@ -93,7 +93,7 @@ def get_executable(path: str):
     if not executable_module:
         print(f"Executable not found: {module_name}.py")
         sys.exit(1)
-    return executable_module.run
+    return executable_module.runner.run
 
 
 def get_args_for_command_and_settings(settings: Settings, cmd: Command) -> list:
