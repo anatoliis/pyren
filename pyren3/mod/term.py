@@ -4,6 +4,8 @@ import string
 import sys
 import time
 
+from serial.tools import list_ports
+
 from pyren3 import config
 from pyren3.mod import utils
 from pyren3.mod.elm import ELM, dnat, pyren_time, snat
@@ -18,26 +20,6 @@ auto_dia = False
 debug_mode = False
 
 key_pressed = ""
-
-if config.OS == "nt":
-    import colorama
-
-    colorama.init()
-else:
-    try:
-        import androidhelper as android
-
-        config.OS = "android"
-    except Exception:
-        try:
-            import android
-
-            config.OS = "android"
-        except Exception:
-            pass
-
-if config.OS != "android":
-    from serial.tools import list_ports
 
 
 def init_macro():

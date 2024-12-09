@@ -6,32 +6,14 @@ import sys
 import threading
 import time
 
+from serial.tools import list_ports
+
 from pyren3 import config
 from pyren3.mod import db_manager, utils
 from pyren3.mod.ddt import ddt_utils
 from pyren3.mod.ddt.ddt_ecu import DDTECU
 from pyren3.mod.elm import ELM, pyren_time
 from pyren3.mod.utils import ChoiceLong, KBHit, clearScreen
-
-if config.OS == "nt":
-    import colorama
-
-    colorama.init()
-else:
-    try:
-        import androidhelper as android
-
-        config.OS = "android"
-    except Exception:
-        try:
-            import android
-
-            config.OS = "android"
-        except Exception:
-            pass
-
-if config.OS != "android":
-    from serial.tools import list_ports
 
 
 class DDT_MON:

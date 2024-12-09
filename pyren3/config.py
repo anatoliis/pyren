@@ -91,6 +91,10 @@ if OS == "android":
         pass
     else:
         JNIUS_MODE = True
+elif OS == "nt":
+    import colorama
+
+    colorama.init()
 
 print(f"Detected OS: {OS}{' (jnius mode)' if JNIUS_MODE else ''}")
 

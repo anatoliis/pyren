@@ -10,6 +10,7 @@ package-mode = false
 python = "^3.11"
 pyjnius = "^1.6.1"
 pyserial = "^3.5"
+colorama = "^0.4.6"
 
 [tool.black]
 line-length = 88

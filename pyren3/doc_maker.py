@@ -79,11 +79,6 @@ td.row_d {
 
 """
 
-if config.OS == "nt":
-    import colorama
-
-    colorama.init()
-
 table_header = False
 dfg_ds = {}
 
