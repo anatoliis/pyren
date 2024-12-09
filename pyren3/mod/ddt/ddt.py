@@ -5,6 +5,11 @@ import os
 import pickle
 import sys
 import time
+import tkinter as tk
+import tkinter.filedialog
+import tkinter.font
+import tkinter.messagebox
+import tkinter.ttk as ttk
 import xml.etree.ElementTree as et
 from shutil import copyfile
 
@@ -15,13 +20,6 @@ from pyren3.mod.ddt.ddt_ecu import DDTECU, ecuSearch
 from pyren3.mod.ddt.ddt_screen import DDTScreen
 from pyren3.mod.elm import AllowedList, ELM
 from pyren3.mod.utils import clearScreen
-
-if not config.CLI:
-    import tkinter as tk
-    import tkinter.filedialog
-    import tkinter.font
-    import tkinter.messagebox
-    import tkinter.ttk as ttk
 
 if config.OS != "nt":
     # let's try android

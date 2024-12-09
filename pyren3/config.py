@@ -5,7 +5,6 @@ BASE_PATH = None
 OPT_DEBUG = False
 DEBUG_FILE = None
 
-CLI = False
 PORT = ""
 ECU_ID = ""
 ECU_ADDR = ""

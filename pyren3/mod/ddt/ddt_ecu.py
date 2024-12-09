@@ -15,7 +15,7 @@ from pyren3.mod.ddt.ddt_data import DecuDatas
 from pyren3.mod.ddt.ddt_request import DecuRequests
 from pyren3.mod.elm import AllowedList
 
-if config.OS != "android" and not config.CLI:
+if config.OS != "android":
     import tkinter as tk
 
 

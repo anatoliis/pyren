@@ -7,6 +7,7 @@ from collections import OrderedDict
 from datetime import datetime
 
 from pyren3 import config
+from pyren3.mod import db_manager
 from pyren3.mod.ecu.command import EcuCommands, executeCommand, runCommand
 from pyren3.mod.ecu.dataids import EcuDataIds
 from pyren3.mod.ecu.ecu_default import (
@@ -30,12 +31,6 @@ from pyren3.mod.elm import AllowedList, dnat, pyren_time, snat
 from pyren3.mod.mod_ply import Calc
 from pyren3.mod.optfile import Optfile
 from pyren3.mod.utils import Choice, ChoiceLong, KBHit, clearScreen, show_doc
-
-if config.OS != "android":
-    from pyren3.mod.ddt.ddt import DDT
-
-from pyren3 import config
-from pyren3.mod import db_manager
 
 F2A = {
     "01": "7A",
@@ -1449,6 +1444,8 @@ class ECU:
                 continue
 
             if choice[0][:3] == "DDT":
+                from pyren3.mod.ddt.ddt import DDT
+
                 langmap = self.getLanguageMap()
                 ddt = DDT(self.elm, self.ecudata, langmap)
                 del ddt

@@ -1,12 +1,10 @@
 import sys
 
-from pyren3 import config
 from pyren3.enums import Command
 from pyren3.runner import run
 from pyren3.settings import Settings
 
 if __name__ == "__main__":
-    config.CLI = True
     if len(sys.argv) < 2:
         cmd = Command.DEMO
     else:
