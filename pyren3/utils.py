@@ -112,7 +112,7 @@ def getLangList():
 
 def getPortList():
     ret = []
-    if config.OS == "android":
+    if config.OS != "android":
         if config.JNIUS_MODE:
             from jnius import autoclass
 

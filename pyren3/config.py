@@ -1,5 +1,4 @@
 import os
-import sys
 
 BASE_PATH = None
 
@@ -80,21 +79,17 @@ except ImportError:
     except ImportError:
         pass
 
-JNIUS_MODE = False
-if OS == "android":
-    try:
-        import jnius
-    except ImportError:
-        print("Missing dependency: pyjnius")
-        sys.exit(1)
-    except Exception:
-        pass
-    else:
-        JNIUS_MODE = True
-elif OS == "nt":
+if OS == "nt":
     import colorama
 
     colorama.init()
+
+try:
+    import jnius
+except Exception:
+    JNIUS_MODE = False
+else:
+    JNIUS_MODE = True
 
 print(f"Detected OS: {OS}{' (jnius mode)' if JNIUS_MODE else ''}")
 
