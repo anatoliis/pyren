@@ -1,4 +1,4 @@
 build==1.2.2.post1
+click==8.1.7
 colorama==0.4.6
-pip-tools==7.4.1
 pyserial==3.5
