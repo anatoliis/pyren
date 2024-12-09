@@ -10,3 +10,7 @@ class Command(str, enum.Enum):
     PIDS = "pids"
     MON = "mon"
     DDT = "ddt"
+
+    @classmethod
+    def all(cls):
+        return [cmd.value for cmd in cls.__members__.values()]
