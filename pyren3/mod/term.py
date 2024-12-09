@@ -387,16 +387,8 @@ class FileChooser:
                 pass
 
         if config.OS != "android":
-            try:
-                # Python2
-                import tkinter as tk
-                import tkinter.ttk
-                import tkinter.filedialog as filedialog
-            except ImportError:
-                # Python3
-                import tkinter as tk
-                import tkinter.ttk as ttk
-                import tkinter.filedialog as filedialog
+            import tkinter as tk
+            import tkinter.filedialog as filedialog
 
             root = tk.Tk()
             root.withdraw()

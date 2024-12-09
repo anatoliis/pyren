@@ -2,16 +2,18 @@ import copy
 import datetime
 import gc
 import os
-import tkinter as tk
-import tkinter.filedialog
-import tkinter.font
-import tkinter.messagebox
-import tkinter.ttk as ttk
 
 from pyren3 import config
 from pyren3.mod import db_manager
 from pyren3.mod.elm import AllowedList, dnat, pyren_time
 from pyren3.mod.utils import clearScreen
+
+if not config.CLI:
+    import tkinter as tk
+    import tkinter.filedialog
+    import tkinter.font
+    import tkinter.messagebox
+    import tkinter.ttk as ttk
 
 
 class screenSettings:  # for future use.
