@@ -14,7 +14,8 @@ import xml.dom.minidom
 import xml.etree.cElementTree as et
 from collections import OrderedDict
 
-from pyren3.mod import config, db_manager
+from pyren3 import config
+from pyren3.mod import db_manager
 from pyren3.mod.ply import Calc
 from pyren3.mod.utils import Choice, clearScreen, isHex
 

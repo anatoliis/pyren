@@ -2,8 +2,8 @@ import os
 import pickle
 import sys
 
-from pyren3 import pyren3
-from pyren3.mod import config, db_manager, utils
+from pyren3 import config, pyren3
+from pyren3.mod import db_manager, utils
 from pyren3.mod.ecu.ecu import ECU
 from pyren3.mod.elm import ELM
 from pyren3.mod.optfile import Optfile

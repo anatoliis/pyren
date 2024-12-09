@@ -4,7 +4,8 @@ import string
 import sys
 import time
 
-from pyren3.mod import config, utils
+from pyren3 import config
+from pyren3.mod import utils
 from pyren3.mod.elm import ELM, dnat, pyren_time, snat
 
 macro = {}

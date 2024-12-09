@@ -13,7 +13,8 @@ import tkinter.ttk as ttk
 import xml.etree.ElementTree as et
 from shutil import copyfile
 
-from pyren3.mod import config, db_manager, scan_ecus, utils
+from pyren3 import config
+from pyren3.mod import db_manager, scan_ecus, utils
 from pyren3.mod.ddt import ddt_utils
 from pyren3.mod.ddt.ddt_ecu import DDTECU, ecuSearch
 from pyren3.mod.ddt.ddt_screen import DDTScreen

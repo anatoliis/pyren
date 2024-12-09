@@ -6,7 +6,7 @@ import xml.dom.minidom
 from collections import OrderedDict
 from datetime import datetime
 
-from pyren3.mod import config
+from pyren3 import config
 from pyren3.mod.ecu.command import EcuCommands, executeCommand, runCommand
 from pyren3.mod.ecu.dataids import EcuDataIds
 from pyren3.mod.ecu.ecu_default import (
@@ -34,7 +34,7 @@ from pyren3.mod.utils import Choice, ChoiceLong, KBHit, clearScreen, show_doc
 if config.OS != "android":
     from pyren3.mod.ddt.ddt import DDT
 
-from pyren3.mod import config
+from pyren3 import config
 from pyren3.mod import db_manager
 
 F2A = {

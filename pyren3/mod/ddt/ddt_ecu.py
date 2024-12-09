@@ -8,7 +8,8 @@ import time
 import xml.etree.ElementTree as et
 from datetime import datetime
 
-from pyren3.mod import config, db_manager
+from pyren3 import config
+from pyren3.mod import db_manager
 from pyren3.mod.ddt import ddt_utils
 from pyren3.mod.ddt.ddt_data import DecuDatas
 from pyren3.mod.ddt.ddt_request import DecuRequests

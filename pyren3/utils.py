@@ -3,7 +3,7 @@ import shutil
 
 from serial.tools import list_ports
 
-from pyren3.mod import config
+from pyren3 import config
 
 
 def update_from_gitlab():

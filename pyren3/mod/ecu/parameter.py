@@ -1,6 +1,6 @@
 import xml.dom.minidom
 
-from pyren3.mod import config
+from pyren3 import config
 from pyren3.mod.ecu.mnemonic import get_SnapShotMnemonic, get_mnemonic
 
 

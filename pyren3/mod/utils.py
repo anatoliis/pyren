@@ -18,7 +18,7 @@ import subprocess
 import sys
 import webbrowser
 
-from pyren3.mod import config
+from pyren3 import config
 
 # Snippet from http://home.wlu.edu/~levys/software/kbhit.py
 

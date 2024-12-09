@@ -11,8 +11,7 @@ import pickle
 import sys
 import time
 
-from pyren3 import pyren3
-from pyren3.mod import config
+from pyren3 import config, pyren3
 from pyren3.mod.ecu.ecu import ECU
 from pyren3.mod.elm import ELM
 from pyren3.mod.optfile import Optfile

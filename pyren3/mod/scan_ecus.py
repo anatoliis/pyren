@@ -27,7 +27,8 @@ import string
 import sys
 import xml.dom.minidom
 
-from pyren3.mod import config, db_manager
+from pyren3 import config
+from pyren3.mod import db_manager
 from pyren3.mod.elm import dnat, snat
 from pyren3.mod.utils import Choice, ChoiceLong, DBG
 

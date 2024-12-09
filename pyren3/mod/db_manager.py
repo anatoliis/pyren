@@ -4,7 +4,7 @@ import re
 import shutil
 import zipfile
 
-from pyren3.mod import config
+from pyren3 import config
 
 db_dir_list = [".", ".."]
 android_dir_list = ["/mnt/sdcard/pyren"]

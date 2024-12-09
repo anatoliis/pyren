@@ -13,7 +13,8 @@ import time
 import xml.dom.minidom
 from copy import deepcopy
 
-from pyren3.mod import config, db_manager
+from pyren3 import config
+from pyren3.mod import db_manager
 from pyren3.mod.utils import KBHit, clearScreen
 
 

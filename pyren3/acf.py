@@ -3,7 +3,8 @@ import pickle
 
 from serial.tools import list_ports
 
-from pyren3.mod import config, db_manager, utils
+from pyren3 import config
+from pyren3.mod import db_manager, utils
 from pyren3.mod.acf_func import acf_loadModules
 from pyren3.mod.acf_proc import acf_MTC_generateDefaults, acf_MTC_optionsExplorer
 from pyren3.mod.elm import ELM

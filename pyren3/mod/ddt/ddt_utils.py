@@ -6,7 +6,8 @@ import xml.etree.ElementTree as et
 from copy import deepcopy
 from operator import itemgetter
 
-from pyren3.mod import config, db_manager
+from pyren3 import config
+from pyren3.mod import db_manager
 
 if config.OS != "android":
     from serial.tools import list_ports

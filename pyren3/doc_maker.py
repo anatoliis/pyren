@@ -3,7 +3,8 @@ import os
 import sys
 import xml.etree.ElementTree as et
 
-from pyren3.mod import config, db_manager, utils
+from pyren3 import config
+from pyren3.mod import db_manager, utils
 from pyren3.mod.dfg import ClassDfg
 from pyren3.mod.elm import ELM
 from pyren3.mod.mtc import acf_MTC_compare_doc, acf_buildFull, acf_getMTC

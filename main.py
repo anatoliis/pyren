@@ -1,6 +1,6 @@
 import os
 
-from pyren3.mod import config
+from pyren3 import config
 
 config.BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 

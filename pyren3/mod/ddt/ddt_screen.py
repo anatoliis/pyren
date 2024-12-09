@@ -8,7 +8,8 @@ import tkinter.font
 import tkinter.messagebox
 import tkinter.ttk as ttk
 
-from pyren3.mod import config, db_manager
+from pyren3 import config
+from pyren3.mod import db_manager
 from pyren3.mod.elm import AllowedList, dnat, pyren_time
 from pyren3.mod.utils import clearScreen
 

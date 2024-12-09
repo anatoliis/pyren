@@ -11,7 +11,8 @@ URL  -  scm:scen_ecri_codevin#scen_ecri_codevin_xxxxx.xml
 
 import xml.dom.minidom
 
-from pyren3.mod import config, db_manager
+from pyren3 import config
+from pyren3.mod import db_manager
 from pyren3.mod.utils import clearScreen, hex_VIN_plus_CRC
 
 

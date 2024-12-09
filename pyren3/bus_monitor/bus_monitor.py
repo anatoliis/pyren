@@ -6,7 +6,8 @@ import sys
 import threading
 import time
 
-from pyren3.mod import config, db_manager, utils
+from pyren3 import config
+from pyren3.mod import db_manager, utils
 from pyren3.mod.ddt import ddt_utils
 from pyren3.mod.ddt.ddt_ecu import DDTECU
 from pyren3.mod.elm import ELM, pyren_time

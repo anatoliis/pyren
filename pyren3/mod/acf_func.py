@@ -3,7 +3,7 @@ import pickle
 import time
 import zipfile
 
-from pyren3.mod import config
+from pyren3 import config
 
 errone = {}
 acfFile = ""

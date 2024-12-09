@@ -12,7 +12,7 @@ import time
 from collections import OrderedDict
 from datetime import datetime
 
-from pyren3.mod import config
+from pyren3 import config
 
 try:
     import androidhelper as android

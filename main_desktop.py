@@ -5,8 +5,8 @@ import tkinter.font
 import tkinter.messagebox
 import tkinter.ttk as ttk
 
+from pyren3 import config
 from pyren3.enums import Command
-from pyren3.mod import config
 from pyren3.runner import run
 from pyren3.settings import Settings
 from pyren3.utils import getLangList, getPathList, getPortList, update_from_gitlab

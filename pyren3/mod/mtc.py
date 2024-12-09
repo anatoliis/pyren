@@ -3,7 +3,7 @@ import os
 import shutil
 import zipfile
 
-from pyren3.mod import config
+from pyren3 import config
 from pyren3.mod.utils import Choice
 
 
