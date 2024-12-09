@@ -17,13 +17,13 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(config.language_dict.keys()):
-            value = config.language_dict[value]
+        if value.isdigit() and value in list(config.LANGUAGE_DICT.keys()):
+            value = config.LANGUAGE_DICT[value]
         return value
 
     def get_message_by_id(id):
-        if id.isdigit() and id in list(config.language_dict.keys()):
-            value = config.language_dict[id]
+        if id.isdigit() and id in list(config.LANGUAGE_DICT.keys()):
+            value = config.LANGUAGE_DICT[id]
         return value
 
     DOMTree = xml.dom.minidom.parse(db_manager.get_file_from_clip(data))

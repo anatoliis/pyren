@@ -41,19 +41,19 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(config.language_dict.keys()):
+        if value.isdigit() and value in list(config.LANGUAGE_DICT.keys()):
             if encode:
-                value = config.language_dict[value]
+                value = config.LANGUAGE_DICT[value]
             else:
-                value = config.language_dict[value]
+                value = config.LANGUAGE_DICT[value]
         return value
 
     def get_message_by_id(id, encode=True):
-        if id.isdigit() and id in list(config.language_dict.keys()):
+        if id.isdigit() and id in list(config.LANGUAGE_DICT.keys()):
             if encode:
-                value = config.language_dict[id]
+                value = config.LANGUAGE_DICT[id]
             else:
-                value = config.language_dict[id]
+                value = config.LANGUAGE_DICT[id]
         return value
 
     #
@@ -74,7 +74,7 @@ def run(elm, ecu, command, data):
 
     for Set in ScmSets:
         if len(Set.attributes) != 1:
-            setname = config.language_dict[Set.getAttribute("name")]
+            setname = config.LANGUAGE_DICT[Set.getAttribute("name")]
             ScmParams = Set.getElementsByTagName("ScmParam")
 
             for Param in ScmParams:
@@ -197,7 +197,7 @@ def run(elm, ecu, command, data):
     def sendTrainingCmd():
         resp = ecu.run_cmd(ScmParam["CmndRoutineTraining"])
         clearScreen()
-        if tariningCmdResp not in resp and not config.opt_demo:
+        if tariningCmdResp not in resp and not config.DEMO:
             nrCode = resp[resp.find("NR") - 3 : resp.find("NR")]
             print()
             if "NR" in resp:
@@ -358,14 +358,14 @@ def run(elm, ecu, command, data):
             print("*" * 80)
 
             if (
-                value2 == config.language_dict[ScmParam["StateNO"]]
+                value2 == config.LANGUAGE_DICT[ScmParam["StateNO"]]
                 and len(readCodes) < 4
             ):
                 print("%-50s %-20s" % (readCodeMessage, readCode))
                 print()
                 print("No codes read")
             elif (
-                value2 == config.language_dict[ScmParam["StateYES"]]
+                value2 == config.LANGUAGE_DICT[ScmParam["StateYES"]]
                 and len(readCodes) < 4
             ):
                 print("%-50s %-20s" % (readCodeMessage, readCode))

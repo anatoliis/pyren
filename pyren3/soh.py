@@ -152,10 +152,10 @@ class Tl:
 
         # start ELM
         try:
-            config.opt_speed = 38400
-            config.opt_rate = 230400
-            self.elm = ELM(p_name, config.opt_speed, "")
-            self.elm.port.soft_boudrate(config.opt_rate)
+            config.SPEED = 38400
+            config.RATE = 230400
+            self.elm = ELM(p_name, config.SPEED, "")
+            self.elm.port.soft_boudrate(config.RATE)
         except:
             tkinter.messagebox.showinfo(
                 "INFO", "ELM is not connected or incompatible. "

@@ -129,7 +129,7 @@ def main():
     res = ""
 
     print("Opening ELM")
-    elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
+    elm = ELM(config.PORT, config.SPEED, config.LOG)
     elm.portTimeout = 5
 
     for st in cmdb.split("#"):

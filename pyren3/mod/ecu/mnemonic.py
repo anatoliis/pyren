@@ -30,10 +30,10 @@ def get_mnemonicDTC(m, resp):
 
 
 def get_mnemonic(m, se, elm, raw=False):
-    if not m.serviceID and config.ext_cur_DTC != "000000":
+    if not m.serviceID and config.EXT_CUR_DTC != "000000":
         for sid in list(se.keys()):
             startReq = se[sid].startReq
-            if startReq.startswith("12") and startReq.endswith(config.ext_cur_DTC[:4]):
+            if startReq.startswith("12") and startReq.endswith(config.EXT_CUR_DTC[:4]):
                 m.startByte = (
                     se[sid]
                     .responses[list(se[sid].responses.keys())[0]]
@@ -89,7 +89,7 @@ def get_SnapShotMnemonic(m, se, elm, dataids):
 
     resp = executeService(snapshotService, elm, [], "", True)
     if (
-        (config.opt_demo and not resp)
+        (config.DEMO and not resp)
         or not resp.startswith(snapshotService.simpleRsp)
         or len(resp) // 2 == 6
     ):

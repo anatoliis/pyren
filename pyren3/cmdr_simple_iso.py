@@ -5,17 +5,17 @@ from pyren3.mod.elm import ELM
 
 ecu_functional_address = "7a"
 # config.opt_port    = 'com4'
-config.opt_port = "/dev/cu.usbserial-AH01J4BS"
+config.PORT = "/dev/cu.usbserial-AH01J4BS"
 
 #########################################
 
 
 # config.opt_demo    = True
-config.opt_speed = 38400
-config.opt_log = "simpl.txt"
+config.SPEED = 38400
+config.LOG = "simpl.txt"
 
 print("Opening ELM")
-elm = ELM(config.opt_port, config.opt_speed, True)
+elm = ELM(config.PORT, config.SPEED, True)
 
 print("Init    ELM")
 print(elm.cmd("at z"))

@@ -53,7 +53,7 @@ def get_default_std_a(df, mn, se, elm, calc, getDTCmnemo):
             comp = comp.replace(m, "0x" + hex_val)
         isExists = calc.calculate(comp)
 
-        if not config.opt_minordtc:
+        if not config.MINOR_DTC:
             if isExists == 0:  # ignore error if it's definition does not exist
                 DTCs = DTCs[9:]
                 continue
@@ -73,16 +73,16 @@ def get_default_std_a(df, mn, se, elm, calc, getDTCmnemo):
 
         # if the self.status eq 1 then default is alive
         # if the self.status eq 2 then default is memorised
-        if not config.opt_minordtc:
+        if not config.MINOR_DTC:
             if df[dtc].status == 0:  # ignore error if it's definition does not exist
                 DTCs = DTCs[9:]
                 continue
 
         isAlive = ""
         if df[dtc].status == 1:
-            isAlive = config.language_dict.get("16882", "ALIVE")
+            isAlive = config.LANGUAGE_DICT.get("16882", "ALIVE")
         else:
-            isAlive = config.language_dict.get("646", "MEMORISED")
+            isAlive = config.LANGUAGE_DICT.get("646", "MEMORISED")
         # if not config.opt_minordtc:
         #  if df[dtc].status==0: 		     #ignore error if it's definition does not exist
         #    DTCs = DTCs[9:]
@@ -181,7 +181,7 @@ def get_default_std_b(df, mn, se, elm, calc, getDTCmnemo):
             comp = comp.replace(m, "0x" + hex_val)
         isExists = calc.calculate(comp)
 
-        if not config.opt_minordtc:
+        if not config.MINOR_DTC:
             if isExists == 0:  # ignore error if it's definition does not exist
                 DTCs = DTCs[12:]
                 continue
@@ -201,16 +201,16 @@ def get_default_std_b(df, mn, se, elm, calc, getDTCmnemo):
 
         # if the self.status eq 1 then default is alive
         # if the self.status eq 2 then default is memorised
-        if not config.opt_minordtc:
+        if not config.MINOR_DTC:
             if df[dtc].status == 0:  # ignore error if it's definition does not exist
                 DTCs = DTCs[12:]
                 continue
 
         isAlive = ""
         if df[dtc].status == 1:
-            isAlive = config.language_dict.get("16882", "ALIVE")  # ALIVE
+            isAlive = config.LANGUAGE_DICT.get("16882", "ALIVE")  # ALIVE
         else:
-            isAlive = config.language_dict.get("646", "MEMORISED")  # MEMORISED
+            isAlive = config.LANGUAGE_DICT.get("646", "MEMORISED")  # MEMORISED
         # if df[dtc].status==0:      #ignore error if it's definition does not exist
         #   DTCs = DTCs[12:]
         #   continue
@@ -269,7 +269,7 @@ def get_default_std_b(df, mn, se, elm, calc, getDTCmnemo):
                 if l.split(":")[0] == interpretation:
                     hlpstr = hlpstr + "\t" + l + "\n"
 
-        if config.opt_verbose:
+        if config.VERBOSE:
             stBits = "{0:0>8b}".format(int(dtcStatus, 16))
             hlpstr = (
                 hlpstr + "\t----------- Status byte: " + dtcStatus + " -----------\n"
@@ -334,9 +334,9 @@ def get_default_failflag(df, mn, se, elm, calc):
             continue
         isAlive = ""
         if df[dtc].status == 1:
-            isAlive = config.language_dict.get("16882", "ALIVE")  # ALIVE
+            isAlive = config.LANGUAGE_DICT.get("16882", "ALIVE")  # ALIVE
         else:
-            isAlive = config.language_dict.get("646", "MEMORISED")  # MEMORISED
+            isAlive = config.LANGUAGE_DICT.get("646", "MEMORISED")  # MEMORISED
 
         # Now get the interpretation
 

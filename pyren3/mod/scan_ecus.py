@@ -192,11 +192,11 @@ class ScanEcus:
         """scan all ecus. If savedEcus.p exists then load it and return"""
 
         SEFname = "savedEcus.p"
-        if config.opt_can2:
+        if config.CAN2:
             SEFname = "savedEcus2.p"
 
         # check if savedEcus exists
-        if os.path.isfile(SEFname) and not config.opt_scan:
+        if os.path.isfile(SEFname) and not config.SCAN:
 
             # load it
             self.detectedEcus = pickle.load(open(SEFname, "rb"))
@@ -244,9 +244,9 @@ class ScanEcus:
                     pickle.dump(self.detectedEcus, open(SEFname, "wb"))
             return
         else:
-            config.opt_scan = True
+            config.SCAN = True
 
-        config.state_scan = True
+        config.STATE_SCAN = True
 
         self.reqres = []
         self.errres = []
@@ -269,7 +269,7 @@ class ScanEcus:
 
         canH = "6"
         canL = "14"
-        if config.opt_can2:
+        if config.CAN2:
             canH = "13"
             canL = "12"
 
@@ -306,7 +306,7 @@ class ScanEcus:
         self.elm.close_protocol()
 
         # scan KWP ecus
-        if not config.opt_can2:
+        if not config.CAN2:
             self.elm.init_iso()  # actually it executed every time the address is changed
             for ecu, row in sorted(
                 iter(self.allecus.items()),
@@ -346,7 +346,7 @@ class ScanEcus:
             + str(len(self.detectedEcus))
         )
 
-        config.state_scan = False
+        config.STATE_SCAN = False
 
         # sort list of detected ECUs
         self.detectedEcus = sorted(self.detectedEcus, key=lambda k: int(k["idf"]))
@@ -357,7 +357,7 @@ class ScanEcus:
     def reScanErrors(self):
         """scan only detectedEcus for re-check errors"""
 
-        config.opt_scan = True
+        config.SCAN = True
 
         self.reqres = []
         self.errres = []
@@ -377,7 +377,7 @@ class ScanEcus:
         # scan CAN ecus
         canH = "6"
         canL = "14"
-        if config.opt_can2:
+        if config.CAN2:
             canH = "13"
             canL = "12"
 
@@ -403,7 +403,7 @@ class ScanEcus:
         self.elm.close_protocol()
 
         # scan KWP ecud
-        if not config.opt_can2:
+        if not config.CAN2:
             self.elm.init_iso()
             for row in sorted(self.detectedEcus, key=lambda k: int(k["idf"])):
                 if row["pin"] == "iso" and row["pin1"] == "7" and row["pin2"] == "15":
@@ -454,26 +454,26 @@ class ScanEcus:
         listecu = []
 
         if config.OS == "android":
-            if config.opt_scan:
+            if config.SCAN:
                 print("\n     %-40s %s" % ("Name", "Warn"))
             else:
                 print("\n     %-40s %s" % ("Name", "Type"))
 
             for row in self.detectedEcus:
-                if families[row["idf"]] in list(config.language_dict.keys()):
-                    fmlyn = config.language_dict[families[row["idf"]]]
-                    if config.opt_scan:
+                if families[row["idf"]] in list(config.LANGUAGE_DICT.keys()):
+                    fmlyn = config.LANGUAGE_DICT[families[row["idf"]]]
+                    if config.SCAN:
                         line = "%-40s %s" % (fmlyn, row["rerr"])
                     else:
                         line = "%-40s %s" % (fmlyn, row["stdType"])
                 else:
-                    if config.opt_scan:
+                    if config.SCAN:
                         line = "%-40s %s" % (row["doc"].strip(), row["rerr"])
                     else:
                         line = "%-40s %s" % (row["doc"].strip(), row["stdType"])
                 listecu.append(line)
         else:
-            if config.opt_scan:
+            if config.SCAN:
                 print(
                     "\n     %-7s %-6s %-5s %-40s %s"
                     % ("Addr", "Family", "Index", "Name", "Warn")
@@ -491,10 +491,10 @@ class ScanEcus:
                     dnat[row["dst"]] = "000"
                     snat[row["dst"]] = "000"
                 if row["idf"] in list(families.keys()) and families[row["idf"]] in list(
-                    config.language_dict.keys()
+                    config.LANGUAGE_DICT.keys()
                 ):
-                    fmlyn = config.language_dict[families[row["idf"]]]
-                    if config.opt_scan:
+                    fmlyn = config.LANGUAGE_DICT[families[row["idf"]]]
+                    if config.SCAN:
                         line = "%-2s(%3s) %-6s %-5s %-40s %s" % (
                             row["dst"],
                             dnat[row["dst"]],
@@ -513,7 +513,7 @@ class ScanEcus:
                             row["stdType"],
                         )
                 else:
-                    if config.opt_scan:
+                    if config.SCAN:
                         line = "%-2s(%3s) %-6s %-5s %-40s %s" % (
                             row["dst"],
                             dnat[row["dst"]],

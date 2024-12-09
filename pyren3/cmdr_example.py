@@ -27,18 +27,18 @@ def prepareECU():
 
     pyren3.optParser()
 
-    if len(config.opt_log) == 0:
-        config.opt_log = "commander_log.txt"
+    if len(config.LOG) == 0:
+        config.LOG = "commander_log.txt"
 
     print("Opening ELM")
-    elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
+    elm = ELM(config.PORT, config.SPEED, config.LOG)
 
     print("Loading ECUs list")
     se = ScanEcus(elm)  # Prepare list of all ecus
 
-    if not os.path.isfile("savedEcus.p") or config.opt_scan:
+    if not os.path.isfile("savedEcus.p") or config.SCAN:
         # choosing model
-        se.chooseModel(config.opt_car)  # choose model of car for doing full scan
+        se.chooseModel(config.CAR)  # choose model of car for doing full scan
 
     # Do this check every time
     se.scanAllEcus()  # First scan of all ecus
@@ -46,18 +46,18 @@ def prepareECU():
     print("Loading language ")
     sys.stdout.flush()
     # loading language data
-    lang = Optfile("Location/DiagOnCAN_" + config.opt_lang + ".bqm", True)
-    config.language_dict = lang.dict
+    lang = Optfile("Location/DiagOnCAN_" + config.LANG + ".bqm", True)
+    config.LANGUAGE_DICT = lang.dict
     print("Done")
 
     # clearScreen()
 
-    choosen_ecu = se.chooseECU(config.opt_ecuid)  # choose ECU among detected
+    choosen_ecu = se.chooseECU(config.ECU_ID)  # choose ECU among detected
     if choosen_ecu == -1:
         print("#\n" * 3, "#   Unknown ECU defined!!!\n", "#\n" * 3)
         exit(1)
 
-    ecucashfile = "./cache/" + choosen_ecu["ModelId"] + "_" + config.opt_lang + ".p"
+    ecucashfile = "./cache/" + choosen_ecu["ModelId"] + "_" + config.LANG + ".p"
 
     if os.path.isfile(ecucashfile):  # if cache exists
         ecu = pickle.load(open(ecucashfile, "rb"))  # load it

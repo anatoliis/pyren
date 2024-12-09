@@ -240,17 +240,17 @@ def optParser():
         print("")
         exit(2)
     else:
-        config.opt_port = options.port
-        config.opt_rate = int(options.rate)
-        config.opt_speed = int(options.rate)
+        config.PORT = options.port
+        config.RATE = int(options.rate)
+        config.SPEED = int(options.rate)
         auto_macro = options.macro
-        config.opt_log = options.logfile
-        config.opt_demo = options.demo
-        config.opt_si = options.si
-        config.opt_cfc0 = options.cfc
-        config.opt_caf = options.caf
-        config.opt_n1c = options.n1c
-        config.opt_minordtc = options.minordtc
+        config.LOG = options.logfile
+        config.DEMO = options.demo
+        config.SLOW_INIT = options.si
+        config.CFC0 = options.cfc
+        config.CAF = options.caf
+        config.N1C = options.n1c
+        config.MINOR_DTC = options.minordtc
         auto_dia = options.dia
         debug_mode = options.dbg
 
@@ -847,12 +847,12 @@ def main():
     optParser()
 
     print("Opening ELM")
-    elm = ELM(config.opt_port, config.opt_speed, True)
+    elm = ELM(config.PORT, config.SPEED, True)
 
     # change serial port baud rate
-    if not config.opt_demo and elm.port and elm.port.portType == 0:
-        if config.opt_speed < config.opt_rate:
-            elm.port.soft_boudrate(config.opt_rate)
+    if not config.DEMO and elm.port and elm.port.portType == 0:
+        if config.SPEED < config.RATE:
+            elm.port.soft_boudrate(config.RATE)
 
     elm.currentaddress = "7A"
     elm.currentprotocol = "can"
@@ -870,7 +870,7 @@ def main():
             f.close()
 
     if debug_mode:
-        config.opt_demo = True
+        config.DEMO = True
         elm.loadDump("./dumps/term_test.txt")
         fname = "./macro/test/test.cmd"
         if len(fname) > 0:

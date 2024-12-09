@@ -186,8 +186,8 @@ class ClassDfg:
             print(header)
             menu = {}
             for dk in list(self.domain.keys()):
-                if self.domain[dk]["codetext"] in list(config.language_dict.keys()):
-                    menu[dk] = config.language_dict[self.domain[dk]["codetext"]]
+                if self.domain[dk]["codetext"] in list(config.LANGUAGE_DICT.keys()):
+                    menu[dk] = config.LANGUAGE_DICT[self.domain[dk]["codetext"]]
                 else:
                     menu[dk] = self.domain[dk]["defaultText"]
 
@@ -197,7 +197,7 @@ class ClassDfg:
                 return
             dk = choice[0]
 
-            path = path + config.language_dict[self.domain[dk]["codetext"]]
+            path = path + config.LANGUAGE_DICT[self.domain[dk]["codetext"]]
             while True:
                 clearScreen()
                 header = self.tcom + " : " + self.defaultText + "\n"
@@ -206,9 +206,9 @@ class ClassDfg:
                 menu = {}
                 for fk in list(self.domain[dk]["function"].keys()):
                     if self.domain[dk]["function"][fk]["codetext"] in list(
-                        config.language_dict.keys()
+                        config.LANGUAGE_DICT.keys()
                     ):
-                        menu[fk] = config.language_dict[
+                        menu[fk] = config.LANGUAGE_DICT[
                             self.domain[dk]["function"][fk]["codetext"]
                         ]
                     else:
@@ -223,7 +223,7 @@ class ClassDfg:
                 path = (
                     path
                     + "/"
-                    + config.language_dict[self.domain[dk]["function"][fk]["codetext"]]
+                    + config.LANGUAGE_DICT[self.domain[dk]["function"][fk]["codetext"]]
                 )
                 while True:
                     clearScreen()
@@ -239,8 +239,8 @@ class ClassDfg:
                     for ek in list(self.domain[dk]["function"][fk]["feature"].keys()):
                         if self.domain[dk]["function"][fk]["feature"][ek][
                             "codetext"
-                        ] in list(config.language_dict.keys()):
-                            menu[ek] = config.language_dict[
+                        ] in list(config.LANGUAGE_DICT.keys()):
+                            menu[ek] = config.LANGUAGE_DICT[
                                 self.domain[dk]["function"][fk]["feature"][ek][
                                     "codetext"
                                 ]

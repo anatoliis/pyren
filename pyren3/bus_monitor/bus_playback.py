@@ -41,9 +41,9 @@ if not options.port and config.OS != "android":
 
     exit(2)
 
-config.opt_port = options.port
-config.opt_rate = int(options.rate)
-config.opt_log = options.logfile
+config.PORT = options.port
+config.RATE = int(options.rate)
+config.LOG = options.logfile
 
 try:
     playbackfile = open(options.log)
@@ -52,10 +52,10 @@ except IOError as e:
     exit(2)
 
 print("Opening ELM")
-elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
+elm = ELM(config.PORT, config.SPEED, config.LOG)
 
-if config.opt_speed < config.opt_rate:
-    elm.port.soft_boudrate(config.opt_rate)
+if config.SPEED < config.RATE:
+    elm.port.soft_boudrate(config.RATE)
 
 print("Init    ELM")
 print(elm.cmd("at z"))

@@ -453,7 +453,7 @@ def processXML(path, l, ff):
 
     convertXML(root, nel, fns, ff, lid)
 
-    if dtcId_106 != "" and config.opt_sd:
+    if dtcId_106 != "" and config.SEPARATE_DOC_FILES:
         saveToSeparateFile(nel, dtcId_106)
 
     return nel, lid, title
@@ -492,8 +492,8 @@ def f_features(dfg_fun, ff, of, pref, funname, path):
     fun_t = et.Element("div")  # text
 
     for ek in list(dfg_fun["feature"].keys()):
-        if dfg_fun["feature"][ek]["codetext"] in list(config.language_dict.keys()):
-            fetname = config.language_dict[dfg_fun["feature"][ek]["codetext"]]
+        if dfg_fun["feature"][ek]["codetext"] in list(config.LANGUAGE_DICT.keys()):
+            fetname = config.LANGUAGE_DICT[dfg_fun["feature"][ek]["codetext"]]
         else:
             fetname = dfg_fun["feature"][ek]["codetext"]
         pref = dfg_fun["feature"][ek]["id_ppc"]
@@ -548,8 +548,8 @@ def f_functions(dfg_dom, ff, of, pref, domname, path):
     et.SubElement(cop, "a", href="#" + pref + "_par").text = "Parameters"
 
     for fk in list(dfg_dom["function"].keys()):
-        if dfg_dom["function"][fk]["codetext"] in list(config.language_dict.keys()):
-            funname = config.language_dict[dfg_dom["function"][fk]["codetext"]]
+        if dfg_dom["function"][fk]["codetext"] in list(config.LANGUAGE_DICT.keys()):
+            funname = config.LANGUAGE_DICT[dfg_dom["function"][fk]["codetext"]]
         else:
             funname = dfg_dom["function"][fk]["codetext"]
         pref = dfg_dom["function"][fk]["id_ppc"]
@@ -626,8 +626,8 @@ def generateHTML(path, mtc, vin, dfg, date_madc):
         )
         sys.stdout.flush()
 
-        if dfg.domain[dk]["codetext"] in list(config.language_dict.keys()):
-            domname = config.language_dict[dfg.domain[dk]["codetext"]]
+        if dfg.domain[dk]["codetext"] in list(config.LANGUAGE_DICT.keys()):
+            domname = config.LANGUAGE_DICT[dfg.domain[dk]["codetext"]]
         else:
             domname = dfg.domain[dk]["defaultText"]
         pref = dfg.domain[dk]["id_ppc"]
@@ -761,16 +761,16 @@ def optParser():
     #  print ""
     #  exit(2)
     # else:
-    config.opt_port = options.port
-    config.opt_speed = int(options.speed)
-    config.opt_rate = int(options.rate)
-    config.opt_lang = options.lang
-    config.opt_log = options.logfile
-    config.opt_demo = options.demo
-    config.opt_scan = options.scan
-    config.opt_si = options.si
-    config.opt_cfc0 = options.cfc
-    config.opt_sd = options.sd
+    config.PORT = options.port
+    config.SPEED = int(options.speed)
+    config.RATE = int(options.rate)
+    config.LANG = options.lang
+    config.LOG = options.logfile
+    config.DEMO = options.demo
+    config.SCAN = options.scan
+    config.SLOW_INIT = options.si
+    config.CFC0 = options.cfc
+    config.SEPARATE_DOC_FILES = options.sd
     vin_opt = options.vinnum
     allvin = options.allvin
 
@@ -800,14 +800,14 @@ def main():
 
     """If MTC database does not exists then demo mode"""
     if not os.path.exists("../BVMEXTRACTION"):
-        config.opt_demo = True
+        config.DEMO = True
 
     print("Loading language ")
     sys.stdout.flush()
 
     # loading language data
-    lang = Optfile("Location/DiagOnCAN_" + config.opt_lang + ".bqm", True)
-    config.language_dict = lang.dict
+    lang = Optfile("Location/DiagOnCAN_" + config.LANG + ".bqm", True)
+    config.LANGUAGE_DICT = lang.dict
     print("Done")
 
     # finding zip
@@ -823,25 +823,25 @@ def main():
 
     VIN = ""
     if vin_opt == "" and (
-        not config.opt_demo and (config.opt_scan or not os.path.exists("savedVIN.txt"))
+        not config.DEMO and (config.SCAN or not os.path.exists("savedVIN.txt"))
     ):
         print("Opening ELM")
-        elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
+        elm = ELM(config.PORT, config.SPEED, config.LOG)
 
         # change serial port baud rate
-        if config.opt_speed < config.opt_rate and not config.opt_demo:
-            elm.port.soft_boudrate(config.opt_rate)
+        if config.SPEED < config.RATE and not config.DEMO:
+            elm.port.soft_boudrate(config.RATE)
 
         print("Loading ECUs list")
         se = ScanEcus(elm)  # Prepare list of all ecus
 
         SEFname = "savedEcus.p"
 
-        if config.opt_demo and len(config.opt_ecuid) > 0:
+        if config.DEMO and len(config.ECU_ID) > 0:
             # demo mode with predefined ecu list
             se.read_Uces_file(all=True)
             se.detectedEcus = []
-            for i in config.opt_ecuid.split(","):
+            for i in config.ECU_ID.split(","):
                 if i in list(se.allecus.keys()):
                     se.allecus[i]["ecuname"] = i
                     se.allecus[i]["idf"] = se.allecus[i]["ModelId"][2:4]
@@ -850,11 +850,9 @@ def main():
                     se.allecus[i]["pin"] = "can"
                     se.detectedEcus.append(se.allecus[i])
         else:
-            if not os.path.isfile(SEFname) or config.opt_scan:
+            if not os.path.isfile(SEFname) or config.SCAN:
                 # choosing model
-                se.chooseModel(
-                    config.opt_car
-                )  # choose model of car for doing full scan
+                se.chooseModel(config.CAR)  # choose model of car for doing full scan
 
             # Do this check every time
             se.scanAllEcus()  # First scan of all ecus
@@ -881,7 +879,7 @@ def main():
 
     if len(VIN) != 17:
         print("Can't find any valid VIN. Switch to demo")
-        config.opt_demo = True
+        config.DEMO = True
     else:
         print("\tVIN     :", VIN)
 
@@ -896,7 +894,7 @@ def main():
 
         if vindata == "" or mtcdata == "" or refdata == "":
             print("ERROR!!! Can't find MTC data in database")
-            config.opt_demo = True
+            config.DEMO = True
 
         print("\tPlatform:", platform)
         # print "\tvindata:",vindata
@@ -939,7 +937,7 @@ def main():
     # try:
     # if dfg.tcom == '135' : dfg.tcom = '147'
     generateHTML(
-        "../DocDB_" + config.opt_lang + "/DocDb" + dfg.tcom + "/SIE/",
+        "../DocDB_" + config.LANG + "/DocDb" + dfg.tcom + "/SIE/",
         mtcdata.split(";"),
         VIN,
         dfg,

@@ -54,7 +54,7 @@ class DDT:
         decucashfile = "./cache/ddt_" + cecu["ModelId"] + ".p"
 
         if (
-            os.path.isfile(decucashfile) and config.opt_ddtxml == ""
+            os.path.isfile(decucashfile) and config.DDT_XML == ""
         ):  # if cache exists and no xml defined
             self.decu = pickle.load(open(decucashfile, "rb"))  # load it
         else:  # else
@@ -83,20 +83,20 @@ class DDT:
                     dumpIs = True
                     break
 
-        if not config.opt_demo and not dumpIs and not config.opt_dump:
+        if not config.DEMO and not dumpIs and not config.DUMP:
             answer = input("Save dump ? [y/n] : ")
             if "N" in answer.upper():
                 dumpIs = True
 
-        if config.opt_demo:
+        if config.DEMO:
             print("Loading dump")
             self.decu.loadDump()
-        elif config.opt_dump or not dumpIs:
+        elif config.DUMP or not dumpIs:
             print("Saving dump")
             self.decu.saveDump()
 
         # Load XML
-        if not self.decu.ecufname.startswith(config.ddtroot):
+        if not self.decu.ecufname.startswith(config.DDT_ROOT):
             tmp_f_name = self.decu.ecufname.split("/")[-1]
             self.decu.ecufname = "ecus/" + tmp_f_name
 
@@ -224,27 +224,27 @@ def optParser():
         print("")
         exit(2)
     else:
-        config.opt_port = options.port
-        config.opt_ecuAddr = options.ecuAddr.upper()
-        config.opt_rate = int(options.rate)
-        config.opt_lang = options.lang
-        config.opt_log = options.logfile
-        config.opt_demo = options.demo
-        config.opt_dump = options.dump
-        config.opt_exp = options.exp
-        config.opt_cfc0 = options.cfc
-        config.opt_n1c = options.n1c
-        config.opt_ddtxml = options.ddtxml
+        config.PORT = options.port
+        config.ECU_ADDR = options.ecuAddr.upper()
+        config.RATE = int(options.rate)
+        config.LANG = options.lang
+        config.LOG = options.logfile
+        config.DEMO = options.demo
+        config.DUMP = options.dump
+        config.EXPERT_MODE = options.exp
+        config.CFC0 = options.cfc
+        config.N1C = options.n1c
+        config.DDT_XML = options.ddtxml
         if "S" in options.protocol.upper():
-            config.opt_protocol = "S"
+            config.PROTOCOL = "S"
         elif "F" in options.protocol.upper():
-            config.opt_protocol = "F"
+            config.PROTOCOL = "F"
         elif "250" in options.protocol:
-            config.opt_protocol = "250"
+            config.PROTOCOL = "250"
         elif "500" in options.protocol:
-            config.opt_protocol = "500"
+            config.PROTOCOL = "500"
         else:
-            config.opt_protocol = "500"
+            config.PROTOCOL = "500"
 
 
 class DDTLauncher:
@@ -359,7 +359,7 @@ class DDTLauncher:
 
         self.l_db = tk.Label(self.mf, text="DB root:", background="#d9d9d9")
         self.l_db.grid(row=0, column=0, **optsGrid_e)
-        self.l_db2 = tk.Label(self.mf, text=config.ddtroot, background="#d9d9d9")
+        self.l_db2 = tk.Label(self.mf, text=config.DDT_ROOT, background="#d9d9d9")
         self.l_db2.grid(row=0, column=1, **optsGrid_w)
 
         self.l_pr = tk.Label(self.mf, text="Project:", background="#d9d9d9")
@@ -566,8 +566,8 @@ class DDTLauncher:
         self.applySettings()
 
         try:
-            config.opt_demo = False
-            self.elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
+            config.DEMO = False
+            self.elm = ELM(config.PORT, config.SPEED, config.LOG)
         except:
             result = tkinter.messagebox.askquestion(
                 "Warning",
@@ -575,18 +575,18 @@ class DDTLauncher:
                 icon="warning",
             )
             if result == "yes":
-                config.opt_demo = True
-                self.elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
-                if config.opt_obdlink == True:
+                config.DEMO = True
+                self.elm = ELM(config.PORT, config.SPEED, config.LOG)
+                if config.OBD_LINK == True:
                     self.elm.ATCFC0 = False
-                    config.opt_cfc0 = False
+                    config.CFC0 = False
             else:
                 raise Exception("elm is not connected")
                 return
 
         # change serial port baud rate
-        if config.opt_speed < config.opt_rate and not config.opt_demo:
-            self.elm.port.soft_boudrate(config.opt_rate)
+        if config.SPEED < config.RATE and not config.DEMO:
+            self.elm.port.soft_boudrate(config.RATE)
 
     def LoadCarFile(self, filename):
         if not os.path.isfile(filename):
@@ -690,17 +690,17 @@ class DDTLauncher:
                 ecudata["protocol"] = "KWP_Fast"
                 ecudata["fastInit"] = ce["addr"]
                 ecudata["slowInit"] = ""
-                config.opt_si = False
+                config.SLOW_INIT = False
             elif ce["prot"] == "ISO8" and ce["iso8"] != "":
                 ecudata["protocol"] = "KWP_Slow"
                 ecudata["fastInit"] = ""
                 ecudata["slowInit"] = ce["iso8"]
-                config.opt_si = True
+                config.SLOW_INIT = True
             else:
                 ecudata["protocol"] = "KWP_Slow"
                 ecudata["fastInit"] = ""
                 ecudata["slowInit"] = ce["addr"]
-                config.opt_si = True
+                config.SLOW_INIT = True
 
             ecudata["pin"] = "iso"
             self.elm.set_iso_addr(ce["addr"], ecudata)
@@ -870,7 +870,7 @@ class DDTLauncher:
             )
             return None
 
-        config.opt_demo = False
+        config.DEMO = False
 
         self.OpenECUScreens(ecu)
 
@@ -905,8 +905,8 @@ class DDTLauncher:
         except:
             return
 
-        if not config.opt_demo and self.var_dump.get():
-            config.opt_dump = True
+        if not config.DEMO and self.var_dump.get():
+            config.DUMP = True
 
         ce = self.getSelectedECU()
 
@@ -968,13 +968,13 @@ class DDTLauncher:
         #    if 'N' in answer.upper():
         #        dumpIs = True
 
-        if config.opt_demo:
+        if config.DEMO:
             print("Loading dump")
             if len(ce["dump"]) == 0:
                 decu.loadDump()
             else:
                 decu.loadDump("./dumps/" + ce["dump"])
-        elif config.opt_dump:
+        elif config.DUMP:
             ce["dump"] = self.guiSaveDump(decu)
             for ec in self.carecus:
                 if ce["xml"][:-4] in ec["xml"]:
@@ -1080,7 +1080,7 @@ class DDTLauncher:
             )
             return None
 
-        config.opt_demo = True
+        config.DEMO = True
 
         self.OpenECUScreens(ecu)
 
@@ -1380,18 +1380,18 @@ class DDTLauncher:
         self.ecutree.update()
 
     def applySettings(self):
-        config.opt_port = self.var_port.get().split(";")[0]
-        config.opt_rate = int(self.var_speed.get())
-        config.opt_can2 = self.var_can2.get()
+        config.PORT = self.var_port.get().split(";")[0]
+        config.RATE = int(self.var_speed.get())
+        config.CAN2 = self.var_can2.get()
         if self.var_log.get():
-            config.opt_log = self.var_logName.get()
+            config.LOG = self.var_logName.get()
         else:
-            config.opt_log = ""
-        config.opt_cfc0 = True
+            config.LOG = ""
+        config.CFC0 = True
 
     def xmlBtnClick(self):
         filename = tkinter.filedialog.askopenfilename(
-            initialdir=config.ddtroot + "/ecus/",
+            initialdir=config.DDT_ROOT + "/ecus/",
             title="Select file",
             filetypes=[("xml files", "*.xml")],
         )

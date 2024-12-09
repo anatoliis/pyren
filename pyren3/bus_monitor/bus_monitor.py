@@ -77,7 +77,7 @@ class DDT_MON:
 
         # addr = "7A"
 
-        if "250" in config.opt_protocol or self.decu.BaudRate == "250000":
+        if "250" in config.PROTOCOL or self.decu.BaudRate == "250000":
             # CAN 250
             elm.init_can()
             elm.cmd("at sp 8")
@@ -238,7 +238,7 @@ class DDT_MON:
                             d, False, self.f2r[fid], self.frames[fid]["data"]
                         )
                     else:
-                        val = config.none_val
+                        val = config.NONE_VAL
                     self.datas[d] = val
 
             clearScreen()
@@ -324,21 +324,21 @@ def optParser():
         print("")
         exit(2)
     else:
-        config.opt_port = options.port
-        config.opt_rate = int(options.rate)
-        config.opt_log = options.logfile
-        config.opt_ecuAddr = options.ecuAddr.upper()
-        config.opt_demo = options.demo
+        config.PORT = options.port
+        config.RATE = int(options.rate)
+        config.LOG = options.logfile
+        config.ECU_ADDR = options.ecuAddr.upper()
+        config.DEMO = options.demo
         if "250" in options.protocol:
-            config.opt_protocol = "250"
+            config.PROTOCOL = "250"
         elif "500" in options.protocol:
-            config.opt_protocol = "500"
+            config.PROTOCOL = "500"
         else:
-            config.opt_protocol = "UnDef"
+            config.PROTOCOL = "UnDef"
         candef = options.xmlfile
         outfile = options.outfile
         infile = options.infile
-        config.opt_exp = True
+        config.EXPERT_MODE = True
 
 
 def chooseXml():
@@ -390,11 +390,11 @@ def main():
     elm = None
     if len(outfile) == 0:
         print("Opening ELM")
-        elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
+        elm = ELM(config.PORT, config.SPEED, config.LOG)
 
     # change serial port baud rate
-    if config.opt_speed < config.opt_rate and not config.opt_demo:
-        elm.port.soft_boudrate(config.opt_rate)
+    if config.SPEED < config.RATE and not config.DEMO:
+        elm.port.soft_boudrate(config.RATE)
 
     print(candef)
     mon = DDT_MON(elm, candef, outfile, infile)
@@ -405,8 +405,8 @@ def main():
 
     show_loc = threading.Event()
 
-    if config.opt_ecuAddr != "":
-        mon.framefilter = config.opt_ecuAddr
+    if config.ECU_ADDR != "":
+        mon.framefilter = config.ECU_ADDR
         mon.setFilter(mon.framefilter)
 
     while 1:

@@ -45,13 +45,13 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(config.language_dict.keys()):
-            value = config.language_dict[value]
+        if value.isdigit() and value in list(config.LANGUAGE_DICT.keys()):
+            value = config.LANGUAGE_DICT[value]
         return value
 
     def get_message_by_id(id):
-        if id.isdigit() and id in list(config.language_dict.keys()):
-            value = config.language_dict[id]
+        if id.isdigit() and id in list(config.LANGUAGE_DICT.keys()):
+            value = config.LANGUAGE_DICT[id]
         return value
 
     #
@@ -72,7 +72,7 @@ def run(elm, ecu, command, data):
     ScmSets = ScmRoom.getElementsByTagName("ScmSet")
 
     for Set in ScmSets:
-        setname = config.language_dict[Set.getAttribute("name")]
+        setname = config.LANGUAGE_DICT[Set.getAttribute("name")]
         ScmParams = Set.getElementsByTagName("ScmParam")
 
         for Param in ScmParams:
@@ -131,7 +131,7 @@ def run(elm, ecu, command, data):
     State1_ref = ecu.get_ref_st(ScmParam["State1"])  # Engine state
     value7, datastr7 = ecu.get_st(ScmParam["State1"])
     kb = KBHit()
-    while value7 != config.language_dict[ScmParam["TOURNANT"]]:
+    while value7 != config.LANGUAGE_DICT[ScmParam["TOURNANT"]]:
         value7, datastr7 = ecu.get_st(ScmParam["State1"])
         value5, datastr5 = ecu.get_pr(ScmParam["Param6"])
         value6, datastr6 = ecu.get_pr(ScmParam["Param7"])
@@ -238,7 +238,7 @@ def run(elm, ecu, command, data):
         #    Check result
         #
         rescode = value9
-        result = config.language_dict[ScmSet[rescode]]
+        result = config.LANGUAGE_DICT[ScmSet[rescode]]
 
         clearScreen()
         print(header)

@@ -147,7 +147,7 @@ def Choice(list, question):
         if ch == "q":
             ch = "Q"
         if ch == "cmd":
-            config.opt_cmd = True
+            config.CMD = True
         if ch in d.keys():
             return [d[ch], ch]
 
@@ -214,7 +214,7 @@ def ChoiceLong(list, question, header=""):
                 break
 
             if ch == "cmd":
-                config.opt_cmd = True
+                config.CMD = True
             if ch in d.keys():
                 return [d[ch], ch]
 
@@ -398,7 +398,7 @@ def getVIN(de, elm, getFirst=False):
     for e in de:
 
         # init elm
-        if config.opt_demo:  # try to load dump
+        if config.DEMO:  # try to load dump
             loadDumpToELM(e["ecuname"], elm)
         else:
             if e["pin"].lower() == "can":
@@ -459,9 +459,9 @@ def getVIN(de, elm, getFirst=False):
 
 
 def DBG(tag, s):
-    if config.opt_debug and config.debug_file is not None:
-        config.debug_file.write("### " + tag + "\n")
-        config.debug_file.write('"' + s + '"\n')
+    if config.OPT_DEBUG and config.DEBUG_FILE is not None:
+        config.DEBUG_FILE.write("### " + tag + "\n")
+        config.DEBUG_FILE.write('"' + s + '"\n')
 
 
 def isHex(s):
@@ -469,24 +469,24 @@ def isHex(s):
 
 
 def kill_server():
-    if config.doc_server_proc is None:
+    if config.DOC_SERVER_PROC is None:
         pass
     else:
-        os.kill(config.doc_server_proc.pid, signal.SIGTERM)
+        os.kill(config.DOC_SERVER_PROC.pid, signal.SIGTERM)
 
 
 def show_doc(addr, id):
-    if config.vin == "" and not config.opt_sd:
+    if config.VIN == "" and not config.SEPARATE_DOC_FILES:
         return
 
-    if config.doc_server_proc is None:
-        config.doc_server_proc = subprocess.Popen(
+    if config.DOC_SERVER_PROC is None:
+        config.DOC_SERVER_PROC = subprocess.Popen(
             ["python3", "-m", "http.server", "59152"]
         )
         atexit.register(kill_server)
 
-    if config.opt_sd and id != "":
+    if config.SEPARATE_DOC_FILES and id != "":
         url = "http://127.0.0.1:59152/doc/" + id[1:] + ".htm"
     else:
-        url = "http://127.0.0.1:59152/doc/" + config.vin + ".htm" + id
+        url = "http://127.0.0.1:59152/doc/" + config.VIN + ".htm" + id
     webbrowser.open(url, new=0)

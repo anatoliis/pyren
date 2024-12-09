@@ -108,8 +108,8 @@ def acf_MTC_generateDefaults(m, mtc):
 
     # dumpn1 = config.mtcdir+'/dumps/'+str(int(time.time()))+'_'+ddtxml+'.txt'
     # dumpn2 = config.mtcdir+'/dumps/'+str(int(time.time()))+'_'+m['ecuname']+'.txt'
-    dumpn1 = config.mtcdir + "/dumps/000000_" + ddtxml + ".txt"
-    dumpn2 = config.mtcdir + "/dumps/000000_" + m["ecuname"] + ".txt"
+    dumpn1 = config.MTC_DIR + "/dumps/000000_" + ddtxml + ".txt"
+    dumpn2 = config.MTC_DIR + "/dumps/000000_" + m["ecuname"] + ".txt"
 
     df1 = open(dumpn1, "wt")
 
@@ -127,13 +127,13 @@ def acf_MTC_generateDefaults(m, mtc):
     # print dumpn2
 
     scriptn = (
-        config.mtcdir
+        config.MTC_DIR
         + "/scripts/cmd_"
         + m["pin"]
         + "_"
         + m["idf"]
         + "_"
-        + config.vin[-4:]
+        + config.VIN[-4:]
         + "_"
         + m["sref"]
         + ".cmd"
@@ -143,7 +143,7 @@ def acf_MTC_generateDefaults(m, mtc):
     # print "--------------- Write Commands --------------------"
 
     # write preamble
-    sf.write("# " + config.vin + "\n\n")
+    sf.write("# " + config.VIN + "\n\n")
     sf.write("$addr = " + m["dst"] + "\n\n")
     sf.write("#idTx = " + m["idTx"] + " idRx = " + m["idRx"] + "\n\n")
     if m["pin"].startswith("can"):
@@ -160,7 +160,7 @@ def acf_MTC_generateDefaults(m, mtc):
 
     # save write commands
     for k, v in sorted(list(m["acf_wc"].items()), key=lambda x_y: x_y[1]):
-        if config.opt_verbose or config.opt_verbose2:
+        if config.VERBOSE or config.opt_verbose2:
             try:
                 sf.write("#" * 60 + "\n")
                 sf.write("# " + k + "\n")
@@ -182,8 +182,8 @@ def acf_MTC_generateDefaults(m, mtc):
 
     # write trailer
     sf.write("\n# VIN programming !!!check the command!!!\n")
-    sf.write("#2EF190" + hex_VIN_plus_CRC(config.vin, False) + "\n")
-    sf.write("#3B81" + hex_VIN_plus_CRC(config.vin, True) + "\n")
+    sf.write("#2EF190" + hex_VIN_plus_CRC(config.VIN, False) + "\n")
+    sf.write("#3B81" + hex_VIN_plus_CRC(config.VIN, True) + "\n")
     sf.write("\n# reset ecu or disconnect the battary!!!check the command!!!\n")
     sf.write("#1101\n\n")
     sf.write("exit\n")
@@ -202,7 +202,7 @@ def acf_MTC_findDiff(m, mtc, elm):
     ace = m["mo"]
 
     # init elm
-    if config.opt_demo:  # try to load dump
+    if config.DEMO:  # try to load dump
         loadDumpToELM(m["ecuname"], elm)
     else:
         if m["pin"].lower() == "can":

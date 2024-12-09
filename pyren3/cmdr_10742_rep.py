@@ -5,17 +5,17 @@ from pyren3.mod.elm import ELM, dnat, snat
 
 ecu_functional_address = "7A"
 config.OS = "android"
-config.opt_port = "bt"  # 'COM4'
+config.PORT = "bt"  # 'COM4'
 
 #########################################
 
 # config.opt_demo    = True
-config.opt_cfc0 = True
-config.opt_speed = 38400
-config.opt_log = "10742-rep.txt"
+config.CFC0 = True
+config.SPEED = 38400
+config.LOG = "10742-rep.txt"
 
 print("Opening ELM")
-elm = ELM(config.opt_port, config.opt_speed, True)
+elm = ELM(config.PORT, config.SPEED, True)
 
 print("Init    ELM")
 elm.init_can()

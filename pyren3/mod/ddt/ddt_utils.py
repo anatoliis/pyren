@@ -15,9 +15,9 @@ if config.OS != "android":
 
 def searchddtroot():
     if not os.path.exists("../DDT2000data/ecus"):
-        config.ddtroot = ".."
+        config.DDT_ROOT = ".."
     else:
-        config.ddtroot = "../DDT2000data"
+        config.DDT_ROOT = "../DDT2000data"
     return
 
 
@@ -124,7 +124,7 @@ def getPortList():
 def loadECUlist():
     # make or load eculist
     print("Loading eculist")
-    eculistcache = os.path.join(config.cache_dir, "ddt_eculist.p")
+    eculistcache = os.path.join(config.CACHE_DIR, "ddt_eculist.p")
 
     if os.path.isfile(eculistcache):  # if cache exists
         eculist = pickle.load(open(eculistcache, "rb"))  # load it #dbaccess

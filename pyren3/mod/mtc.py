@@ -25,7 +25,7 @@ def acf_saveMTCtoFile(folder, vindata, mtcdata, refdata, platform):
     f.close()
 
     SEFname = "savedEcus.p"
-    if config.opt_can2:
+    if config.CAN2:
         SEFname = "savedEcus2.p"
 
     if os.path.exists("./" + SEFname):
@@ -156,7 +156,7 @@ def acf_getMTC(VIN, preferFile=False):
 
     # check and prepare folder for loading or saving data
     mtc_dir = "../MTCSAVE/" + VIN
-    config.mtcdir = mtc_dir
+    config.MTC_DIR = mtc_dir
     if not os.path.exists(mtc_dir):
         os.makedirs(mtc_dir)
     if not os.path.exists(mtc_dir + "/dumps"):

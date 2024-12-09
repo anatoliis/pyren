@@ -48,13 +48,13 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(config.language_dict.keys()):
-            value = config.language_dict[value]
+        if value.isdigit() and value in list(config.LANGUAGE_DICT.keys()):
+            value = config.LANGUAGE_DICT[value]
         return value
 
     def get_message_by_id(id):
-        if id.isdigit() and id in list(config.language_dict.keys()):
-            value = config.language_dict[id]
+        if id.isdigit() and id in list(config.LANGUAGE_DICT.keys()):
+            value = config.LANGUAGE_DICT[id]
         return value
 
     #
@@ -128,9 +128,9 @@ def run(elm, ecu, command, data):
         state_ref = ecu.get_ref_st(etat["Index"])
         value1, datastr1 = ecu.get_st(etat["Index"])
         print(datastr1)
-        if value1 != config.language_dict[etat["RefOK"]]:
+        if value1 != config.LANGUAGE_DICT[etat["RefOK"]]:
             value2, datastr2 = ecu.get_st(etat["Donne1"])
-            print(config.language_dict[etat["TexteSortie"]])
+            print(config.LANGUAGE_DICT[etat["TexteSortie"]])
             print((datastr2))
             print("*" * 80)
             ch = input("Press ENTER to exit")
@@ -170,8 +170,8 @@ def run(elm, ecu, command, data):
         rescode = value1
         result = rescode
         for m in ScmList_Messages:
-            if rescode in config.language_dict[m["Valeur"]]:
-                result = config.language_dict[m["Texte"]]
+            if rescode in config.LANGUAGE_DICT[m["Valeur"]]:
+                result = config.LANGUAGE_DICT[m["Texte"]]
 
         current_time = time.time()
         elapsed = int(current_time - begin_time)

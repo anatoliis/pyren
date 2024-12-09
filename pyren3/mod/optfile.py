@@ -17,12 +17,12 @@ class Optfile:
         self.dict = {}
 
         # check in cache folder
-        cachename = config.cache_dir + os.path.basename(filename)[:-4] + ".p"
+        cachename = config.CACHE_DIR + os.path.basename(filename)[:-4] + ".p"
         if os.path.isfile(cachename):
             self.dict = pickle.load(open(cachename, "rb"))
             return
 
-        if config.clip_arc != "" and db_manager.file_in_clip(filename[:-4] + ".p"):
+        if config.CLIP_ARC != "" and db_manager.file_in_clip(filename[:-4] + ".p"):
             db_manager.extract_from_clip_to_cache(filename[:-4] + ".p")
             self.dict = pickle.load(open(cachename, "rb"))
             return

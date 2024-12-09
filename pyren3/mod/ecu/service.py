@@ -61,7 +61,7 @@ def executeService(service, elm, status=[], param="", cache=False):
     sentDataIdentifires = (
         []
     )  # dataids sent in one 22 request, nedded for a response parse
-    performanceMode = config.opt_performance and elm.performanceModeLevel > 1
+    performanceMode = config.PERFORMANCE_MODE and elm.performanceModeLevel > 1
 
     commandToSend = service.startReq
 
@@ -72,7 +72,7 @@ def executeService(service, elm, status=[], param="", cache=False):
 
     if len(service.params) > 0:  # but I support only one and do not support SnapShot
         if service.params[0]["type"] == "DTC":
-            param = config.ext_cur_DTC
+            param = config.EXT_CUR_DTC
         pos = (int(service.params[0]["pos"]) - 1) * 2
         commandToSend = commandToSend[:pos] + param + commandToSend[pos:]
 

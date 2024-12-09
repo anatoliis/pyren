@@ -32,14 +32,14 @@ class ACE:
 
 def get_alternative_refs(platform):
     # finds more frequent use of ref1 from --ref otion in REF.DAT
-    if config.opt_ref == "":
+    if config.ALTERNATIVE_REFS == "":
         return {}
 
     start_time = time.time()
 
     res = {}
     alt = {}
-    for aref in config.opt_ref.split(";"):
+    for aref in config.ALTERNATIVE_REFS.split(";"):
         aref = aref.strip()
         if (len(aref) == 23 or len(aref) == 24) and " " in aref:
             # ref pair defined compleatle

@@ -2,68 +2,65 @@ import os
 
 BASE_PATH = None
 
-opt_debug = False
-debug_file = None
+OPT_DEBUG = False
+DEBUG_FILE = None
 
-opt_port = ""
-opt_ecuid = ""
-opt_ecuAddr = ""
-opt_protocol = ""
-opt_speed = 38400
-opt_rate = 38400
-opt_lang = ""
-opt_car = ""
-opt_log = ""
-opt_demo = False
-opt_scan = False
-opt_csv = False
-opt_csv_only = False
-opt_csv_human = False
-opt_csv_sep = ","
-opt_csv_dec = "."
-opt_excel = False
-opt_usrkey = ""
-opt_verbose = False
-opt_cmd = False
-opt_ddt = False
-opt_si = False  # try slow init every time
-opt_cfc0 = False  # turn off automatic FC and do it by script
-opt_caf = False  # turn on CAN Automatic Formatting
-opt_n1c = False  # turn off L1 cache
-opt_dev = False  # switch to development session for commands from DevList
-opt_devses = "1086"  # development session for commands from DevList
-opt_exp = False  # allow to use buttons in ddt
-opt_dump = False  # dump responses from all 21xx and 22xxxx requests
-opt_can2 = False  # can connected to pins 13 and 12
-opt_ddtxml = ""
-opt_obdlink = False  # basically, STN(PIC24) based ELM327
-opt_stn = False  # STN(PIC24) ELM327 which has ability to automatically switch beetween two CAN lines
-opt_sd = False  # separate doc files
-opt_performance = False
-opt_minordtc = False
-opt_ref = ""  # alternative ref set for acf
-opt_mtc = ""  # alternative mtc set for acf
-dumpName = ""
+PORT = ""
+ECU_ID = ""
+ECU_ADDR = ""
+PROTOCOL = ""
+SPEED = 38400
+RATE = 38400
+LANG = ""
+CAR = ""
+LOG = ""
+DEMO = False
+SCAN = False
+CSV = False
+CSV_ONLY = False
+CSV_HUMAN = False
+CSV_SEP = ","
+CSV_DEC = "."
+EXCEL = False
+USER_KEY = ""
+VERBOSE = False
+CMD = False
+DDT = False
+SLOW_INIT = False  # try slow init every time
+CFC0 = False  # turn off automatic FC and do it by script
+CAF = False  # turn on CAN Automatic Formatting
+N1C = False  # turn off L1 cache
+DEV = False  # switch to development session for commands from DevList
+DEV_SESSION = "1086"  # development session for commands from DevList
+EXPERT_MODE = False  # allow using buttons in ddt
+DUMP = False  # dump responses from all 21xx and 22xxxx requests
+CAN2 = False  # CAN is connected to pins 13 and 12
+DDT_XML = ""
+OBD_LINK = False  # basically, STN(PIC24) based ELM327
+STN = False  # STN(PIC24) ELM327 which can automatically switch between two CAN lines
+SEPARATE_DOC_FILES = False  # separate doc files
+PERFORMANCE_MODE = False
+MINOR_DTC = False
+ALTERNATIVE_REFS = ""  # alternative ref set for acf
+ALTERNATIVE_MTC = ""  # alternative mtc set for acf
+DUMP_NAME = ""
 
-state_scan = False
+STATE_SCAN = False
 
-currentDDTscreen = None
+EXT_CUR_DTC = "000000"
 
-ext_cur_DTC = "000000"
+NONE_VAL = "None"
 
-none_val = "None"
-
-mtcdir = "./MTCSAVE/VIN"
-user_data_dir = "./"
-cache_dir = "./cache/"
-log_dir = "./logs/"
-dumps_dir = "./dumps/"
-ddt_arc = ""
-ddtroot = (
+MTC_DIR = "./MTCSAVE/VIN"
+CACHE_DIR = "./cache/"
+LOG_DIR = "./logs/"
+DUMPS_DIR = "./dumps/"
+DDT_ARC = ""
+DDT_ROOT = (
     ".."  # parent folder for backward compatibility. for 9n and up use ../DDT2000data
 )
-clip_arc = ""
-cliproot = ".."
+CLIP_ARC = ""
+CLIP_ROOT = ".."
 
 OS = os.name
 
@@ -93,10 +90,10 @@ else:
 
 print(f"Detected OS: {OS}{' (jnius mode)' if JNIUS_MODE else ''}")
 
-language_dict = {}
+LANGUAGE_DICT = {}
 
-vin = ""
+VIN = ""
 
-doc_server_proc = None
+DOC_SERVER_PROC = None
 
 CSV_OPTIONS = ["csv", "csv_human", "csv_only"]

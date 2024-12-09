@@ -98,7 +98,7 @@ class InfoDialog(tkinter.simpledialog.Dialog):
     def hnid_func(self):
         self.txt.delete("1.0", tk.END)
         for t in self.orig_text.split("---\n"):
-            if config.none_val not in t:
+            if config.NONE_VAL not in t:
                 self.txt.insert(tk.END, t + "---\n")
 
 
@@ -290,7 +290,7 @@ class DDTScreen(tk.Frame):
         self.translated.set(True)
 
         self.expertmode = tk.BooleanVar()
-        self.expertmode.set(config.opt_exp)
+        self.expertmode.set(config.EXPERT_MODE)
 
         self.approve = tk.BooleanVar()
         self.approve.set(True)
@@ -379,7 +379,7 @@ class DDTScreen(tk.Frame):
                         self.iValue[d].set(val)
                     else:
                         val = self.decu.getHex(d)
-                        if val != config.none_val:
+                        if val != config.NONE_VAL:
                             val = "0x" + val
                         self.iValue[d].set(val)
 
@@ -402,7 +402,7 @@ class DDTScreen(tk.Frame):
                             request=self.decu.requests[cmd],
                             response=self.decu.requests[cmd].SentBytes,
                         )
-                        if val != config.none_val:
+                        if val != config.NONE_VAL:
                             val = "0x" + val
                         self.iValue[d].set(val)
                 self.iValueNeedUpdate[d] = False
@@ -427,7 +427,7 @@ class DDTScreen(tk.Frame):
                 req = self.decu.requests[r].SentBytes
 
                 # not expert mode protection
-                if (req[:2] not in AllowedList) and not config.opt_exp:
+                if (req[:2] not in AllowedList) and not config.EXPERT_MODE:
                     tmstr = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
                     self.addToLog(
                         tmstr + " Req:" + req + " rejected due to non expert mode"
@@ -466,7 +466,7 @@ class DDTScreen(tk.Frame):
             req = self.decu.requests[r].SentBytes
 
             # not expert mode protection
-            if (req[:2] not in ["10"] + AllowedList) and not config.opt_exp:
+            if (req[:2] not in ["10"] + AllowedList) and not config.EXPERT_MODE:
                 self.addToLog("Request:" + req + " rejected due to non expert mode")
                 continue
 
@@ -526,7 +526,7 @@ class DDTScreen(tk.Frame):
                 rsp = "00"
 
                 # protection for debug period
-                if config.opt_exp:
+                if config.EXPERT_MODE:
                     rsp = self.decu.elmRequest(c["c"], c["d"], cache=False)
                 else:
                     rsp = r.ReplyBytes.replace(" ", "")
@@ -554,13 +554,13 @@ class DDTScreen(tk.Frame):
                                 self.iValue[d].set(val)
                             else:
                                 val = self.decu.getHex(d, False, r, rsp)
-                                if val != config.none_val:
+                                if val != config.NONE_VAL:
                                     val = "0x" + val
                                 self.iValue[d].set(val)
                             self.iValueNeedUpdate[d] = False
 
                 self.addToLog("#Finish command execution")
-                if not config.opt_exp:
+                if not config.EXPERT_MODE:
                     self.addToLog(
                         "#WARNING!!! NOT EXPERT MODE!!! Commands wasn't realy sent to ECU"
                     )
@@ -659,17 +659,17 @@ class DDTScreen(tk.Frame):
 
         (conf_2, cv_2) = self.decu.makeConf()
 
-        savedMode = config.opt_demo
-        config.opt_demo = True
-        saveDumpName = config.dumpName
+        savedMode = config.DEMO
+        config.DEMO = True
+        saveDumpName = config.DUMP_NAME
         self.decu.loadDump(fname)
 
         (conf_1, cv_1) = self.decu.makeConf(indump=True)
 
-        config.dumpName = saveDumpName
-        config.opt_demo = savedMode
-        if config.opt_demo:
-            self.decu.loadDump(config.dumpName)
+        config.DUMP_NAME = saveDumpName
+        config.DEMO = savedMode
+        if config.DEMO:
+            self.decu.loadDump(config.DUMP_NAME)
         else:
             self.decu.clearELMcache()
 
@@ -690,13 +690,13 @@ class DDTScreen(tk.Frame):
                 rsp = "00"
 
                 # protection for debug period
-                if config.opt_exp:
+                if config.EXPERT_MODE:
                     rsp = self.decu.elmRequest(c, sendDelay, cache=False)
                 else:
                     self.addToLog("#  Should be sent:%s Delay:%s" % (c, sendDelay))
 
             self.addToLog("#Finish command execution")
-            if not config.opt_exp:
+            if not config.EXPERT_MODE:
                 self.addToLog(
                     "#WARNING!!! NOT EXPERT MODE!!! Commands wasn't realy sent to ECU"
                 )
@@ -725,18 +725,18 @@ class DDTScreen(tk.Frame):
         self.decu.rotaryRunAlloved.clear()
 
         # save state
-        savedMode = config.opt_demo
-        config.opt_demo = True
-        saveDumpName = config.dumpName
+        savedMode = config.DEMO
+        config.DEMO = True
+        saveDumpName = config.DUMP_NAME
         self.decu.loadDump(fname)
 
         (conf_1, cv_1) = self.decu.makeConf(indump=True, annotate=True)
 
         # restore state
-        config.dumpName = saveDumpName
-        config.opt_demo = savedMode
-        if config.opt_demo:
-            self.decu.loadDump(config.dumpName)
+        config.DUMP_NAME = saveDumpName
+        config.DEMO = savedMode
+        if config.DEMO:
+            self.decu.loadDump(config.DUMP_NAME)
         else:
             self.decu.clearELMcache()
 
@@ -809,9 +809,9 @@ class DDTScreen(tk.Frame):
         del conf_2
         del cv_2_tmp
 
-        savedMode = config.opt_demo
-        config.opt_demo = True
-        saveDumpName = config.dumpName
+        savedMode = config.DEMO
+        config.DEMO = True
+        saveDumpName = config.DUMP_NAME
         self.decu.loadDump(fname)
 
         (conf_1, cv_1_tmp) = self.decu.makeConf(indump=True)
@@ -824,10 +824,10 @@ class DDTScreen(tk.Frame):
 
         du_1 = copy.deepcopy(self.decu.elm.ecudump)
 
-        config.dumpName = saveDumpName
-        config.opt_demo = savedMode
-        if config.opt_demo:
-            self.decu.loadDump(config.dumpName)
+        config.DUMP_NAME = saveDumpName
+        config.DEMO = savedMode
+        if config.DEMO:
+            self.decu.loadDump(config.DUMP_NAME)
         else:
             self.decu.clearELMcache()
 
@@ -841,8 +841,8 @@ class DDTScreen(tk.Frame):
 
         # show confirmation dialog if approve is True
         xText = "< " + self.dumpName2str(fname) + "\n"
-        if config.opt_demo:
-            xText += "> " + self.dumpName2str(config.dumpName) + "\n\n"
+        if config.DEMO:
+            xText += "> " + self.dumpName2str(config.DUMP_NAME) + "\n\n"
         else:
             xText += "> Current ECU state\n"
 
@@ -900,8 +900,8 @@ class DDTScreen(tk.Frame):
         self.loadScreen(self.currentscreen)
 
     def changeMode(self):
-        config.opt_exp = self.expertmode.get()
-        if config.opt_exp:
+        config.EXPERT_MODE = self.expertmode.get()
+        if config.EXPERT_MODE:
             self.modeLabel.configure(
                 text="Expert Mode", background="#d9d9d9", foreground="#d90000"
             )
@@ -1241,7 +1241,7 @@ class DDTScreen(tk.Frame):
             self.scf = 1.25  # scale font
 
         screenTitle = self.xmlName
-        if config.opt_demo:
+        if config.DEMO:
             screenTitle = "OFF-LINE: " + screenTitle
 
         self.root.title(screenTitle)
@@ -1320,7 +1320,7 @@ class DDTScreen(tk.Frame):
         self.toolmenu.add_separator()
         self.toolmenu.add_command(label="Show diff", command=self.showDiff)
         self.toolmenu.add_separator()
-        if config.opt_demo:
+        if config.DEMO:
             self.toolmenu.add_command(label="Load DUMP", command=self.loadDump)
         else:
             self.toolmenu.add_command(label="Save DUMP", command=self.saveDump)
@@ -1399,7 +1399,7 @@ class DDTScreen(tk.Frame):
         self.lrpw.pack(fill=tk.BOTH, expand=True)
         self.root.update()
 
-        if config.opt_exp:
+        if config.EXPERT_MODE:
             self.modeLabel = tk.Label(
                 self.lef_f,
                 height=1,
@@ -1559,7 +1559,7 @@ class DDTScreen(tk.Frame):
 
     def loadScreen(self, scr):
         # reset Expert mode with every screen changing
-        config.opt_exp = False
+        config.EXPERT_MODE = False
         self.expertmode.set(False)
         self.changeMode()
 
@@ -1898,7 +1898,7 @@ class DDTScreen(tk.Frame):
 
                 if xText not in list(self.dValue.keys()):
                     self.dValue[xText] = tk.StringVar()
-                    self.dValue[xText].set(config.none_val)
+                    self.dValue[xText].set(config.NONE_VAL)
 
                 obj = tk.Label(
                     frame,
@@ -2292,7 +2292,7 @@ class DDTScreen(tk.Frame):
 
             if xText not in list(self.dValue.keys()):
                 self.dValue[xText] = tk.StringVar()
-                self.dValue[xText].set(config.none_val)
+                self.dValue[xText].set(config.NONE_VAL)
                 if xText in list(self.decu.req4data.keys()) and self.decu.req4data[
                     xText
                 ] in list(self.decu.requests.keys()):

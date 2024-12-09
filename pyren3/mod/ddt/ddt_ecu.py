@@ -153,7 +153,7 @@ class DDTECU:
                         self.sentRequests.append(req)
 
                 else:
-                    if config.opt_demo:
+                    if config.DEMO:
                         time.sleep(0.1)
 
         # print "Update thread terminated"
@@ -284,9 +284,9 @@ class DDTECU:
 
         # ddt_utils.searchddtroot()
 
-        if len(config.opt_ddtxml) > 0:
-            fname = config.opt_ddtxml
-            self.ecufname = config.ddtroot + "/ecus/" + fname
+        if len(config.DDT_XML) > 0:
+            fname = config.DDT_XML
+            self.ecufname = config.DDT_ROOT + "/ecus/" + fname
         else:
             problist = ecuSearch(
                 vehTypeCode, Address, DiagVersion, Supplier, Soft, Version, eculist
@@ -422,7 +422,7 @@ class DDTECU:
         # debug
         print("Dump name:", dumpname)
 
-        config.dumpName = dumpname
+        config.DUMP_NAME = dumpname
         df = open(dumpname, "rt")
         lines = df.readlines()
         df.close()
@@ -475,8 +475,8 @@ class DDTECU:
         # first get hex value
         hv = self.getHex(data, auto, request, response)
 
-        if hv == config.none_val:
-            return config.none_val
+        if hv == config.NONE_VAL:
+            return config.NONE_VAL
 
         # get data instance
         if data in list(self.datas.keys()):
@@ -545,7 +545,7 @@ class DDTECU:
             if data not in list(
                 self.requests.keys()
             ):  # special case when no DataName in Display
-                return config.none_val
+                return config.NONE_VAL
 
         # find appropriate request r
         if request is None:
@@ -559,7 +559,7 @@ class DDTECU:
                 ):  # special case when no DataName in Display
                     r = self.requests[data]
                 else:
-                    return config.none_val
+                    return config.NONE_VAL
         else:
             r = request
 
@@ -569,15 +569,15 @@ class DDTECU:
             and (r.ManuelSend or len(list(r.SentDI.keys())) > 0)
             and data not in list(r.SentDI.keys())
         ):
-            return config.none_val
+            return config.NONE_VAL
 
         # protect not expert mode
         if (
             (r.SentBytes[:2] not in AllowedList)
-            and not config.opt_exp
+            and not config.EXPERT_MODE
             and data not in list(r.SentDI.keys())
         ):
-            return config.none_val
+            return config.NONE_VAL
 
         # if response not defined as an argument
         if response is None:
@@ -616,7 +616,7 @@ class DDTECU:
 
         # check length of response
         if (sb * 3 + bytes * 3 - 1) > (len(resp)):
-            return config.none_val
+            return config.NONE_VAL
 
         # extract hex
         hexval = resp[sb * 3 : (sb + bytes) * 3 - 1]
@@ -969,7 +969,7 @@ class DDTECU:
             res = self.getValue(d, request=self.requests[rcmd])
         else:
             gh = self.getHex(d, request=self.requests[rcmd])
-            if gh != config.none_val:
+            if gh != config.NONE_VAL:
                 res = "0x" + gh
             else:
                 res = gh
@@ -991,12 +991,12 @@ class DDTECU:
             res = self.getValue(d, request=self.requests[rcmd])
         else:
             gh = self.getHex(d, request=self.requests[rcmd])
-            if gh != config.none_val:
+            if gh != config.NONE_VAL:
                 res = "0x" + gh
             else:
                 res = gh
 
-        if res == config.none_val:  # try to find second command
+        if res == config.NONE_VAL:  # try to find second command
             res = self.getValueForConfig_second_cmd(d, rcmd)
 
         return res

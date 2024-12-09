@@ -20,7 +20,7 @@ def get_state(st, mn, se, elm, calc, dataids={}):
     else:
         st.value = str(tmp_val)
 
-    if config.opt_csv and config.opt_csv_only:
+    if config.CSV and config.CSV_ONLY:
         csv_val = str(tmp_val)
     else:
         csv_val = str(st.value)

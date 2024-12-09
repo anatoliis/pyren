@@ -54,19 +54,19 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(config.language_dict.keys()):
+        if value.isdigit() and value in list(config.LANGUAGE_DICT.keys()):
             if encode:
-                value = config.language_dict[value]
+                value = config.LANGUAGE_DICT[value]
             else:
-                value = config.language_dict[value]
+                value = config.LANGUAGE_DICT[value]
         return value
 
     def get_message_by_id(id, encode=1):
-        if id.isdigit() and id in list(config.language_dict.keys()):
+        if id.isdigit() and id in list(config.LANGUAGE_DICT.keys()):
             if encode:
-                value = config.language_dict[id]
+                value = config.LANGUAGE_DICT[id]
             else:
-                value = config.language_dict[id]
+                value = config.LANGUAGE_DICT[id]
         return value
 
     #
@@ -89,7 +89,7 @@ def run(elm, ecu, command, data):
 
     for Set in ScmSets:
         if len(Set.attributes) != 1:
-            setname = config.language_dict[Set.getAttribute("name")]
+            setname = config.LANGUAGE_DICT[Set.getAttribute("name")]
             ScmParams = Set.getElementsByTagName("ScmParam")
 
             for Param in ScmParams:
@@ -125,7 +125,7 @@ def run(elm, ecu, command, data):
     else:
         correctEcu = ecusList[0]
 
-    if not correctEcu and config.opt_demo:
+    if not correctEcu and config.DEMO:
         correctEcu = ecusList[0]
 
     if vdiagExists:
@@ -515,7 +515,7 @@ def run(elm, ecu, command, data):
             fileRoot.insert(1, el)
 
         tree = et.ElementTree(fileRoot)
-        tree.write(config.dumps_dir + ScmParam["FileName"])
+        tree.write(config.DUMPS_DIR + ScmParam["FileName"])
 
     def loadDump():
         clearScreen()
@@ -523,7 +523,7 @@ def run(elm, ecu, command, data):
         paramToSend = ""
         dumpScmParam = {}
         try:
-            dumpData = open(config.dumps_dir + ScmParam["FileName"], "r")
+            dumpData = open(config.DUMPS_DIR + ScmParam["FileName"], "r")
         except:
             print(get_message_by_id("2194"))
             input()

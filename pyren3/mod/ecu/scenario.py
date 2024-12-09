@@ -27,7 +27,7 @@ def playScenario(command, ecu, elm):
 
     if os.path.isfile("./" + scenarioName + ".py"):
         scen = __import__(scenarioName)
-        if config.clip_arc:
+        if config.CLIP_ARC:
             scen.run(elm, ecu, command, "../" + path + scenarioData)
         else:
             scen.run(elm, ecu, command, "./" + path + scenarioData)
@@ -58,8 +58,8 @@ def playScenario(command, ecu, elm):
             p_name = ma.group(1)
             p_value = ma.group(2)
 
-            if p_value.isdigit() and p_value in list(config.language_dict.keys()):
-                p_value = config.language_dict[p_value]
+            if p_value.isdigit() and p_value in list(config.LANGUAGE_DICT.keys()):
+                p_value = config.LANGUAGE_DICT[p_value]
 
             print("  %-20s : %s" % (p_name, p_value))
 

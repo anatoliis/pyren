@@ -236,11 +236,11 @@ class ECU:
 
         self.elm.start_session(self.ecudata["startDiagReq"])
 
-        if config.OS == "android" or config.opt_csv:
+        if config.OS == "android" or config.CSV:
             if (
                 self.ecudata["pin"].lower() == "can"
                 and self.DataIds
-                and config.opt_performance
+                and config.PERFORMANCE_MODE
             ):
                 self.elm.checkModulePerformaceLevel(self.DataIds)
 
@@ -520,7 +520,7 @@ class ECU:
                 if int(self.States[st].value):
                     masks.append(self.States[st].name)
 
-        if mask and not config.opt_demo:
+        if mask and not config.DEMO:
             for dr in datarefs:
                 if dr.type == "State":
                     if (
@@ -555,11 +555,11 @@ class ECU:
                 self.show_commands(datarefs, path)
                 return
 
-        if config.opt_csv and config.ext_cur_DTC == "000000":
+        if config.CSV and config.EXT_CUR_DTC == "000000":
             # prepare to csv save
             self.minimumrefreshrate = 0
-            if config.opt_excel:
-                csvline = "sep=" + config.opt_csv_sep + "\n"
+            if config.EXCEL:
+                csvline = "sep=" + config.CSV_SEP + "\n"
             csvline = "Time"
             nparams = 0
             for dr in datarefs:
@@ -582,7 +582,7 @@ class ECU:
                         + "]"
                     )
                     nparams += 1
-            if config.opt_usrkey:
+            if config.USER_KEY:
                 csvline += ";User events"
             csvline = csvline
             if nparams:
@@ -625,7 +625,7 @@ class ECU:
         # 5. Send reqests from the requests list and save the responses in a responseHistory list
         # 6. On exit generate csv log file from the responseHistory
 
-        if config.opt_csv_only:
+        if config.CSV_ONLY:
             print("Data is sending directly to csv-file")
             print("")
             print("Press any key to exit")
@@ -641,30 +641,30 @@ class ECU:
             strlst = []
             datarefsRequestTime = int(round(pyren_time() * 1000))
 
-            if config.opt_csv_human and csvf != 0:
+            if config.CSV_HUMAN and csvf != 0:
                 csvline = csvline + "\n"
-                csvline = csvline.replace(".", config.opt_csv_dec)
-                csvline = csvline.replace(",", config.opt_csv_dec)
-                csvline = csvline.replace(";", config.opt_csv_sep)
+                csvline = csvline.replace(".", config.CSV_DEC)
+                csvline = csvline.replace(",", config.CSV_DEC)
+                csvline = csvline.replace(";", config.CSV_SEP)
                 csvf.write(csvline)
                 csvf.flush()
                 time_diff = int(round(pyren_time() * 1000)) - csv_start_time
                 time_sec = str(time_diff // 1000)
                 time_ms = str((time_diff) % 1000)
-                csvline = time_sec.zfill(2) + config.opt_csv_dec + time_ms.zfill(3)
+                csvline = time_sec.zfill(2) + config.CSV_DEC + time_ms.zfill(3)
 
             # Collect all the requests from the current screen
             if (
-                config.opt_performance
+                config.PERFORMANCE_MODE
                 and self.elm.performanceModeLevel > 1
-                and config.opt_csv_only
+                and config.CSV_ONLY
             ):
                 if self.elm.rsp_cache:
                     if not requests:
                         requests = self.generateRequestsList()
 
             self.elm.clear_cache()
-            if not (config.opt_csv_only and requests):
+            if not (config.CSV_ONLY and requests):
                 for dr in datarefs:
                     datastr = dr.name
                     help = dr.type
@@ -672,7 +672,7 @@ class ECU:
                         if (
                             self.DataIds
                             and "DTC" in path
-                            and dr in self.Defaults[config.ext_cur_DTC[:4]].memDatarefs
+                            and dr in self.Defaults[config.EXT_CUR_DTC[:4]].memDatarefs
                         ):
                             datastr, help, csvd = get_state(
                                 self.States[dr.name],
@@ -694,7 +694,7 @@ class ECU:
                         if (
                             self.DataIds
                             and "DTC" in path
-                            and dr in self.Defaults[config.ext_cur_DTC[:4]].memDatarefs
+                            and dr in self.Defaults[config.EXT_CUR_DTC[:4]].memDatarefs
                         ):
                             datastr, help, csvd = get_parameter(
                                 self.Parameters[dr.name],
@@ -726,15 +726,15 @@ class ECU:
                         datastr = dr.name
                         help = ""
                     if (
-                        config.opt_csv_human
+                        config.CSV_HUMAN
                         and csvf != 0
                         and (dr.type == "State" or dr.type == "Parameter")
                     ):
                         csvline += ";" + csvd
 
-                    if not (config.opt_csv and config.opt_csv_only):
+                    if not (config.CSV and config.CSV_ONLY):
                         strlst.append(datastr)
-                        if config.opt_verbose and len(help) > 0:
+                        if config.VERBOSE and len(help) > 0:
                             tmp_str = ""
                             for s in help:
                                 # s = s.replace('\n','\n\t')
@@ -753,7 +753,7 @@ class ECU:
                 for req in requests:
                     self.elm.request(req)
 
-            if not (config.opt_csv and config.opt_csv_only):
+            if not (config.CSV and config.CSV_ONLY):
                 newScreen = initScreen
                 connectionData = (
                     "   (RT:"
@@ -805,7 +805,7 @@ class ECU:
                 sys.stdout.flush()
 
                 # check refresh rate
-                if config.opt_demo:
+                if config.DEMO:
                     self.minimumrefreshrate = 1
 
                 tc = pyren_time()
@@ -813,12 +813,12 @@ class ECU:
                     time.sleep(tb + self.minimumrefreshrate - tc)
                 tb = tc
 
-            if config.opt_csv_only:
+            if config.CSV_ONLY:
                 responseHistory[datarefsRequestTime] = (
                     self.elm.rsp_cache
                 )  # Collect data to generate a file
 
-            if config.opt_performance and self.elm.performanceModeLevel > 1:
+            if config.PERFORMANCE_MODE and self.elm.performanceModeLevel > 1:
                 self.elm.currentScreenDataIds = self.getDataIds(
                     self.elm.rsp_cache, self.DataIds
                 )
@@ -839,13 +839,13 @@ class ECU:
                         self.add_favourite()
                         kb.set_getch_term()
                     else:
-                        if config.opt_csv and (c in config.opt_usrkey):
+                        if config.CSV and (c in config.USER_KEY):
                             csvline += ";" + c
                             continue
                         kb.set_normal_term()
                         self.saveFavList()
-                        if config.opt_csv and csvf != 0:
-                            if config.opt_csv_human:
+                        if config.CSV and csvf != 0:
+                            if config.CSV_HUMAN:
                                 csvf.close()
                                 return
                             self.createFile(
@@ -858,7 +858,7 @@ class ECU:
                         return
                 else:
                     n = ord(c) - ord("0")
-                    if (not config.opt_csv_only) and n > 0 and n <= (pages + 1):
+                    if (not config.CSV_ONLY) and n > 0 and n <= (pages + 1):
                         page = n - 1
                         clearScreen()
                         continue
@@ -875,19 +875,19 @@ class ECU:
                             page = page + 1
                         clearScreen()
                         continue
-                    if config.opt_csv and (c in config.opt_usrkey):
+                    if config.CSV and (c in config.USER_KEY):
                         csvline += ";" + c
                         continue
                     kb.set_normal_term()
-                    if config.opt_csv and csvf != 0:
-                        if config.opt_csv_human:
+                    if config.CSV and csvf != 0:
+                        if config.CSV_HUMAN:
                             csvf.close()
                             return
                         self.createFile(
                             responseHistory, displayedDataIds, csvline, csvf, datarefs
                         )
                     if "DTC" in path:
-                        config.ext_cur_DTC = "000000"
+                        config.EXT_CUR_DTC = "000000"
                     return
 
     def generateRequestsList(self):
@@ -927,15 +927,15 @@ class ECU:
                     self.elm.rsp_cache[req] = rsp
 
             csvline = csvline + "\n"
-            csvline = csvline.replace(".", config.opt_csv_dec)
-            csvline = csvline.replace(",", config.opt_csv_dec)
-            csvline = csvline.replace(";", config.opt_csv_sep)
+            csvline = csvline.replace(".", config.CSV_DEC)
+            csvline = csvline.replace(",", config.CSV_DEC)
+            csvline = csvline.replace(";", config.CSV_SEP)
             csvf.write(csvline)
             csvf.flush()
             time_diff = reqTime - startTime
             time_sec = str(time_diff // 1000)
             time_ms = str((time_diff) % 1000)
-            csvline = time_sec.zfill(2) + config.opt_csv_dec + time_ms.zfill(3)
+            csvline = time_sec.zfill(2) + config.CSV_DEC + time_ms.zfill(3)
 
             for dr in datarefs:
                 datastr = dr.name
@@ -1167,7 +1167,7 @@ class ECU:
 
             index = int(choice[1]) - 1
             dtchex = listkeys[index] if len(listkeys) > index else listkeys[0]
-            config.ext_cur_DTC = dtchex
+            config.EXT_CUR_DTC = dtchex
 
             path = path + " -> " + defstr[dtchex] + "\n\n" + hlpstr[dtchex] + "\n"
 
@@ -1177,12 +1177,12 @@ class ECU:
             if self.Defaults[dtchex[:4]].datarefs:
                 cur_dtrf = [
                     EcuScreenDataRef(
-                        0, "\n" + config.language_dict["300"] + "\n", "Text"
+                        0, "\n" + config.LANGUAGE_DICT["300"] + "\n", "Text"
                     )
                 ] + self.Defaults[dtchex[:4]].datarefs
             if self.Defaults[dtchex[:4]].memDatarefs:
                 mem_dtrf_txt = (
-                    config.language_dict["299"] + " DTC" + config.ext_cur_DTC + "\n"
+                    config.LANGUAGE_DICT["299"] + " DTC" + config.EXT_CUR_DTC + "\n"
                 )
                 mem_dtrf = [EcuScreenDataRef(0, mem_dtrf_txt, "Text")] + self.Defaults[
                     dtchex[:4]
@@ -1237,7 +1237,7 @@ class ECU:
 
             index = int(choice[1]) - 1
             dtchex = listkeys[index] if len(listkeys) > index else listkeys[0]
-            config.ext_cur_DTC = dtchex
+            config.EXT_CUR_DTC = dtchex
 
             path = path + " -> " + defstr[dtchex] + "\n\n" + hlpstr[dtchex] + "\n"
 
@@ -1248,12 +1248,12 @@ class ECU:
             if self.Defaults[dtchex[:4]].datarefs:
                 cur_dtrf = [
                     EcuScreenDataRef(
-                        0, "\n" + config.language_dict["300"] + "\n", "Text"
+                        0, "\n" + config.LANGUAGE_DICT["300"] + "\n", "Text"
                     )
                 ] + self.Defaults[dtchex[:4]].datarefs
             if self.Defaults[dtchex[:4]].memDatarefs:
                 mem_dtrf_txt = (
-                    config.language_dict["299"] + " DTC" + config.ext_cur_DTC + "\n"
+                    config.LANGUAGE_DICT["299"] + " DTC" + config.EXT_CUR_DTC + "\n"
                 )
                 mem_dtrf = [EcuScreenDataRef(0, mem_dtrf_txt, "Text")] + self.Defaults[
                     dtchex[:4]
@@ -1261,7 +1261,7 @@ class ECU:
             if self.ext_de:
                 ext_info_dtrf = [
                     EcuScreenDataRef(
-                        0, "\n" + config.language_dict["1691"] + "\n", "Text"
+                        0, "\n" + config.LANGUAGE_DICT["1691"] + "\n", "Text"
                     )
                 ] + self.ext_de
 
@@ -1310,7 +1310,7 @@ class ECU:
                 return
 
             dtchex = dtcs[int(choice[1]) - 1]
-            config.ext_cur_DTC = dtchex
+            config.EXT_CUR_DTC = dtchex
 
             path = path + " -> " + defstr[dtchex] + "\n\n" + hlpstr[dtchex] + "\n"
 
@@ -1358,7 +1358,7 @@ class ECU:
                     l.name = "ED : DE extra information"
                     continue
                 menu.append(l.name)
-            if config.opt_cmd:
+            if config.CMD:
                 menu.append("ECM : Extended command set")
             if self.Parameters:
                 menu.append("PRA : Parameters list")
@@ -1366,7 +1366,7 @@ class ECU:
                 menu.append("ETA : States list")
             if self.Identifications:
                 menu.append("IDA : Identifications list")
-            if config.opt_ddt:
+            if config.DDT:
                 menu.append("DDT : DDT screens")
             if self.acf_ready() != "":
                 menu.append("ACI : Auto Config Info")

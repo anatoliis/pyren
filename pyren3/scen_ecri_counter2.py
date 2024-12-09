@@ -40,19 +40,19 @@ def run(elm, ecu, command, data):
             value = ScmParam[msg]
         else:
             value = msg
-        if value.isdigit() and value in list(config.language_dict.keys()):
+        if value.isdigit() and value in list(config.LANGUAGE_DICT.keys()):
             if encode:
-                value = config.language_dict[value]
+                value = config.LANGUAGE_DICT[value]
             else:
-                value = config.language_dict[value]
+                value = config.LANGUAGE_DICT[value]
         return value
 
     def get_message_by_id(id, encode=1):
-        if id.isdigit() and id in list(config.language_dict.keys()):
+        if id.isdigit() and id in list(config.LANGUAGE_DICT.keys()):
             if encode:
-                value = config.language_dict[id]
+                value = config.LANGUAGE_DICT[id]
             else:
-                value = config.language_dict[id]
+                value = config.LANGUAGE_DICT[id]
         return value
 
     #
@@ -73,7 +73,7 @@ def run(elm, ecu, command, data):
 
     for Set in ScmSets:
         if len(Set.attributes) != 1:
-            setname = config.language_dict[Set.getAttribute("name")]
+            setname = config.LANGUAGE_DICT[Set.getAttribute("name")]
             ScmParams = Set.getElementsByTagName("ScmParam")
 
             for Param in ScmParams:
@@ -111,7 +111,7 @@ def run(elm, ecu, command, data):
     paramsToSend = mnemo1Data + resetBytes + mnemo2Data
 
     fap_command_sids = ecu.get_ref_cmd(ScmParam["Cmde1"]).serviceID
-    if len(fap_command_sids) and not config.opt_demo:
+    if len(fap_command_sids) and not config.DEMO:
         for sid in fap_command_sids:
             if len(ecu.Services[sid].params):
                 if (

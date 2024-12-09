@@ -215,50 +215,50 @@ def optParser():
         print("")
         exit()
     else:
-        config.opt_port = options.port
-        config.opt_ecuid = options.ecuid
-        config.opt_speed = int(options.speed)
-        config.opt_rate = int(options.rate)
-        config.opt_lang = options.lang
-        config.opt_car = options.car
-        config.opt_log = options.logfile
-        config.opt_demo = options.demo
-        config.opt_scan = options.scan
-        config.opt_csv = options.csv
-        config.opt_csv_only = options.csv_only
-        if config.opt_csv:
-            config.opt_csv_human = True
-        if config.opt_csv_only:
-            config.opt_csv = True
-        config.opt_csv_human = options.csv_human
-        if config.opt_csv_human:
-            config.opt_csv = True
-        config.opt_usrkey = options.usr_key
-        config.opt_verbose = options.verbose
-        config.opt_si = options.si
-        config.opt_cfc0 = options.cfc
-        config.opt_caf = options.caf
-        config.opt_n1c = options.n1c
-        config.opt_exp = options.exp
-        config.opt_dump = options.dump
-        config.opt_can2 = options.can2
-        config.opt_performance = options.performance
-        config.opt_sd = options.sd
-        config.opt_minordtc = options.minordtc
+        config.PORT = options.port
+        config.ECU_ID = options.ecuid
+        config.SPEED = int(options.speed)
+        config.RATE = int(options.rate)
+        config.LANG = options.lang
+        config.CAR = options.car
+        config.LOG = options.logfile
+        config.DEMO = options.demo
+        config.SCAN = options.scan
+        config.CSV = options.csv
+        config.CSV_ONLY = options.csv_only
+        if config.CSV:
+            config.CSV_HUMAN = True
+        if config.CSV_ONLY:
+            config.CSV = True
+        config.CSV_HUMAN = options.csv_human
+        if config.CSV_HUMAN:
+            config.CSV = True
+        config.USER_KEY = options.usr_key
+        config.VERBOSE = options.verbose
+        config.SLOW_INIT = options.si
+        config.CFC0 = options.cfc
+        config.CAF = options.caf
+        config.N1C = options.n1c
+        config.EXPERT_MODE = options.exp
+        config.DUMP = options.dump
+        config.CAN2 = options.can2
+        config.PERFORMANCE_MODE = options.performance
+        config.SEPARATE_DOC_FILES = options.sd
+        config.MINOR_DTC = options.minordtc
         if options.dev == "" or len(options.dev) != 4 or options.dev[0:2] != "10":
-            config.opt_dev = False
-            config.opt_devses = "1086"
+            config.DEV = False
+            config.DEV_SESSION = "1086"
         else:
             print("Development MODE")
-            config.opt_dev = True
-            config.opt_devses = options.dev
-        config.opt_excel = options.excel
-        if config.opt_excel:
-            config.opt_csv_sep = ";"
-            config.opt_csv_dec = ","
+            config.DEV = True
+            config.DEV_SESSION = options.dev
+        config.EXCEL = options.excel
+        if config.EXCEL:
+            config.CSV_SEP = ";"
+            config.CSV_DEC = ","
         else:
-            config.opt_csv_sep = ","
-            config.opt_csv_dec = "."
+            config.CSV_SEP = ","
+            config.CSV_DEC = "."
 
 
 def main():
@@ -269,29 +269,29 @@ def main():
     db_manager.find_DBs()
 
     print("Opening ELM")
-    elm = ELM(config.opt_port, config.opt_speed, config.opt_log)
+    elm = ELM(config.PORT, config.SPEED, config.LOG)
 
     # change serial port baud rate
-    if config.opt_speed < config.opt_rate and not config.opt_demo:
-        elm.port.soft_boudrate(config.opt_rate)
+    if config.SPEED < config.RATE and not config.DEMO:
+        elm.port.soft_boudrate(config.RATE)
 
     print("Loading ECUs list")
     se = ScanEcus(elm)  # Prepare list of all ecus
 
     SEFname = "savedEcus.p"
-    if config.opt_can2:
+    if config.CAN2:
         SEFname = "savedEcus2.p"
 
-    if config.opt_demo and len(config.opt_ecuid) > 0:
+    if config.DEMO and len(config.ECU_ID) > 0:
         # demo mode with predefined ecu list
-        if "tcom" in config.opt_ecuid.lower() or len(config.opt_ecuid) < 4:
-            tcomid = "".join([i for i in config.opt_ecuid if i.isdigit()])
+        if "tcom" in config.ECU_ID.lower() or len(config.ECU_ID) < 4:
+            tcomid = "".join([i for i in config.ECU_ID if i.isdigit()])
             se.load_model_ECUs("Vehicles/TCOM_" + tcomid + ".xml")
-            config.opt_ecuid = ",".join(sorted(se.allecus.keys()))
+            config.ECU_ID = ",".join(sorted(se.allecus.keys()))
         else:
             se.read_Uces_file(all=True)
         se.detectedEcus = []
-        for i in config.opt_ecuid.split(","):
+        for i in config.ECU_ID.split(","):
             if i in list(se.allecus.keys()):
                 se.allecus[i]["ecuname"] = i
                 se.allecus[i]["idf"] = se.allecus[i]["ModelId"][2:4]
@@ -303,32 +303,32 @@ def main():
                 se.allecus[i]["pin"] = "can"
                 se.detectedEcus.append(se.allecus[i])
     else:
-        if not os.path.isfile(SEFname) or config.opt_scan:
+        if not os.path.isfile(SEFname) or config.SCAN:
             # choosing model
-            se.chooseModel(config.opt_car)  # choose model of car for doing full scan
+            se.chooseModel(config.CAR)  # choose model of car for doing full scan
 
         # Do this check every time
         se.scanAllEcus()  # First scan of all ecus
 
-    config.vin = getVIN(se.detectedEcus, elm, getFirst=True)
+    config.VIN = getVIN(se.detectedEcus, elm, getFirst=True)
 
     print("Loading language ")
     sys.stdout.flush()
     # loading language data
-    lang = Optfile("Location/DiagOnCAN_" + config.opt_lang + ".bqm", True)
-    config.language_dict = lang.dict
+    lang = Optfile("Location/DiagOnCAN_" + config.LANG + ".bqm", True)
+    config.LANGUAGE_DICT = lang.dict
     print("Done")
 
     ddt_utils.searchddtroot()
 
     while 1:
         clearScreen()
-        choosen_ecu = se.chooseECU(config.opt_ecuid)  # choose ECU among detected
-        config.opt_ecuid = ""
+        choosen_ecu = se.chooseECU(config.ECU_ID)  # choose ECU among detected
+        config.ECU_ID = ""
         if choosen_ecu == -1:
             continue
 
-        ecucashfile = "./cache/" + choosen_ecu["ModelId"] + "_" + config.opt_lang + ".p"
+        ecucashfile = "./cache/" + choosen_ecu["ModelId"] + "_" + config.LANG + ".p"
 
         if os.path.isfile(ecucashfile):  # if cache exists
             ecu = pickle.load(open(ecucashfile, "rb"))  # load it
@@ -340,10 +340,10 @@ def main():
 
         ecu.initELM(elm)  # init ELM for chosen ECU
 
-        if config.opt_demo:
+        if config.DEMO:
             print("Loading dump")
             ecu.loadDump()
-        elif config.opt_dump:
+        elif config.DUMP:
             print("Saving dump")
             ecu.saveDump()
 
