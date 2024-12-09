@@ -6,15 +6,10 @@ import tkinter.messagebox
 import tkinter.ttk as ttk
 
 from pyren3 import config
-from pyren3.runner_base import get_runner
 from pyren3.enums import Command
+from pyren3.runner_base import get_runner
 from pyren3.settings import Settings
-from pyren3.utils import (
-    get_lang_list,
-    get_path_list,
-    get_port_list,
-    update_from_gitlab,
-)
+from pyren3.utils import get_lang_list, get_path_list, get_port_list
 
 
 class DesktopGui(tk.Frame):
@@ -32,36 +27,14 @@ class DesktopGui(tk.Frame):
         runner = get_runner(self.settings.path)
         runner.run(self.settings, command)
 
-    def cmd_mon(self):
-        self.cmd(Command.MON)
-
-    def cmd_check(self):
-        self.cmd(Command.CHECK)
-
-    def cmd_demo(self):
-        self.cmd(Command.DEMO)
+    def cmd_start(self):
+        self.cmd(Command.START)
 
     def cmd_scan(self):
         self.cmd(Command.SCAN)
 
-    def cmd_start(self):
-        self.cmd(Command.PYREN)
-
-    def cmd_ddt(self):
-        self.cmd(Command.DDT)
-
-    def cmd_term(self):
-        self.cmd(Command.TERM)
-
-    @staticmethod
-    def cmd_update():
-        res = update_from_gitlab()
-        if res == 0:
-            tkinter.messagebox.showinfo("Information", "Done")
-        elif res == 1:
-            tkinter.messagebox.showerror("Error", "No connection with gitlab.com")
-        elif res == 2:
-            tkinter.messagebox.showerror("Error", "UnZip error")
+    def cmd_demo(self):
+        self.cmd(Command.DEMO)
 
     def save_settings(self):
         self.settings.path = self.var_path.get()
@@ -456,20 +429,7 @@ class DesktopGui(tk.Frame):
         self.btn_start.configure(foreground="#000000")
         self.btn_start.configure(highlightbackground="#d9d9d9")
         self.btn_start.configure(highlightcolor="black")
-        self.btn_start.configure(text="""Start pyren""")
-
-        self.btn_ddt = tk.Button(self.root)
-        self.btn_ddt.place(
-            relx=0.01, rely=0.91, height=self.btn_height, width=self.btn_width
-        )
-        self.btn_ddt.configure(activebackground="#d9d9d9")
-        self.btn_ddt.configure(activeforeground="#000000")
-        self.btn_ddt.configure(background="#d9d9d9")
-        self.btn_ddt.configure(command=self.cmd_ddt)
-        self.btn_ddt.configure(foreground="#000000")
-        self.btn_ddt.configure(highlightbackground="#d9d9d9")
-        self.btn_ddt.configure(highlightcolor="black")
-        self.btn_ddt.configure(text="""Start DDT""")
+        self.btn_start.configure(text="""Start""")
 
         self.btn_scan = tk.Button(self.root)
         self.btn_scan.place(
@@ -498,58 +458,6 @@ class DesktopGui(tk.Frame):
         self.btn_demo.configure(highlightcolor="black")
         self.btn_demo.configure(text="""Demo""")
         self.btn_demo.configure(width=120)
-
-        self.btn_check = tk.Button(self.root)
-        self.btn_check.place(
-            relx=0.61, rely=0.84, height=self.btn_height, width=self.btn_width
-        )
-        self.btn_check.configure(activebackground="#d9d9d9")
-        self.btn_check.configure(activeforeground="#000000")
-        self.btn_check.configure(background="#d9d9d9")
-        self.btn_check.configure(command=self.cmd_check)
-        self.btn_check.configure(foreground="#000000")
-        self.btn_check.configure(highlightbackground="#d9d9d9")
-        self.btn_check.configure(highlightcolor="black")
-        self.btn_check.configure(text="""Check ELM""")
-
-        self.btn_mon = tk.Button(self.root)
-        self.btn_mon.place(
-            relx=0.81, rely=0.84, height=self.btn_height, width=self.btn_width
-        )
-        self.btn_mon.configure(activebackground="#d9d9d9")
-        self.btn_mon.configure(activeforeground="#000000")
-        self.btn_mon.configure(background="#d9d9d9")
-        self.btn_mon.configure(command=self.cmd_mon)
-        self.btn_mon.configure(foreground="#000000")
-        self.btn_mon.configure(highlightbackground="#d9d9d9")
-        self.btn_mon.configure(highlightcolor="black")
-        self.btn_mon.configure(text="""Monitor""")
-
-        self.btn_mac = tk.Button(self.root)
-        self.btn_mac.place(
-            relx=0.81, rely=0.91, height=self.btn_height, width=self.btn_width
-        )
-        self.btn_mac.configure(activebackground="#d9d9d9")
-        self.btn_mac.configure(activeforeground="#000000")
-        self.btn_mac.configure(background="#d9d9d9")
-        self.btn_mac.configure(command=self.cmd_term)
-        self.btn_mac.configure(foreground="#000000")
-        self.btn_mac.configure(highlightbackground="#d9d9d9")
-        self.btn_mac.configure(highlightcolor="black")
-        self.btn_mac.configure(text="""Macro""")
-
-        self.btn_upg = tk.Button(self.root)
-        self.btn_upg.place(
-            relx=0.41, rely=0.91, height=self.btn_height, width=self.btn_width
-        )
-        self.btn_upg.configure(activebackground="#d9d9d9")
-        self.btn_upg.configure(activeforeground="#000000")
-        self.btn_upg.configure(background="#d9d9d9")
-        self.btn_upg.configure(command=self.cmd_update)
-        self.btn_upg.configure(foreground="#000000")
-        self.btn_upg.configure(highlightbackground="#d9d9d9")
-        self.btn_upg.configure(highlightcolor="black")
-        self.btn_upg.configure(text="""Update""")
 
         self.path_list = tkinter.ttk.Combobox(self.root)
         self.path_list.place(relx=0.04, rely=0.05, relheight=0.06, relwidth=0.41)

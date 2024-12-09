@@ -2,14 +2,14 @@ import enum
 
 
 class Command(str, enum.Enum):
-    CHECK = "check"
-    DEMO = "demo"
+    START = "start"
     SCAN = "scan"
-    PYREN = "pyren"
+    DEMO = "demo"
+    DDT = "ddt"
+    CHECK = "check"
     TERM = "term"
     PIDS = "pids"
     MON = "mon"
-    DDT = "ddt"
 
     @classmethod
     def all(cls):

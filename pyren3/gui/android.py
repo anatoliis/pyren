@@ -1,14 +1,10 @@
 import re
 
 from pyren3 import config
-from pyren3.runner_base import get_runner
 from pyren3.enums import Command
+from pyren3.runner_base import get_runner
 from pyren3.settings import Settings
-from pyren3.utils import (
-    get_lang_list,
-    get_path_list,
-    update_from_gitlab,
-)
+from pyren3.utils import get_lang_list, get_path_list
 
 try:
     import androidhelper as android
@@ -31,35 +27,14 @@ class AndroidGui:
         runner = get_runner(self.settings.path)
         runner.run(self.settings, command)
 
-    def cmd_mon(self):
-        self.cmd(Command.MON)
-
-    def cmd_check(self):
-        self.cmd(Command.CHECK)
-
-    def cmd_demo(self):
-        self.cmd(Command.DEMO)
+    def cmd_start(self):
+        self.cmd(Command.START)
 
     def cmd_scan(self):
         self.cmd(Command.SCAN)
 
-    def cmd_start(self):
-        self.cmd(Command.PYREN)
-
-    def cmd_term(self):
-        self.cmd(Command.TERM)
-
-    def cmd_pids(self):
-        self.cmd(Command.PIDS)
-
-    def cmd_update(self):
-        res = update_from_gitlab()
-        if res == 0:
-            self.droid.makeToast("Done")
-        elif res == 1:
-            self.droid.makeToast("No connection with gitlab.com")
-        elif res == 2:
-            self.droid.makeToast("UnZip error")
+    def cmd_demo(self):
+        self.cmd(Command.DEMO)
 
     def save_settings(self):
         self.settings.path = self.paths_list[
@@ -427,41 +402,6 @@ class AndroidGui:
                 android:layout_below="@id/in_options"
                 android:layout_toRightOf="@id/bt_scan"
                 android:text="Demo" />
-            <Button
-                android:id="@+id/bt_check"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/bt_start"
-                android:layout_alignParentRight="true"
-                android:text="ChkELM" />
-            <Button
-                android:id="@+id/bt_mon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/bt_start"
-                android:layout_toLeftOf="@id/bt_check"
-                android:text="Monitor" />
-            <Button
-                android:id="@+id/bt_term"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/bt_start"
-                android:layout_toLeftOf="@+id/bt_mon"
-                android:text="Macro" />
-            <Button
-                android:id="@+id/bt_pids"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/bt_start"
-                android:layout_toLeftOf="@+id/bt_term"
-                android:text="PIDs" />
-            <Button
-                android:id="@+id/bt_update"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_below="@id/in_options"
-                android:text="Update" />
         </RelativeLayout>
 
     </ScrollView>
@@ -481,16 +421,6 @@ class AndroidGui:
                     self.cmd_scan()
                 elif event_id == "bt_demo":
                     self.cmd_demo()
-                elif event_id == "bt_check":
-                    self.cmd_check()
-                elif event_id == "bt_mon":
-                    self.cmd_mon()
-                elif event_id == "bt_term":
-                    self.cmd_term()
-                elif event_id == "bt_pids":
-                    self.cmd_pids()
-                elif event_id == "bt_update":
-                    self.cmd_update()
 
     def __init__(self):
         self.settings = Settings()
