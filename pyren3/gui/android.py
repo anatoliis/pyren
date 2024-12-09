@@ -16,47 +16,38 @@ except ImportError:
 
 
 class AndroidGui:
-    save = None
-    pl = []
-    ll = []
-    csvl = []
+    settings = None
+    paths_list = []
+    language_list = []
+    csv_options_list = []
 
-    def cmd_Mon(self):
-        self.saveSettings()
+    def cmd(self, command: Command):
+        self.save_settings()
         self.droid.fullDismiss()
-        run(self.save, Command.MON)
+        run(self.settings, command)
 
-    def cmd_Check(self):
-        self.saveSettings()
-        self.droid.fullDismiss()
-        run(self.save, Command.CHECK)
+    def cmd_mon(self):
+        self.cmd(Command.MON)
 
-    def cmd_Demo(self):
-        self.saveSettings()
-        self.droid.fullDismiss()
-        run(self.save, Command.DEMO)
+    def cmd_check(self):
+        self.cmd(Command.CHECK)
 
-    def cmd_Scan(self):
-        self.saveSettings()
-        self.droid.fullDismiss()
-        run(self.save, Command.SCAN)
+    def cmd_demo(self):
+        self.cmd(Command.DEMO)
 
-    def cmd_Start(self):
-        self.saveSettings()
-        self.droid.fullDismiss()
-        run(self.save, Command.PYREN)
+    def cmd_scan(self):
+        self.cmd(Command.SCAN)
 
-    def cmd_Term(self):
-        self.saveSettings()
-        self.droid.fullDismiss()
-        run(self.save, Command.TERM)
+    def cmd_start(self):
+        self.cmd(Command.PYREN)
 
-    def cmd_PIDs(self):
-        self.saveSettings()
-        self.droid.fullDismiss()
-        run(self.save, Command.PIDS)
+    def cmd_term(self):
+        self.cmd(Command.TERM)
 
-    def cmd_Update(self):
+    def cmd_pids(self):
+        self.cmd(Command.PIDS)
+
+    def cmd_update(self):
         res = update_from_gitlab()
         if res == 0:
             self.droid.makeToast("Done")
@@ -65,161 +56,171 @@ class AndroidGui:
         elif res == 2:
             self.droid.makeToast("UnZip error")
 
-    def saveSettings(self):
-        self.save.path = self.pl[
+    def save_settings(self):
+        self.settings.path = self.paths_list[
             int(self.droid.fullQueryDetail("sp_version").result["selectedItemPosition"])
         ]
-        self.save.lang = self.ll[
+        self.settings.lang = self.language_list[
             int(
                 self.droid.fullQueryDetail("sp_language").result["selectedItemPosition"]
             )
         ]
-        self.save.csv_option = self.csvl[
+        self.settings.csv_option = self.csv_options_list[
             int(self.droid.fullQueryDetail("sp_csv").result["selectedItemPosition"])
         ]
 
         if self.droid.fullQueryDetail("rb_bt").result["checked"] == "false":
-            self.save.port = "192.168.0.10:35000"
+            self.settings.port = "192.168.0.10:35000"
         else:
-            portName = self.dev_list[
+            port_name = self.devices_list[
                 int(
                     self.droid.fullQueryDetail("in_wifi").result["selectedItemPosition"]
                 )
             ]
-            upPortName = portName.upper().split(";")[0]
-            MAC = ""
+            port_name_upper = port_name.upper().split(";")[0]
+            mac_addr = ""
             if (
                 re.match(
                     r"^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$",
-                    upPortName,
+                    port_name_upper,
                 )
-                or re.match(r"^[0-9A-F]{4}.[0-9A-F]{4}.[0-9A-F]{4}$", upPortName)
-                or re.match(r"^[0-9A-F]{12}$", upPortName)
+                or re.match(r"^[0-9A-F]{4}.[0-9A-F]{4}.[0-9A-F]{4}$", port_name_upper)
+                or re.match(r"^[0-9A-F]{12}$", port_name_upper)
             ):
-                upPortName = upPortName.replace(":", "").replace(".", "")
-                MAC = ":".join(a + b for a, b in zip(upPortName[::2], upPortName[1::2]))
-            self.save.port = MAC + ";" + "BT"
+                port_name_upper = port_name_upper.replace(":", "").replace(".", "")
+                mac_addr = ":".join(
+                    a + b for a, b in zip(port_name_upper[::2], port_name_upper[1::2])
+                )
+            self.settings.port = mac_addr + ";" + "BT"
 
-        self.save.speed = "38400"
+        self.settings.speed = "38400"
 
-        self.save.log_name = self.droid.fullQueryDetail("in_logname").result["text"]
+        self.settings.log_name = self.droid.fullQueryDetail("in_logname").result["text"]
 
-        if self.droid.fullQueryDetail("cb_log").result["checked"] == "false":
-            self.save.log = False
+        if self.droid.fullQueryDetail("cb_log").result["checked"] != "false":
+            self.settings.log = False
         else:
-            self.save.log = True
+            self.settings.log = True
 
         if self.droid.fullQueryDetail("cb_cfc").result["checked"] == "false":
-            self.save.cfc = False
+            self.settings.cfc = False
         else:
-            self.save.cfc = True
+            self.settings.cfc = True
 
         if self.droid.fullQueryDetail("cb_n1c").result["checked"] == "false":
-            self.save.n1c = False
+            self.settings.n1c = False
         else:
-            self.save.n1c = True
+            self.settings.n1c = True
 
         if self.droid.fullQueryDetail("cb_si").result["checked"] == "false":
-            self.save.si = False
+            self.settings.si = False
         else:
-            self.save.si = True
+            self.settings.si = True
 
         if self.droid.fullQueryDetail("cb_csv").result["checked"] == "false":
-            self.save.csv = False
+            self.settings.csv = False
         else:
-            self.save.csv = True
+            self.settings.csv = True
 
         if self.droid.fullQueryDetail("cb_dump").result["checked"] == "false":
-            self.save.dump = False
+            self.settings.dump = False
         else:
-            self.save.dump = True
+            self.settings.dump = True
 
         if self.droid.fullQueryDetail("cb_can2").result["checked"] == "false":
-            self.save.can2 = False
+            self.settings.can2 = False
         else:
-            self.save.can2 = True
+            self.settings.can2 = True
 
-        self.save.options = self.droid.fullQueryDetail("in_options").result["text"]
+        self.settings.options = self.droid.fullQueryDetail("in_options").result["text"]
 
-        self.save.save()
+        self.settings.save()
 
-    def loadSettings(self):
-        pl = getPathList()
-        if self.save.path in pl:
-            pl.insert(0, pl.pop(pl.index(self.save.path)))
-        self.droid.fullSetList("sp_version", pl)
-        self.pl = pl
+    def load_settings(self):
+        paths_list = getPathList()
+        if self.settings.path in paths_list:
+            paths_list.insert(0, paths_list.pop(paths_list.index(self.settings.path)))
+        self.droid.fullSetList("sp_version", paths_list)
+        self.paths_list = paths_list
 
-        ll = getLangList()
-        if self.save.lang in ll:
-            ll.insert(0, ll.pop(ll.index(self.save.lang)))
-        self.droid.fullSetList("sp_language", ll)
-        self.ll = ll
+        language_list = getLangList()
+        if self.settings.lang in language_list:
+            language_list.insert(
+                0, language_list.pop(language_list.index(self.settings.lang))
+            )
+        self.droid.fullSetList("sp_language", language_list)
+        self.language_list = language_list
 
-        csvl = config.CSV_OPTIONS
-        if self.save.csv_option in csvl:
-            csvl.insert(0, csvl.pop(csvl.index(self.save.csv_option)))
-        self.droid.fullSetList("sp_csv", csvl)
-        self.csvl = csvl
+        csv_options_list = config.CSV_OPTIONS
+        if self.settings.csv_option in csv_options_list:
+            csv_options_list.insert(
+                0,
+                csv_options_list.pop(csv_options_list.index(self.settings.csv_option)),
+            )
+        self.droid.fullSetList("sp_csv", csv_options_list)
+        self.csv_options_list = csv_options_list
 
-        if self.save.port == "":
-            self.save.port = "192.168.0.10:35000;WiFi"
-            self.dev_list.append(self.save.port)
-        if self.save.port.upper().endswith("BT"):
+        if self.settings.port == "":
+            self.settings.port = "192.168.0.10:35000;WiFi"
+            self.devices_list.append(self.settings.port)
+
+        if self.settings.port.upper().endswith("BT"):
             MAC = ""
-            if ";" in self.save.port:
-                MAC = self.save.port.split(";")[0]
-            for d in self.dev_list:
+            if ";" in self.settings.port:
+                MAC = self.settings.port.split(";")[0]
+            for d in self.devices_list:
                 if MAC in d:
-                    self.dev_list.insert(0, self.dev_list.pop(self.dev_list.index(d)))
+                    self.devices_list.insert(
+                        0, self.devices_list.pop(self.devices_list.index(d))
+                    )
 
             self.droid.fullSetProperty("rb_bt", "checked", "true")
             self.droid.fullSetProperty("rb_wifi", "checked", "false")
-            self.droid.fullSetList("in_wifi", self.dev_list)
+            self.droid.fullSetList("in_wifi", self.devices_list)
         else:
             self.droid.fullSetProperty("rb_bt", "checked", "false")
             self.droid.fullSetProperty("rb_wifi", "checked", "true")
-            self.droid.fullSetList("in_wifi", self.dev_list)
+            self.droid.fullSetList("in_wifi", self.devices_list)
 
-        self.droid.fullSetProperty("in_logname", "text", self.save.log_name)
-        if self.save.log:
+        self.droid.fullSetProperty("in_logname", "text", self.settings.log_name)
+        if self.settings.log:
             self.droid.fullSetProperty("cb_log", "checked", "true")
         else:
             self.droid.fullSetProperty("cb_log", "checked", "false")
 
-        if self.save.cfc:
+        if self.settings.cfc:
             self.droid.fullSetProperty("cb_cfc", "checked", "true")
         else:
             self.droid.fullSetProperty("cb_cfc", "checked", "false")
 
-        if self.save.n1c:
+        if self.settings.n1c:
             self.droid.fullSetProperty("cb_n1c", "checked", "true")
         else:
             self.droid.fullSetProperty("cb_n1c", "checked", "false")
 
-        if self.save.si:
+        if self.settings.si:
             self.droid.fullSetProperty("cb_si", "checked", "true")
         else:
             self.droid.fullSetProperty("cb_si", "checked", "false")
 
-        if self.save.csv:
+        if self.settings.csv:
             self.droid.fullSetProperty("cb_csv", "checked", "true")
         else:
             self.droid.fullSetProperty("cb_csv", "checked", "false")
 
-        if self.save.dump:
+        if self.settings.dump:
             self.droid.fullSetProperty("cb_dump", "checked", "true")
         else:
             self.droid.fullSetProperty("cb_dump", "checked", "false")
 
-        if self.save.can2:
+        if self.settings.can2:
             self.droid.fullSetProperty("cb_can2", "checked", "true")
         else:
             self.droid.fullSetProperty("cb_can2", "checked", "false")
 
-        self.droid.fullSetProperty("in_options", "text", self.save.options)
+        self.droid.fullSetProperty("in_options", "text", self.settings.options)
 
-    lay = """<?xml version="1.0" encoding="utf-8"?>
+    layout = """<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
@@ -462,44 +463,46 @@ class AndroidGui:
 
 </RelativeLayout>"""
 
-    def eventloop(self):
+    def event_loop(self):
         while True:
             event = self.droid.eventWait(50).result
             if event is None:
                 continue
             if event["name"] == "click":
-                id = event["data"]["id"]
-                if id == "bt_start":
-                    self.cmd_Start()
-                elif id == "bt_scan":
-                    self.cmd_Scan()
-                elif id == "bt_demo":
-                    self.cmd_Demo()
-                elif id == "bt_check":
-                    self.cmd_Check()
-                elif id == "bt_mon":
-                    self.cmd_Mon()
-                elif id == "bt_term":
-                    self.cmd_Term()
-                elif id == "bt_pids":
-                    self.cmd_PIDs()
-                elif id == "bt_update":
-                    self.cmd_Update()
+                event_id = event["data"]["id"]
+                if event_id == "bt_start":
+                    self.cmd_start()
+                elif event_id == "bt_scan":
+                    self.cmd_scan()
+                elif event_id == "bt_demo":
+                    self.cmd_demo()
+                elif event_id == "bt_check":
+                    self.cmd_check()
+                elif event_id == "bt_mon":
+                    self.cmd_mon()
+                elif event_id == "bt_term":
+                    self.cmd_term()
+                elif event_id == "bt_pids":
+                    self.cmd_pids()
+                elif event_id == "bt_update":
+                    self.cmd_update()
 
     def __init__(self):
-        self.save = Settings()
+        self.settings = Settings()
         try:
             self.droid = android.Android()
-            self.droid.fullShow(self.lay)
-            self.dev_list = ["192.168.0.10:35000;WiFi"]
+            self.droid.fullShow(self.layout)
+            self.devices_list = ["192.168.0.10:35000;WiFi"]
             try:
-                tmp = self.droid.bluetoothGetBondedDevices().result
-                for i in range(0, len(tmp), 2):
-                    self.dev_list.append(tmp[i] + ";" + tmp[i + 1])
+                bonded_devices = self.droid.bluetoothGetBondedDevices().result
+                for i in range(0, len(bonded_devices), 2):
+                    self.devices_list.append(
+                        bonded_devices[i] + ";" + bonded_devices[i + 1]
+                    )
             except Exception:
                 pass
-            self.loadSettings()
-            self.eventloop()
+            self.load_settings()
+            self.event_loop()
         finally:
             self.droid.fullDismiss()
 
