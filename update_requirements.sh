@@ -1,3 +1,3 @@
 #!/bin/sh
 #pip freeze > requirements.in
-pip-compile requirements.in --generate-hashes --allow-unsafe
+pip-compile requirements.in --generate-hashes
