@@ -342,7 +342,7 @@ def optParser():
 
 
 def chooseXml():
-    import projects
+    from pyren3 import projects
 
     p_list = projects.projects.split("\n")
     menu = []
