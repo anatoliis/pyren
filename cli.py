@@ -1,7 +1,7 @@
 import sys
 
 from pyren3.enums import Command
-from pyren3.runner import run
+from pyren3.run_pyren3 import run
 from pyren3.settings import Settings
 
 if __name__ == "__main__":

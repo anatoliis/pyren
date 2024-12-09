@@ -2,7 +2,7 @@ import os
 import pickle
 import sys
 
-from pyren3 import config, pyren3
+from pyren3 import config, pyren
 from pyren3.mod import db_manager, utils
 from pyren3.mod.ecu.ecu import ECU
 from pyren3.mod.elm import ELM
@@ -18,7 +18,7 @@ def prepareECUs():
     global se
     global lang
 
-    pyren3.optParser()
+    pyren.optParser()
 
     utils.chkDirTree()
     db_manager.find_DBs()

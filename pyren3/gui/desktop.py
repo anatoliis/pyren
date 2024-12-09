@@ -7,9 +7,9 @@ import tkinter.ttk as ttk
 
 from pyren3 import config
 from pyren3.enums import Command
-from pyren3.runner import run
 from pyren3.settings import Settings
 from pyren3.utils import (
+    get_executable,
     get_lang_list,
     get_path_list,
     get_port_list,
@@ -29,7 +29,8 @@ class DesktopGui(tk.Frame):
     def cmd(self, command: Command):
         self.save_settings()
         self.gui_destroy()
-        run(self.settings, command)
+        executable = get_executable(self.settings.path)
+        executable(self.settings, command)
 
     def cmd_mon(self):
         self.cmd(Command.MON)

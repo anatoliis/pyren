@@ -1,1 +1,1 @@
-from pyren3.pyren3 import main
+from pyren3 import run_pyren3

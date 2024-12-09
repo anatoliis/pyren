@@ -11,7 +11,7 @@ import pickle
 import sys
 import time
 
-from pyren3 import config, pyren3
+from pyren3 import config, pyren
 from pyren3.mod.ecu.ecu import ECU
 from pyren3.mod.elm import ELM
 from pyren3.mod.optfile import Optfile
@@ -25,7 +25,7 @@ def prepareECU():
     global elm
     global ecu
 
-    pyren3.optParser()
+    pyren.optParser()
 
     if len(config.LOG) == 0:
         config.LOG = "commander_log.txt"

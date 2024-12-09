@@ -1,4 +1,4 @@
-from pyren3 import config, pyren3
+from pyren3 import config, pyren
 from pyren3.mod.elm import ELM
 
 cmdb = """
@@ -120,7 +120,7 @@ cmdb = """
 
 
 def main():
-    pyren3.optParser()
+    pyren.optParser()
 
     good = 0
     total = 0
