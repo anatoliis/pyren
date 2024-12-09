@@ -9,7 +9,12 @@ from pyren3 import config
 from pyren3.enums import Command
 from pyren3.runner import run
 from pyren3.settings import Settings
-from pyren3.utils import getLangList, getPathList, getPortList, update_from_gitlab
+from pyren3.utils import (
+    get_lang_list,
+    get_path_list,
+    get_port_list,
+    update_from_gitlab,
+)
 
 
 class DesktopGui(tk.Frame):
@@ -98,9 +103,9 @@ class DesktopGui(tk.Frame):
             "1000000",
             "2000000",
         ]
-        self.var_lang_list = getLangList()
-        self.var_path_list = getPathList()
-        self.var_port_list = getPortList()
+        self.var_lang_list = get_lang_list()
+        self.var_path_list = get_path_list()
+        self.var_port_list = get_port_list()
         self.var_csv_options = config.CSV_OPTIONS
 
         if len(self.var_path.get()) == 0:

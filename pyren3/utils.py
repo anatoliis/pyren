@@ -1,7 +1,6 @@
 import os
 import shutil
-
-from serial.tools import list_ports
+import sys
 
 from pyren3 import config
 
@@ -72,73 +71,69 @@ def update_from_gitlab():
     return 0
 
 
-def getPathList():
+def get_path_list():
+    paths = []
+
+    for file_name in os.listdir(config.EXECUTABLES_PATH):
+        if os.path.isdir(os.path.join(".", file_name)):
+            continue
+        if not file_name.lower().startswith(config.EXECUTABLE_PREFIX):
+            continue
+        if not file_name.lower().endswith(".py"):
+            continue
+        paths.append(os.path.join(".", file_name))
+    return paths
+
+
+def get_executable(path: str):
+    module_name, _ = os.path.splitext(os.path.basename(path))
+    executable_module = getattr(__import__(config.EXECUTABLES_PATH), module_name, None)
+    if not executable_module:
+        print(f"Executable not found: {module_name}.py")
+        sys.exit(1)
+    return executable_module.run
+
+
+def get_lang_list():
     return [
-        "./" + f
-        for f in os.listdir(".")
-        if os.path.isdir("./" + f)
-        and f.lower().startswith("pyren")
-        and os.path.isfile("./" + f + "/pyren3.py")
+        # fmt: off
+        "AL", "CNT", "CO", "CR", "CZ", "DK", "EL", "FI", "FR", "GB", "HG", "IT",
+        "JP", "NG", "NL", "PL", "PO", "RO", "RU", "SD", "SL", "SP", "TR",
+        # fmt: on
     ]
 
 
-def getLangList():
-    return [
-        "AL",
-        "CNT",
-        "CO",
-        "CR",
-        "CZ",
-        "DK",
-        "EL",
-        "FI",
-        "FR",
-        "GB",
-        "HG",
-        "IT",
-        "JP",
-        "NG",
-        "NL",
-        "PL",
-        "PO",
-        "RO",
-        "RU",
-        "SD",
-        "SL",
-        "SP",
-        "TR",
-    ]
-
-
-def getPortList():
-    ret = []
+def get_port_list():
+    ports = []
     if config.OS != "android":
         if config.JNIUS_MODE:
             from jnius import autoclass
 
-            BluetoothAdapter = autoclass("android.bluetooth.BluetoothAdapter")
+            bluetooth_adapter = autoclass("android.bluetooth.BluetoothAdapter")
 
             try:
                 paired_devices = (
-                    BluetoothAdapter.getDefaultAdapter().getBondedDevices().toArray()
+                    bluetooth_adapter.getDefaultAdapter().getBondedDevices().toArray()
                 )
                 for device in paired_devices:
                     desc = device.getName()
                     de = str(desc.encode("ascii", "ignore"))
-                    ret.append("BT;" + de)
+                    ports.append("BT;" + de)
             except Exception:
-                ret.append("BT;")
-            return ret
+                ports.append("BT;")
+            return ports
+
+        from serial.tools import list_ports
 
         iterator = sorted(list(list_ports.comports()))
         for port, desc, hwid in iterator:
             try:
                 de = str(desc.encode("ascii", "ignore"))
-                ret.append(port + ";" + de)
+                ports.append(port + ";" + de)
             except Exception:
-                ret.append(port + ";")
-        if "192.168.0.10:35000;WiFi" not in ret:
-            ret.append("192.168.0.10:35000;WiFi")
+                ports.append(port + ";")
+        if "192.168.0.10:35000;WiFi" not in ports:
+            ports.append("192.168.0.10:35000;WiFi")
     else:
-        ret = ["BT", "192.168.0.10:35000"]
-    return ret
+        ports = ["BT", "192.168.0.10:35000"]
+    return ports

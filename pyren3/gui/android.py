@@ -2,9 +2,9 @@ import re
 
 from pyren3 import config
 from pyren3.enums import Command
-from pyren3.runner import run
+from pyren3.run_pyren3 import run
 from pyren3.settings import Settings
-from pyren3.utils import getLangList, getPathList, update_from_gitlab
+from pyren3.utils import get_lang_list, get_path_list, update_from_gitlab
 
 try:
     import androidhelper as android
@@ -137,13 +137,13 @@ class AndroidGui:
         self.settings.save()
 
     def load_settings(self):
-        paths_list = getPathList()
+        paths_list = get_path_list()
         if self.settings.path in paths_list:
             paths_list.insert(0, paths_list.pop(paths_list.index(self.settings.path)))
         self.droid.fullSetList("sp_version", paths_list)
         self.paths_list = paths_list
 
-        language_list = getLangList()
+        language_list = get_lang_list()
         if self.settings.lang in language_list:
             language_list.insert(
                 0, language_list.pop(language_list.index(self.settings.lang))

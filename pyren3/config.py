@@ -1,6 +1,8 @@
 import os
 
 BASE_PATH = None
+EXECUTABLES_PATH = "pyren3"
+EXECUTABLE_PREFIX = "run_"
 
 OPT_DEBUG = False
 DEBUG_FILE = None
