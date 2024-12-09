@@ -27,8 +27,8 @@ from pyren3.mod.ecu.service import (
 )
 from pyren3.mod.ecu.state import EcuStates, get_state
 from pyren3.mod.elm import AllowedList, dnat, pyren_time, snat
+from pyren3.mod.mod_ply import Calc
 from pyren3.mod.optfile import Optfile
-from pyren3.mod.ply import Calc
 from pyren3.mod.utils import Choice, ChoiceLong, KBHit, clearScreen, show_doc
 
 if config.OS != "android":
