@@ -8,7 +8,6 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pyjnius = "^1.6.1"
 pyserial = "^3.5"
 colorama = "^0.4.6"
 
